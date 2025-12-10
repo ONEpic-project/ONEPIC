@@ -1,0 +1,40 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Virtual environment
+fastapi_env/
+venv/
+.env/
+*.env
+
+# Environment variables
+.env
+*.env
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+
+# VSCode settings
+.vscode/
+
+# Python Bytecode
+*.pyc
+*.pyd
+*.pyo
+
+# Uvicorn / logs
+*.log
+
+# __init__.py backup
+*__pycache__/
+
+# Python build
+build/
+dist/
+*.egg-info/
+
+# Jupyter (혹시 나중에 쓰게 될 경우)
+.ipynb_checkpoints/
