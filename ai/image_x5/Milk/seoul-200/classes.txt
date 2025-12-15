@@ -1,0 +1,37 @@
+Beetles
+CapriSun-orange
+CapriSun-orange-mango
+ChocoSongi - org
+ChocoSongi - str
+ChocoSongi - jeju
+CocaCola - org - 250
+CocaCola - org - 350
+CocaCola - org - 500
+CocaCola - org - 1500
+CocaCola - zero - 250
+CocaCola - zero - 350
+CocaCola - zero - 500
+CocaCola - zero - 1500
+Milk - gt - 200
+Milk - gt - 500
+Milk - gt - 1000
+Milk - seoul - 200
+Milk - seoul - 500
+Milk - seoul - 1000
+Milk - maeil - 200
+Milk - maeil - 500
+Milk - maeil - 1000
+Onion - take-off
+Onion - org
+OysterSauce - beksul
+OysterSauce - chung
+OysterSauce - otoki
+SeasonedSalt - 95
+SeasonedSalt - 250
+Sugar - beksul
+Sugar - Qone
+YegamSnack - org
+YegamSnack - cheeze
+YegamSnack - onion
+Milk - gt - 10w00
+Milk - seoul - 200ww
