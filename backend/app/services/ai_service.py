@@ -7,7 +7,9 @@ from io import BytesIO
 from PIL import Image
 
 
-MODEL_PATH = os.path.join("app", "services", "model_files", "best.pt")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "model_files", "best.pt")
+
 
 # YOLOv5 모델 로드 (GitHub repo 기반)
 model = torch.hub.load(
@@ -25,7 +27,7 @@ def image_to_base64(img):
     return base64.b64encode(encoded_image.tobytes()).decode("utf-8")
 
 
-def run_yolo5_inference(image_bytes: bytes):
+def analyze_image(image_bytes: bytes):
     # bytes → numpy → opencv image
     nparr = np.frombuffer(image_bytes, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
