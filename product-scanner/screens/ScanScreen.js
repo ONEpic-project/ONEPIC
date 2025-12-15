@@ -8,15 +8,22 @@ import {
   ActivityIndicator,
   Alert,
   Platform,
+  Animated,
+  PanResponder,
+  Dimensions,
+  ScrollView,
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import axios from 'axios';
 
-// 백엔드 API URL (실제 환경에 맞게 수정 필요)
+const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
+const DRAWER_PEEK_HEIGHT = 56; // drawerBleeding과 동일
+const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.5; // 화면의 50%
+
 const API_BASE_URL = Platform.OS === 'android' 
-  ? 'http://10.0.2.2:8000'  // Android 에뮬레이터
-  : 'http://localhost:8000'; // iOS 시뮬레이터 또는 웹
+  ? 'http://10.0.2.2:8000'
+  : 'http://localhost:8000';
 
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -26,7 +33,70 @@ export default function ScanScreen() {
   const [detectionResult, setDetectionResult] = useState(null);
   const cameraRef = useRef(null);
 
-  // 사진 촬영 함수
+  // Bottom Drawer 상태
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const translateY = useRef(new Animated.Value(DRAWER_HEIGHT - DRAWER_PEEK_HEIGHT)).current;
+
+  // Bottom Drawer PanResponder
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: (evt, gestureState) => {
+        return Math.abs(gestureState.dy) > 5;
+      },
+      onPanResponderMove: (evt, gestureState) => {
+        // 위로 드래그: 음수 값
+        // 아래로 드래그: 양수 값
+        const newTranslateY = Math.max(
+          0, // 완전히 열렸을 때
+          Math.min(
+            DRAWER_HEIGHT - DRAWER_PEEK_HEIGHT, // 완전히 닫혔을 때
+            (DRAWER_HEIGHT - DRAWER_PEEK_HEIGHT) + gestureState.dy
+          )
+        );
+        translateY.setValue(newTranslateY);
+      },
+      onPanResponderRelease: (evt, gestureState) => {
+        // 스와이프 속도나 이동 거리에 따라 열기/닫기 결정
+        if (gestureState.dy < -50 || gestureState.vy < -0.5) {
+          // 위로 스와이프 -> 열기
+          openDrawer();
+        } else if (gestureState.dy > 50 || gestureState.vy > 0.5) {
+          // 아래로 스와이프 -> 닫기
+          closeDrawer();
+        } else {
+          // 중간 위치면 현재 상태에 따라 결정
+          if (isDrawerOpen) {
+            openDrawer();
+          } else {
+            closeDrawer();
+          }
+        }
+      },
+    })
+  ).current;
+
+  const openDrawer = () => {
+    setIsDrawerOpen(true);
+    Animated.spring(translateY, {
+      toValue: 0,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 10,
+    }).start();
+  };
+
+  const closeDrawer = () => {
+    setIsDrawerOpen(false);
+    Animated.spring(translateY, {
+      toValue: DRAWER_HEIGHT - DRAWER_PEEK_HEIGHT,
+      useNativeDriver: true,
+      tension: 65,
+      friction: 10,
+    }).start();
+  };
+
+  // 사진 촬영
   const takePicture = async () => {
     if (cameraRef.current) {
       try {
@@ -35,8 +105,6 @@ export default function ScanScreen() {
           quality: 0.8,
           base64: true,
         });
-        
-        // 백엔드로 이미지 전송
         await detectProduct(photo);
       } catch (error) {
         console.error('사진 촬영 오류:', error);
@@ -46,7 +114,7 @@ export default function ScanScreen() {
     }
   };
 
-  // 갤러리에서 이미지 선택
+  // 갤러리에서 선택
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -67,19 +135,16 @@ export default function ScanScreen() {
     }
   };
 
-  // AI 상품 인식 함수
+  // AI 상품 인식
   const detectProduct = async (photo) => {
     try {
-      // FormData 생성
       const formData = new FormData();
-      
       formData.append('file', {
         uri: photo.uri,
         type: 'image/jpeg',
         name: 'product.jpg',
       });
 
-      // 백엔드 API 호출
       const apiResponse = await axios.post(
         `${API_BASE_URL}/api/ai/detect`,
         formData,
@@ -87,22 +152,19 @@ export default function ScanScreen() {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
-          timeout: 30000, // 30초 타임아웃
+          timeout: 30000,
         }
       );
 
-      // 결과 처리
       if (apiResponse.data && apiResponse.data.result) {
         const result = apiResponse.data.result;
         
-        // base64 이미지가 있으면 표시
         if (result.image_base64) {
           setDetectedImage(`data:image/png;base64,${result.image_base64}`);
         }
         
         setDetectionResult(result);
         
-        // 성공 알림
         Alert.alert(
           '인식 완료',
           `상품이 성공적으로 인식되었습니다!\n신뢰도: ${result.confidence || 'N/A'}%`,
@@ -135,20 +197,17 @@ export default function ScanScreen() {
     }
   };
 
-  // 장바구니 추가 함수 (추후 구현)
   const addToCart = (product) => {
     console.log('장바구니에 추가:', product);
     Alert.alert('알림', '장바구니 기능은 추후 구현 예정입니다.');
     resetCamera();
   };
 
-  // 카메라 초기화
   const resetCamera = () => {
     setDetectedImage(null);
     setDetectionResult(null);
   };
 
-  // 카메라 전환
   const toggleCameraFacing = () => {
     setFacing(current => (current === 'back' ? 'front' : 'back'));
   };
@@ -182,7 +241,7 @@ export default function ScanScreen() {
 
   return (
     <View style={styles.container}>
-      {/* 인식 결과 이미지가 있으면 표시 */}
+      {/* 스캔 화면 */}
       {detectedImage ? (
         <View style={styles.resultContainer}>
           <Image
@@ -199,7 +258,6 @@ export default function ScanScreen() {
         </View>
       ) : (
         <>
-          {/* 카메라 프리뷰 */}
           <CameraView
             style={styles.camera}
             facing={facing}
@@ -225,16 +283,14 @@ export default function ScanScreen() {
 
           {/* 하단 컨트롤 */}
           <View style={styles.controls}>
-            {/* 갤러리 버튼 */}
             <TouchableOpacity
               style={styles.controlButton}
               onPress={pickImage}
               disabled={isLoading}
             >
-              <Text style={styles.controlButtonText}>📁</Text>
+              <Text style={styles.controlButtonText}>🖼</Text>
             </TouchableOpacity>
 
-            {/* 촬영 버튼 */}
             <TouchableOpacity
               style={[styles.captureButton, isLoading && styles.captureButtonDisabled]}
               onPress={takePicture}
@@ -247,7 +303,6 @@ export default function ScanScreen() {
               )}
             </TouchableOpacity>
 
-            {/* 카메라 전환 버튼 */}
             <TouchableOpacity
               style={styles.controlButton}
               onPress={toggleCameraFacing}
@@ -266,6 +321,50 @@ export default function ScanScreen() {
           <Text style={styles.loadingOverlayText}>AI가 상품을 인식 중입니다...</Text>
         </View>
       )}
+
+      {/* Bottom Swipeable Drawer */}
+      <Animated.View
+        style={[
+          styles.drawer,
+          {
+            transform: [{ translateY }],
+          },
+        ]}
+      >
+        {/* Drawer Header (항상 보이는 부분) */}
+        <View style={styles.drawerHeader} {...panResponder.panHandlers}>
+          {/* Puller (드래그 핸들) */}
+          <View style={styles.puller} />
+          <Text style={styles.drawerHeaderText}>51 results</Text>
+        </View>
+
+        {/* Drawer Content */}
+        <ScrollView style={styles.drawerContent}>
+          <View style={styles.contentPlaceholder}>
+            <Text style={styles.placeholderText}>스캔 결과가 여기에 표시됩니다</Text>
+            
+            {/* 예시 아이템들 */}
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((item) => (
+              <View key={item} style={styles.resultItem}>
+                <View style={styles.resultItemImage} />
+                <View style={styles.resultItemInfo}>
+                  <Text style={styles.resultItemTitle}>상품 {item}</Text>
+                  <Text style={styles.resultItemPrice}>₩{(item * 1000).toLocaleString()}</Text>
+                </View>
+              </View>
+            ))}
+          </View>
+        </ScrollView>
+      </Animated.View>
+
+      {/* Drawer Overlay (열렸을 때 배경 어둡게) */}
+      {isDrawerOpen && (
+        <TouchableOpacity
+          style={styles.drawerOverlay}
+          activeOpacity={1}
+          onPress={closeDrawer}
+        />
+      )}
     </View>
   );
 }
@@ -274,8 +373,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#000',
-    justifyContent: 'center',
-    alignItems: 'center',
   },
   camera: {
     flex: 1,
@@ -413,6 +510,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.8)',
     justifyContent: 'center',
     alignItems: 'center',
+    zIndex: 5,
   },
   loadingOverlayText: {
     color: '#fff',
@@ -438,46 +536,92 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 40,
   },
+  
+  // Bottom Drawer 스타일
+  drawerOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 10,
+  },
+  drawer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: DRAWER_HEIGHT,
+    backgroundColor: '#fff',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+    elevation: 10,
+    zIndex: 20,
+  },
+  drawerHeader: {
+    height: DRAWER_PEEK_HEIGHT,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  puller: {
+    width: 30,
+    height: 6,
+    backgroundColor: '#bbb',
+    borderRadius: 3,
+    position: 'absolute',
+    top: 8,
+  },
+  drawerHeaderText: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
+  },
+  drawerContent: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
+  contentPlaceholder: {
+    padding: 16,
+  },
+  placeholderText: {
+    fontSize: 16,
+    color: '#999',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  resultItem: {
+    flexDirection: 'row',
+    padding: 12,
+    backgroundColor: '#f5f5f5',
+    borderRadius: 8,
+    marginBottom: 12,
+  },
+  resultItemImage: {
+    width: 60,
+    height: 60,
+    backgroundColor: '#ddd',
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  resultItemInfo: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  resultItemTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  resultItemPrice: {
+    fontSize: 14,
+    color: '#4A90E2',
+    fontWeight: '500',
+  },
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
