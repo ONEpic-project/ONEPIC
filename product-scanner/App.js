@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import ScanScreen from './product-scanner/screens/ScanScreen';
+import ScanScreen from './screens/ScanScreen';
 
 const Stack = createStackNavigator();
 
