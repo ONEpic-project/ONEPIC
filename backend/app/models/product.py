@@ -1,33 +1,26 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime
-from app.database import Base
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy.orm import relationship
+
+from app.database.database import Base
+from app.models.category import Category
+from app.models.brand import Brand
 
 class Product(Base):
     __tablename__ = "product"
-    __table_args__ = {"schema": "onepic"}
 
-    product_id = Column(Integer, primary_key=True, autoincrement=True)
-
+    product_id = Column(Integer, primary_key=True, index=True)
     name = Column(String(200), nullable=False)
 
-    brand_id = Column(Integer, nullable=True)
-    category_id = Column(Integer, nullable=False)
+    brand_id = Column(Integer, ForeignKey("brand.brand_id"), nullable=True)
+    category_id = Column(Integer, ForeignKey("category.category_id"), nullable=False)
 
-    barcode = Column(String(50), unique=True, nullable=True)
+    barcode = Column(String(50))
+    price = Column(Integer)
+    image_url = Column(String(255))
+    description = Column(Text)
+    created_at = Column(DateTime)
+    updated_at = Column(DateTime)
 
-    price = Column(Integer, nullable=True)
-
-    image_url = Column(String(255), nullable=True)
-
-    description = Column(Text, nullable=True)
-
-    created_at = Column(
-        DateTime,
-        nullable=False,
-        server_default="CURRENT_TIMESTAMP",
-    )
-
-    updated_at = Column(
-        DateTime,
-        nullable=False,
-        server_default="CURRENT_TIMESTAMP",
-    )
+    # 🔑 관계
+    brand = relationship("Brand", backref="products")
+    category = relationship("Category", backref="products")
