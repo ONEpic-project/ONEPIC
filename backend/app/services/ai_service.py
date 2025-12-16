@@ -1,13 +1,13 @@
 # AI 추론 + DB 매핑 + 결과 생성
 
 import torch
-import torch.nn as nn
+# import torch.nn as nn
 import numpy as np
 import cv2
 import os
 import base64
 import easyocr
-import timm
+# import timm
 
 from ultralytics import YOLO
 from PIL import Image
@@ -21,7 +21,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "model_files")
 
 YOLO_MODEL_PATH = os.path.join(MODEL_DIR, "best.pt")
-CLS_MODEL_PATH = os.path.join(MODEL_DIR, "yolo+effi.pt")
+# CLS_MODEL_PATH = os.path.join(MODEL_DIR, "yolo+effi.pt")
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
@@ -29,31 +29,31 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 yolo_model = YOLO(YOLO_MODEL_PATH)
 
 # EfficientNet 로딩 (분류)
-class EfficientNetClassifier(nn.Module):
-    def __init__(self, num_classes=35):
-        super().__init__()
-        self.model = timm.create_model(
-            "efficientnet_lite0",
-            pretrained=False,
-            num_classes=num_classes
-        )
+# class EfficientNetClassifier(nn.Module):
+#     def __init__(self, num_classes=35):
+#         super().__init__()
+#         self.model = timm.create_model(
+#             "efficientnet_lite0",
+#             pretrained=False,
+#             num_classes=num_classes
+#         )
 
-    def forward(self, x):
-        return self.model(x)
+#     def forward(self, x):
+#         return self.model(x)
 
 
-cls_model = EfficientNetClassifier(num_classes=35)
+# cls_model = EfficientNetClassifier(num_classes=35)
 
-# checkpoint 로딩
-ckpt = torch.load(CLS_MODEL_PATH, map_location=DEVICE)
-raw_state_dict = ckpt["model"]
+# # checkpoint 로딩
+# ckpt = torch.load(CLS_MODEL_PATH, map_location=DEVICE)
+# raw_state_dict = ckpt["model"]
 
-# prefix 맞추기
-state_dict = {f"model.{k}": v for k, v in raw_state_dict.items()}
-cls_model.load_state_dict(state_dict)
+# # prefix 맞추기
+# state_dict = {f"model.{k}": v for k, v in raw_state_dict.items()}
+# cls_model.load_state_dict(state_dict)
 
-cls_model.to(DEVICE)
-cls_model.eval()
+# cls_model.to(DEVICE)
+# cls_model.eval()
 
 
 # OCR 로딩(보조)
@@ -98,6 +98,9 @@ def analyze_image(image_bytes: bytes, db):
     # YOLO 추론
     results = yolo_model(img)[0]
 
+    print("YOLO detections:", len(results.boxes) if results.boxes else 0)
+
+
     if results.boxes is None:
         return {
             "num_detections": 0,
@@ -113,12 +116,22 @@ def analyze_image(image_bytes: bytes, db):
         if crop.size == 0:
             continue
 
+        # 1. YOLO 결과를 class로 사용
+        cls_id = int(box.cls[0])        # YOLO class id
+        cls_conf = float(box.conf[0])   # YOLO confidence
+
+        print(f"[YOLO] cls_id={cls_id}, conf={cls_conf:.3f}")
+
+
         # 1. EfficientNet 분류 (메인)
-        input_tensor = preprocess_crop(crop)
-        with torch.no_grad():
-            outputs = cls_model(input_tensor)
-            cls_id = torch.argmax(outputs, dim=1).item()
-            cls_conf = torch.softmax(outputs, dim=1)[0][cls_id].item()
+        # input_tensor = preprocess_crop(crop)
+        # with torch.no_grad():
+        #     outputs = cls_model(input_tensor)
+        #     cls_id = torch.argmax(outputs, dim=1).item()
+        #     cls_conf = torch.softmax(outputs, dim=1)[0][cls_id].item()
+
+        #     print(f"[CLS] cls_id={cls_id}, conf={cls_conf:.3f}")
+
 
         # 2. OCR (보조)
         ocr_text = run_ocr(crop)
@@ -126,8 +139,8 @@ def analyze_image(image_bytes: bytes, db):
         # DB 매핑
         mapping = db.query(AIProductMapping)\
             .filter(
-                AIProductMapping.class_id == cls_id,
-                AIProductMapping.is_active == 1
+                AIProductMapping.class_id == cls_id
+                # AIProductMapping.is_active == 1
             )\
             .first()
 
