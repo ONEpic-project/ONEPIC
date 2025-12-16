@@ -41,9 +41,7 @@ def product_view():
                 padding: 20px;
                 background: #f5f5f5;
             }
-            h1 {
-                margin-bottom: 20px;
-            }
+            h1 { margin-bottom: 20px; }
             .box {
                 background: #fff;
                 padding: 20px;
@@ -89,13 +87,12 @@ def product_view():
         </div>
 
         <div class="box">
-            <h3>2️⃣ AI 분석 결과</h3>
-            <div id="aiResult">아직 분석 전</div>
+            <h3>2️⃣ AI 분석 결과 이미지</h3>
             <img id="resultImage" />
         </div>
 
         <div class="box">
-            <h3>3️⃣ DB 상품 결과</h3>
+            <h3>3️⃣ 인식된 상품 정보</h3>
             <ul id="productList"></ul>
         </div>
 
@@ -110,41 +107,40 @@ def product_view():
                 const formData = new FormData();
                 formData.append("file", fileInput.files[0]);
 
-                // ✅ AI API만 호출
-                const aiRes = await fetch("/api/ai/analyze", {
+                const res = await fetch("/api/ai/analyze", {
                     method: "POST",
                     body: formData
                 });
 
-                const aiData = await aiRes.json();
+                const data = await res.json();
 
-                const productList = document.getElementById("productList");
-                const imgEl = document.getElementById("resultImage");
-                productList.innerHTML = "";
+                // 결과 이미지
+                document.getElementById("resultImage").src =
+                    "data:image/jpeg;base64," + data.image_base64;
 
-                // bbox 이미지 표시
-                imgEl.src = "data:image/jpeg;base64," + aiData.image_base64;
+                const list = document.getElementById("productList");
+                list.innerHTML = "";
 
-                // ✅ 여기서 products API 호출 ❌❌❌ 없음
-                const products = aiData.matched_products;
-
-                if (!products || products.length === 0) {
-                    productList.innerHTML = "<li>매칭된 상품 없음</li>";
+                if (!data.detections || data.detections.length === 0) {
+                    list.innerHTML = "<li>상품을 인식하지 못했습니다.</li>";
                     return;
                 }
 
-                products.forEach(p => {
+                data.detections.forEach(d => {
                     const li = document.createElement("li");
                     li.innerHTML = `
-                        <strong>${p.name}</strong><br/>
-                        가격: ${p.price}<br/>
-                        confidence: ${p.confidence.toFixed(2)}
+                        <strong>${d.product_name}</strong><br/>
+                        브랜드: ${d.brand_name}<br/>
+                        가격: ${d.price}원<br/>
+                        <span class="confidence">
+                            YOLO: ${d.yolo_confidence.toFixed(2)} /
+                            Class: ${d.class_confidence.toFixed(2)}
+                        </span>
                     `;
-                    productList.appendChild(li);
+                    list.appendChild(li);
                 });
             }
-            </script>
-
+        </script>
 
     </body>
     </html>
