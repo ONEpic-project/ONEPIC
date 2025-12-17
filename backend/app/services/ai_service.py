@@ -11,6 +11,7 @@ import easyocr
 
 from ultralytics import YOLO
 from PIL import Image
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.product import Product
 from app.models.recognition_log import RecognitionLog
@@ -136,22 +137,30 @@ def analyze_image(image_bytes: bytes, db):
         # 2. OCR (보조)
         ocr_text = run_ocr(crop)
 
-        # DB 매핑
-        mapping = db.query(AIProductMapping)\
-            .filter(
-                AIProductMapping.class_id == cls_id
-                # AIProductMapping.is_active == 1
-            )\
-            .first()
-
+        # DB 관련 기본값
+        mapping = None
         product = None
         product_id = None
+        db_available = True
 
-        if mapping:
-            product_id = mapping.product_id
-            product = db.query(Product)\
-                .filter(Product.product_id == product_id)\
+        # DB 매핑
+        try:
+            mapping = db.query(AIProductMapping)\
+                .filter(
+                    AIProductMapping.class_id == cls_id
+                    # AIProductMapping.is_active == 1
+                )\
                 .first()
+
+            if mapping:
+                product_id = mapping.product_id
+                product = db.query(Product)\
+                    .filter(Product.product_id == product_id)\
+                    .first()
+
+        except SQLAlchemyError as e:
+            print("[DB ERROR] mapping 실패:", e)
+            db_available = False
 
 
         # 결과 저장
