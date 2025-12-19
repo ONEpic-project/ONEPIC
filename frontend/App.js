@@ -7,6 +7,7 @@ import SignupCompleteScreen from './screens/SignupCompleteScreen';
 import FindAccountScreen from './screens/FindAccountScreen'; 
 import Home from './screens/Home';
 import ScanScreen from './screens/ScanScreen';
+import PaymentScreen from './screens/PaymentScreen';
 
 const Stack = createStackNavigator();
 
@@ -79,6 +80,15 @@ export default function App() {
             title: 'ONEPIC - 상품 스캔',
             headerTitleAlign: 'center'
           }}
+        />
+
+         {/* 결제 화면 */}   
+        <Stack.Screen
+        name='Payment'
+        component={PaymentScreen}
+        options={{
+          
+        }}
         />
       </Stack.Navigator>
     </NavigationContainer>
