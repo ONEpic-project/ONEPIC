@@ -24,6 +24,14 @@ export default function Home({ navigation }) {
           <Text style={styles.scanButtonText}>상품 스캔하기</Text>
         </TouchableOpacity>
 
+                <TouchableOpacity
+          style={styles.paymentButton}
+          onPress={() => navigation.navigate('Payment')}
+        >
+          <Text style={styles.paymentButtonIcon}>💳</Text>
+          <Text style={styles.paymentButtonText}>결제하기</Text>
+        </TouchableOpacity>
+
         <View style={styles.featuresContainer}>
           <View style={styles.featureItem}>
             <Text style={styles.featureIcon}>🎯</Text>
@@ -98,6 +106,27 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   scanButtonText: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+  paymentButton: {
+    backgroundColor: '#34C759',
+    borderRadius: 20,
+    padding: 30,
+    alignItems: 'center',
+    marginBottom: 40,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  paymentButtonIcon: {
+    fontSize: 48,
+    marginBottom: 10,
+  },
+  paymentButtonText: {
     color: '#fff',
     fontSize: 24,
     fontWeight: 'bold',

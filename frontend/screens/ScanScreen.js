@@ -136,6 +136,21 @@ export default function ScanScreen() {
     });
   };
 
+  // ✅ 상품 삭제 함수
+  const removeProduct = (id) => {
+    setScannedProducts((products) =>
+      products.filter((product) => product.id !== id)
+    );
+  };
+
+    // ✅ 합계 계산 함수
+  const calculateTotal = () => {
+    return scannedProducts.reduce(
+      (sum, product) => sum + product.price * product.quantity,
+      0
+    );
+  };
+
   // 현재 수량 가져오기
   const getQuantity = (productId) => {
     return productQuantities[productId] || 1;
@@ -714,6 +729,119 @@ const styles = StyleSheet.create({
   drawerContent: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  emptyCart: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  emptyCartText: {
+    fontSize: 18,
+    color: '#666',
+    fontWeight: '600',
+    marginTop: 20,
+    marginBottom: 8,
+  },
+  emptyCartSubText: {
+    fontSize: 14,
+    color: '#999',
+    textAlign: 'center',
+  },
+  productList: {
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 20,
+  },
+  productItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f9f9f9',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 12,
+  },
+  productImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 12,
+  },
+  noImage: {
+    backgroundColor: '#e0e0e0',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  productInfo: {
+    flex: 1,
+  },
+  productName: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 4,
+  },
+  productPrice: {
+    fontSize: 14,
+    color: '#666',
+  },
+  quantityControl: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  quantityButton: {
+    backgroundColor: '#FF8C00',
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  quantityText: {
+    fontSize: 15,
+    fontWeight: '600',
+    marginHorizontal: 12,
+    minWidth: 35,
+    textAlign: 'center',
+  },
+  removeButton: {
+    padding: 5,
+  },
+  footer: {
+    borderTopWidth: 1,
+    borderTopColor: '#eee',
+    paddingHorizontal: 20,
+    paddingTop: 15,
+    paddingBottom: 30,
+    backgroundColor: '#fff',
+  },
+  totalContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+  },
+  totalAmount: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#FF8C00',
+  },
+  paymentButton: {
+    backgroundColor: '#FF8C00',
+    paddingVertical: 16,
+    borderRadius: 12,
+    alignItems: 'center',
+  },
+  paymentButtonText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: 'white',
   },
   contentPlaceholder: {
     padding: 16,
