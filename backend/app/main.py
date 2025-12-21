@@ -5,6 +5,7 @@ from app.routers import products, ai
 app = FastAPI()
 
 # 라우터 등록
+app.include_router(health.router)
 app.include_router(ai.router, prefix="/api/ai")     # 필수로 존재해야 함
 app.include_router(products.router, prefix="/api/products")
 
