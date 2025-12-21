@@ -16,6 +16,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.models.product import Product
 from app.models.recognition_log import RecognitionLog
 from app.models.ai_product_mapping import AIProductMapping
+from app.models.product_attribute_value import ProductAttributeValue
 
 # 경로 설정
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
