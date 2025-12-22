@@ -26,6 +26,9 @@ async def detect(
         size_value = None
         if first.get("product_id"):
             size_value = get_product_size(db, first["product_id"])
+        
+        # confidence 안전 처리
+        confidence = first.get("class_confidence", 0)
 
         return {
             "result": {
@@ -33,7 +36,7 @@ async def detect(
                 "size": size_value,
                 "price": first["price"],
                 "brand_name": first["brand_name"],
-                "confidence": first["class_confidence"],
+                "confidence": confidence,
                 "image_base64": ai_result["image_base64"],
             }
         }

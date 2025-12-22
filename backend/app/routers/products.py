@@ -77,7 +77,7 @@ def product_view():
     </head>
     <body>
 
-        <h1>🧠 ONEPIC - AI 상품 인식 데모</h1>
+        <h1>ONEPIC - AI 상품 인식 데모</h1>
 
         <div class="box">
             <h3>1️⃣ 상품 이미지 업로드</h3>
@@ -107,38 +107,37 @@ def product_view():
                 const formData = new FormData();
                 formData.append("file", fileInput.files[0]);
 
-                const res = await fetch("/api/ai/analyze", {
+                const res = await fetch("/api/ai/detect", {
                     method: "POST",
                     body: formData
                 });
 
                 const data = await res.json();
+                const result = data.result;
 
                 // 결과 이미지
                 document.getElementById("resultImage").src =
-                    "data:image/jpeg;base64," + data.image_base64;
+                    "data:image/jpeg;base64," + result.image_base64;
 
                 const list = document.getElementById("productList");
                 list.innerHTML = "";
 
-                if (!data.detections || data.detections.length === 0) {
+                if (!result.label) {
                     list.innerHTML = "<li>상품을 인식하지 못했습니다.</li>";
                     return;
                 }
 
-                data.detections.forEach(d => {
-                    const li = document.createElement("li");
-                    li.innerHTML = `
-                        <strong>${d.product_name}</strong><br/>
-                        브랜드: ${d.brand_name}<br/>
-                        가격: ${d.price}원<br/>
-                        <span class="confidence">
-                            YOLO: ${d.yolo_confidence.toFixed(2)} /
-                            Class: ${d.class_confidence.toFixed(2)}
-                        </span>
-                    `;
-                    list.appendChild(li);
-                });
+                const li = document.createElement("li");
+                li.innerHTML = `
+                    <strong>${result.label}</strong><br/>
+                    브랜드: ${result.brand_name ?? "-"}<br/>
+                    가격: ${result.price ?? "-"}원<br/>
+                    ${result.size ? `사이즈: ${result.size}<br/>` : ""}
+                    <span class="confidence">
+                        신뢰도: ${result.confidence.toFixed(2)}
+                    </span>
+                `;
+                list.appendChild(li);
             }
         </script>
 

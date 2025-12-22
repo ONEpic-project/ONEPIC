@@ -1,14 +1,15 @@
 # AI 추론 + DB 매핑 + 결과 생성
 
 import torch
-# import torch.nn as nn
 import numpy as np
 import cv2
 import os
 import base64
 import easyocr
-# import timm
+import torch.nn.functional as F
+import torch.nn as nn
 
+from torchvision.models import mobilenet_v3_large
 from ultralytics import YOLO
 from PIL import Image
 from sqlalchemy.exc import SQLAlchemyError
@@ -23,40 +24,38 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_DIR = os.path.join(BASE_DIR, "model_files")
 
 YOLO_MODEL_PATH = os.path.join(MODEL_DIR, "best.pt")
-# CLS_MODEL_PATH = os.path.join(MODEL_DIR, "yolo+effi.pt")
+CLS_MODEL_PATH = os.path.join(MODEL_DIR, "mobilenetv3_best.pt")
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 # yolov8n 모델 로딩(탐지)
 yolo_model = YOLO(YOLO_MODEL_PATH)
 
-# EfficientNet 로딩 (분류)
-# class EfficientNetClassifier(nn.Module):
-#     def __init__(self, num_classes=35):
-#         super().__init__()
-#         self.model = timm.create_model(
-#             "efficientnet_lite0",
-#             pretrained=False,
-#             num_classes=num_classes
-#         )
+# MobileNetV3 모델 로딩 (분류)
+NUM_CLASSES = 34  # 학습 클래스 수
 
-#     def forward(self, x):
-#         return self.model(x)
+cls_model = mobilenet_v3_large(weights=None)
+
+# classifier 교체 (torchvision 구조)
+cls_model.classifier[3] = nn.Linear(
+    cls_model.classifier[3].in_features,
+    NUM_CLASSES
+)
+
+ckpt = torch.load(CLS_MODEL_PATH, map_location=DEVICE)
+cls_model.load_state_dict(ckpt["model_state"])
+
+cls_model.to(DEVICE)
+cls_model.eval()
 
 
-# cls_model = EfficientNetClassifier(num_classes=35)
+ckpt = torch.load(CLS_MODEL_PATH, map_location=DEVICE)
 
-# # checkpoint 로딩
-# ckpt = torch.load(CLS_MODEL_PATH, map_location=DEVICE)
-# raw_state_dict = ckpt["model"]
+# model_state만 사용
+cls_model.load_state_dict(ckpt["model_state"])
 
-# # prefix 맞추기
-# state_dict = {f"model.{k}": v for k, v in raw_state_dict.items()}
-# cls_model.load_state_dict(state_dict)
-
-# cls_model.to(DEVICE)
-# cls_model.eval()
-
+cls_model.to(DEVICE)
+cls_model.eval()
 
 # OCR 로딩(보조)
 reader = easyocr.Reader(['ko', 'en'], gpu=False)
@@ -118,21 +117,19 @@ def analyze_image(image_bytes: bytes, db):
         if crop.size == 0:
             continue
 
-        # 1. YOLO 결과를 class로 사용
-        cls_id = int(box.cls[0])        # YOLO class id
-        cls_conf = float(box.conf[0])   # YOLO confidence
+        # YOLO confidence (탐지 신뢰도)
+        yolo_conf = float(box.conf[0])
 
-        print(f"[YOLO] cls_id={cls_id}, conf={cls_conf:.3f}")
+        # 1. MobileNetV3 분류 (메인)
+        input_tensor = preprocess_crop(crop)
 
+        with torch.no_grad():
+            outputs = cls_model(input_tensor)
+            probs = F.softmax(outputs, dim=1)
+            cls_id = torch.argmax(probs, dim=1).item()
+            cls_conf = probs[0][cls_id].item()
 
-        # 1. EfficientNet 분류 (메인)
-        # input_tensor = preprocess_crop(crop)
-        # with torch.no_grad():
-        #     outputs = cls_model(input_tensor)
-        #     cls_id = torch.argmax(outputs, dim=1).item()
-        #     cls_conf = torch.softmax(outputs, dim=1)[0][cls_id].item()
-
-        #     print(f"[CLS] cls_id={cls_id}, conf={cls_conf:.3f}")
+        print(f"[CLS] cls_id={cls_id}, conf={cls_conf:.3f}")
 
 
         # 2. OCR (보조)
@@ -149,7 +146,6 @@ def analyze_image(image_bytes: bytes, db):
             mapping = db.query(AIProductMapping)\
                 .filter(
                     AIProductMapping.class_id == cls_id
-                    # AIProductMapping.is_active == 1
                 )\
                 .first()
 
@@ -173,7 +169,7 @@ def analyze_image(image_bytes: bytes, db):
             "class_id": cls_id,
             "product_id": product.product_id if product else None,
             "product_name": product.name if product else None,
-            "brand_name": brand_name,          # ⭐️ 추가
+            "brand_name": brand_name,
             "price": product.price if product else None,
             "yolo_confidence": round(yolo_conf, 4),
             "class_confidence": round(cls_conf, 4),
@@ -186,7 +182,7 @@ def analyze_image(image_bytes: bytes, db):
 
 
         # 시각화
-        label = f"{cls_id} | Y:{yolo_conf:.2f} C:{cls_conf:.2f}"
+        label = f"CLS:{cls_id} | Y:{yolo_conf:.2f} | C:{cls_conf:.2f}"
         if ocr_text:
             label += f" | {ocr_text[:15]}"
 
