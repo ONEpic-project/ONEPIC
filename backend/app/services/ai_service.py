@@ -48,15 +48,6 @@ cls_model.load_state_dict(ckpt["model_state"])
 cls_model.to(DEVICE)
 cls_model.eval()
 
-
-ckpt = torch.load(CLS_MODEL_PATH, map_location=DEVICE)
-
-# model_state만 사용
-cls_model.load_state_dict(ckpt["model_state"])
-
-cls_model.to(DEVICE)
-cls_model.eval()
-
 # OCR 로딩(보조)
 reader = easyocr.Reader(['ko', 'en'], gpu=False)
 
@@ -109,9 +100,17 @@ def analyze_image(image_bytes: bytes, db):
             "image_base64": image_to_base64(img_draw)
         }
 
+    yolo_names = yolo_model.model.names
+
     for box in results.boxes:
         x1, y1, x2, y2 = map(int, box.xyxy[0])
         yolo_conf = float(box.conf[0])
+
+        # YOLO 클래스 정보 출력 추가
+        yolo_cls_id = int(box.cls[0])
+        yolo_cls_name = yolo_names.get(yolo_cls_id, "unknown")
+        print(f"[YOLO] cls_id={yolo_cls_id}, name='{yolo_cls_name}', conf={yolo_conf:.3f}")
+
 
         crop = img[y1:y2, x1:x2]
         if crop.size == 0:
@@ -134,6 +133,7 @@ def analyze_image(image_bytes: bytes, db):
 
         # 2. OCR (보조)
         ocr_text = run_ocr(crop)
+        print(f"[OCR] text='{ocr_text}'")
 
         # DB 관련 기본값
         mapping = None

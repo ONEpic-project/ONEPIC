@@ -132,7 +132,7 @@ def product_view():
                     <strong>${result.label}</strong><br/>
                     브랜드: ${result.brand_name ?? "-"}<br/>
                     가격: ${result.price ?? "-"}원<br/>
-                    ${result.size ? `사이즈: ${result.size}<br/>` : ""}
+                    사이즈: ${result.size ?? "-"}<br/>
                     <span class="confidence">
                         신뢰도: ${result.confidence.toFixed(2)}
                     </span>
