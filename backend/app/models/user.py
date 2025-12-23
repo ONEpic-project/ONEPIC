@@ -1,6 +1,6 @@
 # app/models/user.py
 
-from sqlalchemy import Column, Integer, String
+from sqlalchemy import Column, Integer, String, DateTime, func
 from app.database.database import Base
 
 class User(Base):

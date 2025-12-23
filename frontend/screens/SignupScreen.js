@@ -17,6 +17,9 @@ import Header from './components/Header';
 
 const { width, height } = Dimensions.get('window');
 
+// API URL 설정 (실제 배포 시 환경 변수로 관리 권장)
+const API_BASE_URL = 'http://ec2-13-239-10-253.ap-southeast-2.compute.amazonaws.com:8000';
+
 const SignupScreen = ({ navigation }) => {
   const [name, setName] = useState('');
   const [userId, setUserId] = useState('');
@@ -38,13 +41,17 @@ const SignupScreen = ({ navigation }) => {
       return;
     }
     if (!contact.trim()) {
-      Alert.alert('알림', '연락처를 입력해주세요.');
+    Alert.alert('알림', '연락처를 입력해주세요.');
+    return;
+    }
+    if (contact.length !== 11) {
+      Alert.alert('알림', '연락처는 11자리로 입력해주세요.');
       return;
     }
 
     // 회원가입 완료 화면으로 이동
     try {
-    const response = await fetch('http://192.168.2.12:8000/api/auth/signup', {
+    const response = await fetch('${API_BASE_URL}/api/auth/signup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -75,12 +82,12 @@ const SignupScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.flex}
+        //style={styles.flex}
       >
         <ScrollView 
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-          showsVerticalScrollIndicator={false}
+          //contentContainerStyle={styles.scrollContent}
+          //keyboardShouldPersistTaps="handled"
+          //showsVerticalScrollIndicator={false}
         >
           {/* 헤더영역 */}
           <Header 
@@ -91,7 +98,6 @@ const SignupScreen = ({ navigation }) => {
           {/* 입력 필드들 */}
           <View style={styles.formContainer}>
             {/* 성명 */}
-            <View style={styles.inputGroup}>
               <TextInput
                 style={styles.input}
                 value={name}
@@ -100,10 +106,8 @@ const SignupScreen = ({ navigation }) => {
                 placeholderTextColor="#999"
                 autoCapitalize="words"
               />
-            </View>
 
             {/* 아이디 */}
-            <View style={styles.inputGroup}>
               <TextInput
                 style={styles.input}
                 value={userId}
@@ -113,10 +117,8 @@ const SignupScreen = ({ navigation }) => {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-            </View>
 
             {/* 비밀번호 */}
-            <View style={styles.inputGroup}>
               <TextInput
                 style={styles.input}
                 value={password}
@@ -127,10 +129,8 @@ const SignupScreen = ({ navigation }) => {
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-            </View>
 
             {/* 연락처 */}
-            <View style={styles.inputGroup}>
               <TextInput
                 style={styles.input}
                 value={contact}
@@ -139,7 +139,6 @@ const SignupScreen = ({ navigation }) => {
                 placeholderTextColor="#999"
                 keyboardType="phone-pad"
               />
-            </View>
           </View>
 
           {/* 회원가입 버튼 */}
@@ -160,22 +159,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  flex: {
-    flex: 1,
-  },
-  scrollContent: {
+  formContainer: {
+    marginBottom: height * 0.08,
+    marginTop: height * 0.08,
     paddingHorizontal: width * 0.08,
     paddingTop: height * 0.02,
     paddingBottom: height * 0.05,
   },
-  formContainer: {
-    marginBottom: height * 0.08,
-  },
-  inputGroup: {
-    marginBottom: height * 0.025,
-  },
   input: {
-    width: '100%',
+    width: '95%',
     height: height * 0.06, // 화면 높이의 6%
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
@@ -183,6 +175,7 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: height * 0.035,
     paddingVertical: 10,
+    alignSelf: 'center',
   },
   signupButton: {
     backgroundColor: '#FF9500',
@@ -190,6 +183,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: height * 0.03,
+    width: '83%',
+    alignSelf: 'center',
   },
   signupButtonText: {
     color: '#FFFFFF',

@@ -21,9 +21,8 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const DRAWER_PEEK_HEIGHT = 200; // drawerBleeding과 동일
 const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.6; // 화면의 50%
 
-const API_BASE_URL = Platform.OS === 'android' 
-  ? 'http://10.0.2.2:8000'
-  : 'http://localhost:8000';
+// API URL 설정
+const API_BASE_URL = 'http://ec2-13-239-10-253.ap-southeast-2.compute.amazonaws.com:8000';
 
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();

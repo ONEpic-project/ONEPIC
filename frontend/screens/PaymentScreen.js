@@ -10,6 +10,7 @@ import {
   Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import Header from './components/Header';
 
 const { width, height } = Dimensions.get('window');
 
@@ -62,16 +63,10 @@ export default function PaymentScreen({ route, navigation }) {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-        >
-          <Ionicons name="arrow-back" size={24} color="black" />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>결제하기</Text>
-        <View style={styles.placeholder} />
-      </View>
+      <Header 
+        navigation={navigation}
+        title="결제하기"
+      />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         {/* Order Summary */}

@@ -62,21 +62,16 @@ const ReceiptScreen = ({ navigation }) => {
       <StatusBar barStyle="dark-content" backgroundColor="#FFFFFF" />
       
       <View style={styles.container}>
-        {/* 헤더 */}
-        <View style={styles.header}>
 
-          <Header 
+        <Header 
           navigation={navigation}
           title="전자영수증"
-          />
-          
-          <View style={styles.headerRight}>
-            <PeriodDropdown
-              selectedPeriod={selectedPeriod}
-              onPeriodChange={handlePeriodChange}
-            />
-          </View>
-        </View>
+        />
+
+        <PeriodDropdown
+          selectedPeriod={selectedPeriod}
+          onPeriodChange={handlePeriodChange}
+        />
 
         {/* 상단 구분선 */}
         <View style={styles.topDivider} />
