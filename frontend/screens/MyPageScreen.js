@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions 
   } from 'react-native';
-
+import Header from './components/Header';
 
 const { width, height } = Dimensions.get('window');
 
@@ -25,15 +25,10 @@ const MyPageScreen = ({navigation}) => {
   return (
     <View style={styles.container}>
       {/* 헤더 */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.navigate('Home')}
-        >
-          <Text style={styles.backButton}>←</Text>
-        </TouchableOpacity>
-        <Text style={styles.title}>회원 정보</Text>
-      </View>
+      <Header 
+      navigation={navigation}
+      title="회원 정보"
+      />
 
       {/* 입력 필드 */}
       <View style={styles.formContainer}>
@@ -88,6 +83,7 @@ const MyPageScreen = ({navigation}) => {
             </Text>
           </TouchableOpacity>
 
+          {/* 취소? 수정완료? */}
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={() => setIsEditing(false)}
@@ -97,7 +93,7 @@ const MyPageScreen = ({navigation}) => {
         </View>
       </View>
 
-      {/* 하단 메뉴 */}
+      {/* 하단 메뉴 이거는 시간이 되면...*/}
       <View style={styles.bottomMenu}>
         <Text style={styles.logout}>로그아웃</Text>
         <Text style={styles.withdraw}>탈퇴하기</Text>

@@ -10,6 +10,7 @@ import {
   Alert 
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import Header from './components/Header';
 
 const { width, height } = Dimensions.get('window');
 
@@ -197,23 +198,17 @@ const CartScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
       {/* 헤더 */}
-      <View style={styles.header}>
-        <TouchableOpacity 
-          style={styles.backButton}
-          onPress={() => navigation.goBack()}
-        >
-          <Text style={styles.backButtonText}>←</Text>
-        </TouchableOpacity>
-        
-        <Text style={styles.headerTitle}>결제</Text>
-        
+      <Header 
+        navigation={navigation}
+        title="장바구니"
+      />
+
         <TouchableOpacity 
           style={styles.deleteAllButton}
           onPress={removeAll}
         >
           <Text style={styles.deleteAllText}>전체 삭제</Text>
         </TouchableOpacity>
-      </View>
 
       {/* 장바구니 리스트 */}
       {cartItems.length === 0 ? (

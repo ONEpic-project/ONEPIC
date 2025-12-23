@@ -16,8 +16,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width, height } = Dimensions.get('window');
 
-// API URL 설정 (실제 배포 시 환경 변수로 관리 권장)
-const API_BASE_URL = 'http://ec2-13-239-10-253.ap-southeast-2.compute.amazonaws.com';
+// API URL 설정
+const API_BASE_URL = 'http://ec2-13-239-10-253.ap-southeast-2.compute.amazonaws.com:8000';
 
 const LoginScreen = ({ navigation }) => {
   const [userId, setUserId] = useState('');
