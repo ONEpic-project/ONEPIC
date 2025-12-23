@@ -16,7 +16,8 @@ numpy
 opencv-python
 
 # OCR
-easyocr
+paddlepaddle
+paddleocr
 
 # Validation
 pydantic

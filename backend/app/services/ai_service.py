@@ -4,7 +4,7 @@ import re
 import time
 import numpy as np
 import torch
-import easyocr
+from paddleocr import PaddleOCR
 
 from ultralytics import YOLO
 from sqlalchemy.exc import SQLAlchemyError
@@ -30,7 +30,7 @@ DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 
 
 # YOLO (Detection)
-YOLO_IMGSZ = 416
+YOLO_IMGSZ = 352  # 해상도 조정 (416->352): 속도와 정확도 균형
 YOLO_CONF = 0.20
 YOLO_IOU = 0.50
 
@@ -39,7 +39,7 @@ yolo_model = YOLO(YOLO_MODEL_PATH)
 
 # MobileNet (Classification)
 NUM_CLASSES = 34
-OCR_SKIP_CONF = 0.85
+OCR_SKIP_CONF = 0.90  # 90% 이상이면 OCR 생략
 
 def _load_state_dict_any(path: str, device: str):
     ckpt = torch.load(path, map_location=device)
@@ -91,9 +91,16 @@ with torch.no_grad():
     cls_model(_dummy)
 
 
-# OCR
-OCR_GPU = False
-reader = easyocr.Reader(["ko", "en"], gpu=OCR_GPU)
+# OCR - PaddleOCR 기본값 사용 (자동 캐시 다운로드로 안정성 확보)
+OCR_DEVICE = "gpu" if torch.cuda.is_available() else "cpu"
+
+ocr = PaddleOCR(
+    use_angle_cls=True,         # 각도 분류 켜기 - 이미지 회전 자동 보정
+    lang='korean',
+    device=OCR_DEVICE,
+    det_limit_side_len=224,     # 탐지 이미지 크기 (192->224): 정확도 복구
+    rec_batch_num=1             # 배치 크기 1 (단일 이미지 처리에 최적)
+)
 
 
 # Utils
@@ -132,10 +139,43 @@ def classify_with_mobilenet(img_bgr: np.ndarray):
 def run_ocr(img_bgr: np.ndarray):
     if img_bgr is None or img_bgr.size == 0:
         return None
-    rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
-    results = reader.readtext(rgb)
-    texts = [t for (_, t, conf) in results if conf >= 0.5]
-    return " ".join(texts) if texts else None
+    try:
+        # OCR 입력 이미지를 과도하게 크게 넣으면 느려지므로, 긴 변을 400px로 제한
+        h, w = img_bgr.shape[:2]
+        max_side = max(h, w)
+        if max_side > 400:
+            scale = 400 / max_side
+            new_w, new_h = int(w * scale), int(h * scale)
+            img_bgr = cv2.resize(img_bgr, (new_w, new_h), interpolation=cv2.INTER_AREA)
+
+        results = ocr.ocr(img_bgr)
+        texts = []
+        if results and len(results) > 0:
+            result_dict = results[0]
+            if isinstance(result_dict, dict):
+                rec_texts = result_dict.get('rec_texts', [])
+                rec_scores = result_dict.get('rec_scores', [])
+                
+                # 용량/브랜드 키워드
+                brand_keywords = ['백설', '청정원', '오뚜기', '대상', '샘표', '사조', '동원', '풀무원', '해찬들', 'CJ']
+                
+                for text, score in zip(rec_texts, rec_scores):
+                    if score >= 0.5:
+                        # 용량 정보 (숫자 포함)
+                        if any(c.isdigit() for c in text):
+                            # ml, l, g, kg 등 단위가 있거나 숫자만 있는 경우
+                            if any(unit in text.lower() for unit in ['ml', 'l', 'g', 'kg', '개', '입']) or text.replace('.', '').isdigit():
+                                texts.append(text)
+                        # 브랜드 키워드
+                        elif any(brand in text for brand in brand_keywords):
+                            texts.append(text)
+                            
+        result = " ".join(texts) if texts else None
+        print(f"[OCR DEBUG] filtered_text='{result}'")
+        return result
+    except Exception as e:
+        print(f"[OCR ERROR] {e}")
+        return None
 
 
 def extract_size_from_ocr(text: str):
@@ -187,6 +227,7 @@ def analyze_image(image_bytes: bytes, db):
         raise ValueError("이미지 디코딩 실패")
 
     # 1) YOLO (imgsz=416) -> bbox 후보
+    t_yolo = time.perf_counter()
     results = yolo_model.predict(
         img,
         imgsz=YOLO_IMGSZ,
@@ -194,6 +235,7 @@ def analyze_image(image_bytes: bytes, db):
         iou=YOLO_IOU,
         verbose=False
     )[0]
+    t_yolo = time.perf_counter() - t_yolo
 
     boxes = results.boxes
     if boxes is None or len(boxes) == 0:
@@ -209,12 +251,19 @@ def analyze_image(image_bytes: bytes, db):
         return {"num_detections": 0, "detections": []}
 
     # 3) MobileNet 분류
+    t_cls = time.perf_counter()
     cls_id, cls_conf = classify_with_mobilenet(crop)
+    t_cls = time.perf_counter() - t_cls
 
-    # 4) OCR 조건부
+    # 4) OCR: 신뢰도가 낮으면 실행
+    t_ocr = 0.0
     ocr_text = None
-    if cls_conf <= OCR_SKIP_CONF:
+    ocr_run = "skip" if cls_conf >= OCR_SKIP_CONF else "run"
+    
+    if cls_conf < OCR_SKIP_CONF:
+        t_ocr = time.perf_counter()
         ocr_text = run_ocr(crop)
+        t_ocr = time.perf_counter() - t_ocr
 
     # 5) DB 매핑 (cls_id 기준)
     product = None
@@ -250,6 +299,11 @@ def analyze_image(image_bytes: bytes, db):
         # 디버그/운영 안정성을 위해 cls_id는 로그로 남김
         print(f"[NO MAPPING] cls_id={cls_id}, cls_conf={cls_conf:.4f}, ocr={'Y' if ocr_text else 'N'}")
         return {"num_detections": 0, "detections": []}
+
+    # 성능 로깅
+    total = time.perf_counter() - t0
+    print(f"[PERF] yolo={t_yolo:.3f}s cls={t_cls:.3f}s ocr={t_ocr:.3f}s total={total:.3f}s")
+    print(f"[AI] yolo_imgsz={YOLO_IMGSZ} cls_id={cls_id} cls_conf={cls_conf:.3f} ocr={ocr_run} ocr_text='{ocr_text}' elapsed={total:.3f}s")
 
     # 6) DB 기준 값
     FLAVOR_ATTR_ID = 1
@@ -291,6 +345,7 @@ def analyze_image(image_bytes: bytes, db):
     print(
         f"[AI] yolo_imgsz={YOLO_IMGSZ} cls_id={cls_id} cls_conf={cls_conf:.3f} "
         f"ocr={'skip' if cls_conf > OCR_SKIP_CONF else 'run'} "
+        f"ocr_text='{ocr_text}' "
         f"elapsed={(t1 - t0):.3f}s"
     )
 
