@@ -14,11 +14,10 @@ import {
 } from 'react-native';
 
 import Header from './components/Header';
+import { API_BASE_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
 
-// API URL 설정 (실제 배포 시 환경 변수로 관리 권장)
-const API_BASE_URL = 'http://ec2-13-239-10-253.ap-southeast-2.compute.amazonaws.com:8000';
 
 const SignupScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -51,7 +50,7 @@ const SignupScreen = ({ navigation }) => {
 
     // 회원가입 완료 화면으로 이동
     try {
-    const response = await fetch('${API_BASE_URL}/api/auth/signup', {
+    const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

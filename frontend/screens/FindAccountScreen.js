@@ -27,12 +27,6 @@ const FindAccountScreen = ({ navigation }) => {
   const [pwPhone, setPwPhone] = useState('');
   const [foundPassword, setFoundPassword] = useState('');
 
-  // Mock DB 데이터 (실제로는 서버 API 호출)
-  const mockUsers = [
-    { name: 'qwer', phone: '01012345678', id: 'qwer1234', password: 'qwer****' },
-    { name: 'asdf', phone: '01098765432', id: 'asdf1234', password: 'asdf****' },
-  ];
-
   // 아이디 찾기 함수
   const handleFindId = async () => {
     if (!idName.trim() || !idPhone.trim()) {
@@ -41,35 +35,30 @@ const FindAccountScreen = ({ navigation }) => {
     }
 
     // TODO: 실제 API 호출로 교체
-    // try {
-    //   const response = await fetch('http://서버IP:8000/api/auth/find-id', {
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({
-    //       name: idName,
-    //       phone: idPhone,
-    //     }),
-    //   });
-    //
-    //   const data = await response.json();
-    //
-    //   if (!response.ok) {
-    //     Alert.alert('알림', data.detail || '일치하는 회원 정보가 없습니다.');
-    //     setFoundId('');
-    //     return;
-    //   }
-    //
-    //   setFoundId(data.id);
-    // } catch (error) {
-    //   Alert.alert('오류', '서버와 연결할 수 없습니다.');
-    // }
-
-    // Mock DB 검색
-    const user = mockUsers.find(
-      u => u.name === idName && u.phone === idPhone
-    );
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/auth/find-id`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: idName,
+          phone: idPhone,
+        }),
+      });
+    
+      const data = await response.json();
+    
+      if (!response.ok) {
+        Alert.alert('알림', data.detail || '일치하는 회원 정보가 없습니다.');
+        setFoundId('');
+        return;
+      }
+    
+      setFoundId(data.id);
+    } catch (error) {
+      Alert.alert('오류', '서버와 연결할 수 없습니다.');
+    }
 
     if (user) {
       setFoundId(user.id);
@@ -111,11 +100,6 @@ const FindAccountScreen = ({ navigation }) => {
     // } catch (error) {
     //   Alert.alert('오류', '서버와 연결할 수 없습니다.');
     // }
-
-    // Mock DB 검색
-    const user = mockUsers.find(
-      u => u.id === pwId && u.phone === pwPhone
-    );
 
     if (user) {
       setFoundPassword(user.password);

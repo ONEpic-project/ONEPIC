@@ -22,7 +22,7 @@ const DRAWER_PEEK_HEIGHT = 200; // drawerBleeding과 동일
 const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.6; // 화면의 50%
 
 // API URL 설정
-const API_BASE_URL = 'http://ec2-13-239-10-253.ap-southeast-2.compute.amazonaws.com:8000';
+const API_BASE_URL = 'http://13.125.214.120:8000/';
 
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();

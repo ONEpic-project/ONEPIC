@@ -13,11 +13,9 @@ import {
   ActivityIndicator
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { API_BASE_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
-
-// API URL 설정
-const API_BASE_URL = 'http://ec2-13-239-10-253.ap-southeast-2.compute.amazonaws.com:8000';
 
 const LoginScreen = ({ navigation }) => {
   const [userId, setUserId] = useState('');
@@ -25,7 +23,7 @@ const LoginScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogin = async () => {
-    // 간단한 유효성 검사
+    //간단한 유효성 검사
     if (!userId.trim()) {
       Alert.alert('알림', '아이디를 입력해주세요.');
       return;
@@ -42,7 +40,7 @@ const LoginScreen = ({ navigation }) => {
     
     // 로그인 성공 시 홈으로 이동 (뒤로가기 불가)
      try {
-      const response = await fetch('${API_BASE_URL}/api/auth/login', {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -55,38 +53,26 @@ const LoginScreen = ({ navigation }) => {
 
     const data = await response.json();
 
+    console.log('서버 응답 데이터:', data);
+
     if (!response.ok) {
-        // HTTP 상태 코드별 에러 처리
-        if (response.status === 401) {
-          Alert.alert('로그인 실패', '아이디 또는 비밀번호가 일치하지 않습니다.');
-        } else if (response.status === 404) {
-          Alert.alert('로그인 실패', '존재하지 않는 사용자입니다.');
-        } else {
-          Alert.alert('로그인 실패', data.detail || '오류가 발생했습니다.');
-        }
+        /// 에러 처리
+        Alert.alert('로그인 실패', data.detail || '오류가 발생했습니다.');
         return;
       }
 
-    // 로그인 성공 - 토큰 저장
-      if (data.access_token) {
-        await AsyncStorage.setItem('access_token', data.access_token);
-        
-        // refresh_token이 있다면 함께 저장
-        if (data.refresh_token) {
-          await AsyncStorage.setItem('refresh_token', data.refresh_token);
-        }
-
-        // 사용자 정보도 저장 (필요시)
-        if (data.user) {
-          await AsyncStorage.setItem('user_info', JSON.stringify(data.user));
-        }
+    // 로그인 성공 -사용자 정보 저장
+      if (data.user_id && data.username) {
+        await AsyncStorage.setItem('user_id', data.user_id.toString());
+        await AsyncStorage.setItem('username', data.username);
+        await AsyncStorage.setItem('login_id', userId);
 
         console.log('로그인 성공:', data);
         
         // 홈 화면으로 이동 (뒤로가기 불가)
         navigation.replace('Home');
       } else {
-        Alert.alert('오류', '토큰을 받지 못했습니다.');
+        Alert.alert('오류', '사용자 정보를 받지 못했습니다.');
       }
 
     } catch (error) {
@@ -101,9 +87,9 @@ const LoginScreen = ({ navigation }) => {
       } else {
         Alert.alert('오류', '로그인 중 문제가 발생했습니다.');
       }
-    } finally {
-      setIsLoading(false);
-    }
+      } finally {
+        setIsLoading(false);
+      }
   };
 
   const handleSignup = () => {
