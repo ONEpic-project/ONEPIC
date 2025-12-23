@@ -1,8 +1,22 @@
+# FastAPI core
 fastapi
 uvicorn
+python-multipart
+
+# DB
 sqlalchemy
-pydantic
-ultralytics
-opencv-python
-numpy
+pymysql
+python-dotenv
+
+# AI / ML
 torch
+torchvision
+ultralytics
+numpy
+opencv-python
+
+# OCR
+easyocr
+
+# Validation
+pydantic
