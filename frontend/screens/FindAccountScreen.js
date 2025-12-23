@@ -1,4 +1,5 @@
 // FindAccountScreen.js
+// 서버 연동 시 주석 처리된 API 호출 코드의 주석을 해제하고, Mock DB 부분을 제거
 import React, { useState } from 'react';
 import {
   View,
@@ -8,7 +9,10 @@ import {
   StyleSheet,
   Alert,
   ScrollView,
+  Dimensions,
 } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const FindAccountScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('id'); // 'id' or 'password'
@@ -30,13 +34,39 @@ const FindAccountScreen = ({ navigation }) => {
   ];
 
   // 아이디 찾기 함수
-  const handleFindId = () => {
+  const handleFindId = async () => {
     if (!idName.trim() || !idPhone.trim()) {
       Alert.alert('알림', '성명과 연락처를 모두 입력해주세요.');
       return;
     }
 
-    // Mock DB 검색 (실제로는 서버 API 호출)
+    // TODO: 실제 API 호출로 교체
+    // try {
+    //   const response = await fetch('http://서버IP:8000/api/auth/find-id', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({
+    //       name: idName,
+    //       phone: idPhone,
+    //     }),
+    //   });
+    //
+    //   const data = await response.json();
+    //
+    //   if (!response.ok) {
+    //     Alert.alert('알림', data.detail || '일치하는 회원 정보가 없습니다.');
+    //     setFoundId('');
+    //     return;
+    //   }
+    //
+    //   setFoundId(data.id);
+    // } catch (error) {
+    //   Alert.alert('오류', '서버와 연결할 수 없습니다.');
+    // }
+
+    // Mock DB 검색
     const user = mockUsers.find(
       u => u.name === idName && u.phone === idPhone
     );
@@ -50,13 +80,39 @@ const FindAccountScreen = ({ navigation }) => {
   };
 
   // 비밀번호 찾기 함수
-  const handleFindPassword = () => {
+  const handleFindPassword = async () => {
     if (!pwId.trim() || !pwPhone.trim()) {
       Alert.alert('알림', '아이디와 연락처를 모두 입력해주세요.');
       return;
     }
 
-    // Mock DB 검색 (실제로는 서버 API 호출)
+    // TODO: 실제 API 호출로 교체
+    // try {
+    //   const response = await fetch('http://서버IP:8000/api/auth/find-password', {
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({
+    //       login_id: pwId,
+    //       phone: pwPhone,
+    //     }),
+    //   });
+    //
+    //   const data = await response.json();
+    //
+    //   if (!response.ok) {
+    //     Alert.alert('알림', data.detail || '일치하는 회원 정보가 없습니다.');
+    //     setFoundPassword('');
+    //     return;
+    //   }
+    //
+    //   setFoundPassword(data.password);
+    // } catch (error) {
+    //   Alert.alert('오류', '서버와 연결할 수 없습니다.');
+    // }
+
+    // Mock DB 검색
     const user = mockUsers.find(
       u => u.id === pwId && u.phone === pwPhone
     );
@@ -71,20 +127,15 @@ const FindAccountScreen = ({ navigation }) => {
 
   // 로그인 화면으로 이동
   const goToLogin = () => {
-    navigation.navigate('LoginScreen');
+    navigation.navigate('Login');
   };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        {/* 헤더 */}
-        <Text style={styles.header}>
-          {activeTab === 'id' ? '가입정보 찾기-아이디' : '가입정보 찾기-비밀번호'}
-        </Text>
-
-        {/* 탭 */}
+        {/* 탭 버튼 */}
         <View style={styles.tabContainer}>
-          <TouchableOpacity
+          <TouchableOpacity 
             style={[styles.tab, activeTab === 'id' && styles.activeTab]}
             onPress={() => {
               setActiveTab('id');
@@ -95,7 +146,8 @@ const FindAccountScreen = ({ navigation }) => {
               아이디 찾기
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity
+          
+          <TouchableOpacity 
             style={[styles.tab, activeTab === 'password' && styles.activeTab]}
             onPress={() => {
               setActiveTab('password');
@@ -111,74 +163,95 @@ const FindAccountScreen = ({ navigation }) => {
         {/* 아이디 찾기 탭 */}
         {activeTab === 'id' ? (
           <View style={styles.formContainer}>
-            <Text style={styles.label}>성명</Text>
             <TextInput
               style={styles.input}
-              placeholder="성명을 입력하세요"
+              placeholder="성명"
+              placeholderTextColor="#999"
               value={idName}
               onChangeText={setIdName}
             />
-
-            <Text style={styles.label}>연락처</Text>
-            <Text style={styles.helperText}>"-"을 제외하고 입력해 주세요.</Text>
+            
             <TextInput
               style={styles.input}
-              placeholder="연락처를 입력하세요"
+              placeholder="연락처 (- 제외)"
+              placeholderTextColor="#999"
               value={idPhone}
               onChangeText={setIdPhone}
               keyboardType="phone-pad"
             />
 
-            {/* 결과 표시 */}
+            {/* 결과 표시 영역 */}
             {foundId ? (
               <View style={styles.resultContainer}>
-                <Text style={styles.resultLabel}>아이디 : {foundId}</Text>
+                <Text style={styles.resultText}>아이디 : {foundId}</Text>
               </View>
-            ) : null}
+            ) : (
+              <View style={styles.resultContainer} />
+            )}
 
-            <TouchableOpacity style={styles.searchButton} onPress={handleFindId}>
-              <Text style={styles.searchButtonText}>검색</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.loginButton} onPress={goToLogin}>
-              <Text style={styles.loginButtonText}>로그인 하기</Text>
-            </TouchableOpacity>
+            {/* 하단 버튼 */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={styles.searchButton}
+                onPress={handleFindId}
+              >
+                <Text style={styles.searchButtonText}>검색</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.loginButton}
+                onPress={goToLogin}
+              >
+                <Text style={styles.loginButtonText}>로그인 하기</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         ) : (
           /* 비밀번호 찾기 탭 */
           <View style={styles.formContainer}>
-            <Text style={styles.label}>아이디</Text>
             <TextInput
               style={styles.input}
-              placeholder="아이디를 입력하세요"
+              placeholder="아이디"
+              placeholderTextColor="#999"
               value={pwId}
               onChangeText={setPwId}
+              autoCapitalize="none"
             />
-
-            <Text style={styles.label}>연락처</Text>
-            <Text style={styles.helperText}>"-"을 제외하고 입력해 주세요.</Text>
+            
             <TextInput
               style={styles.input}
-              placeholder="연락처를 입력하세요"
+              placeholder="연락처 (- 제외)"
+              placeholderTextColor="#999"
               value={pwPhone}
               onChangeText={setPwPhone}
               keyboardType="phone-pad"
             />
 
-            {/* 결과 표시 */}
+            {/* 결과 표시 영역 */}
             {foundPassword ? (
               <View style={styles.resultContainer}>
-                <Text style={styles.resultLabel}>비밀번호 : {foundPassword}</Text>
+                <Text style={styles.resultText}>비밀번호 : {foundPassword}</Text>
               </View>
-            ) : null}
+            ) : (
+              <View style={styles.resultContainer} />
+            )}
 
-            <TouchableOpacity style={styles.searchButton} onPress={handleFindPassword}>
-              <Text style={styles.searchButtonText}>검색</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.loginButton} onPress={goToLogin}>
-              <Text style={styles.loginButtonText}>로그인 하기</Text>
-            </TouchableOpacity>
+            {/* 하단 버튼 */}
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity 
+                style={styles.searchButton}
+                onPress={handleFindPassword}
+              >
+                <Text style={styles.searchButtonText}>검색</Text>
+              </TouchableOpacity>
+              
+              <TouchableOpacity 
+                style={styles.loginButton}
+                onPress={goToLogin}
+              >
+                <Text style={styles.loginButtonText}>로그인 하기</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </View>
@@ -189,89 +262,93 @@ const FindAccountScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
   },
   content: {
-    padding: 20,
-  },
-  header: {
-    fontSize: 16,
-    color: '#999',
-    marginBottom: 20,
-    marginTop: 20,
+    paddingHorizontal: width * 0.1,
+    paddingTop: height * 0.08,
+    paddingBottom: height * 0.05,
   },
   tabContainer: {
     flexDirection: 'row',
-    marginBottom: 30,
+    marginBottom: height * 0.06,
+    borderRadius: height * 0.03,
+    borderWidth: 2,
+    borderColor: '#FF9500',
+    overflow: 'hidden',
   },
   tab: {
     flex: 1,
-    paddingVertical: 15,
+    paddingVertical: height * 0.015,
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: '#e0e0e0',
+    justifyContent: 'center',
   },
   activeTab: {
-    borderBottomColor: '#FF9800',
+    backgroundColor: '#FF9500',
   },
   tabText: {
-    fontSize: 16,
-    color: '#999',
+    fontSize: width * 0.04,
+    fontWeight: '600',
+    color: '#FF9500',
   },
   activeTabText: {
-    color: '#FF9800',
-    fontWeight: 'bold',
+    color: '#FFFFFF',
   },
   formContainer: {
-    marginTop: 20,
-  },
-  label: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginBottom: 10,
-    color: '#333',
+    width: '100%',
   },
   input: {
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 5,
-    padding: 15,
-    fontSize: 16,
-    marginBottom: 20,
-    backgroundColor: '#f5f5f5',
+    width: '100%',
+    height: height * 0.06,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    fontSize: width * 0.04,
+    color: '#333',
+    marginBottom: height * 0.035,
+    paddingVertical: 10,
   },
   resultContainer: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 20,
     alignItems: 'center',
+    marginVertical: height * 0.08,
+    minHeight: height * 0.03,
   },
-  resultLabel: {
-    fontSize: 16,
-    color: '#FF9800',
+  resultText: {
+    fontSize: width * 0.045,
+    color: '#FF9500',
+    fontWeight: '500',
+  },
+  buttonContainer: {
+    width: '100%',
   },
   searchButton: {
-    backgroundColor: '#FF9800',
-    padding: 18,
-    borderRadius: 5,
+    width: '100%',
+    height: height * 0.06,
+    backgroundColor: '#FF9500',
+    borderRadius: height * 0.03,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: height * 0.02,
   },
   searchButtonText: {
-    color: '#fff',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: width * 0.045,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   loginButton: {
-    backgroundColor: '#d0d0d0',
-    padding: 18,
-    borderRadius: 5,
+    width: '100%',
+    height: height * 0.06,
+    backgroundColor: '#FFFFFF',
+    borderRadius: height * 0.03,
+    borderWidth: 2,
+    borderColor: '#FF9500',
+    justifyContent: 'center',
     alignItems: 'center',
   },
   loginButtonText: {
-    color: '#666',
-    fontSize: 18,
-    fontWeight: 'bold',
+    fontSize: width * 0.045,
+    fontWeight: '600',
+    color: '#FF9500',
   },
 });
 

@@ -5,7 +5,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Image,       
+  Dimensions
 } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const SignupCompleteScreen = ({ navigation }) => {
   const handleGoHome = () => {
@@ -17,58 +21,74 @@ const SignupCompleteScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
+        {/* 축하 이미지 */}
+        <Image 
+          source={require('../assets/celebration.png')} // 실제 이미지 경로로 변경
+          style={styles.celebrationImage}
+          resizeMode="contain"
+        />
+        
         {/* 완료 메시지 */}
         <View style={styles.messageContainer}>
-          <Text style={styles.messageText}>
-            회원가입이{'\n'}완료되었습니다!
-          </Text>
+          <Text style={styles.messageText}>회원가입이</Text>
+          <Text style={styles.messageText}>완료되었습니다!</Text>
         </View>
+      </View>
 
-        {/* 홈 화면 가기 버튼 */}
-        <TouchableOpacity style={styles.homeButton} onPress={handleGoHome}>
-          <Text style={styles.homeButtonText}>로그인 화면으로</Text>
+      {/* 홈 화면 가기 버튼 */}
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity style={styles.homeButton}>
+          <Text style={styles.homeButtonText}>홈 화면 가기</Text>
         </TouchableOpacity>
       </View>
-    </SafeAreaView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 40,
   },
   content: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 30,
+    alignItems: 'center',
+    paddingTop: 100,
+  },
+  celebrationImage: {
+    width: 180,
+    height: 180,
+    marginBottom: 50,
   },
   messageContainer: {
-    flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
   },
   messageText: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#333333',
+    lineHeight: 32,
     textAlign: 'center',
-    lineHeight: 36,
+  },
+  buttonContainer: {
+    paddingBottom: 80,
   },
   homeButton: {
+    width: '100%',
+    height: 50,
     backgroundColor: '#FF9500',
-    height: 55,
+    borderRadius: 25,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 4,
-    marginBottom: 40,
   },
   homeButtonText: {
-    color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
 });
 

@@ -55,7 +55,7 @@ export default function ScanScreen() {
     { id: 8, name: '농심 신라면', size: '120g', price: 950, image: null },
   ];
 
-  // Bottom Drawer PanResponder
+  // 스크롤 업 Bottom Drawer
   const panResponder = useRef(
     PanResponder.create({
       onStartShouldSetPanResponder: () => true,

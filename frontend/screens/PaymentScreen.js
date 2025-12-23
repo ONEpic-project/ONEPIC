@@ -7,8 +7,11 @@ import {
   ScrollView,
   Image,
   Alert,
+  Dimensions
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+
+const { width, height } = Dimensions.get('window');
 
 export default function PaymentScreen({ route, navigation }) {
   const { products, total } = route.params;

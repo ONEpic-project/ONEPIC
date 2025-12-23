@@ -21,12 +21,12 @@ def get_products(
         query = query.filter(Product.category_id == category_id)
     return query.all()
 
-# ✅ 연결 테스트용 (유지)
+# 연결 테스트용 (유지)
 @router.get("/test")
 def product_test():
     return {"message": "Product router OK"}
 
-# ✅ 임시 HTML 테스트 페이지
+# 임시 HTML 테스트 페이지 (AI 연동 최신 스펙 반영)
 @router.get("/view", response_class=HTMLResponse)
 def product_view():
     html = """
@@ -87,8 +87,8 @@ def product_view():
         </div>
 
         <div class="box">
-            <h3>2️⃣ AI 분석 결과 이미지</h3>
-            <img id="resultImage" />
+            <h3>2️⃣ 대표 상품 이미지</h3>
+            <img id="productImage" />
         </div>
 
         <div class="box">
@@ -115,21 +115,24 @@ def product_view():
                 const data = await res.json();
                 const result = data.result;
 
-                // 결과 이미지
-                document.getElementById("resultImage").src =
-                    "data:image/jpeg;base64," + result.image_base64;
-
                 const list = document.getElementById("productList");
-                list.innerHTML = "";
+                const img = document.getElementById("productImage");
 
-                if (!result.label) {
+                list.innerHTML = "";
+                img.src = "";
+
+                if (!result.product_id) {
                     list.innerHTML = "<li>상품을 인식하지 못했습니다.</li>";
                     return;
                 }
 
+                // ✅ product_id 기반 대표 이미지 로드
+                img.src = `/static/products/${result.product_id}/main.jpg`;
+
                 const li = document.createElement("li");
                 li.innerHTML = `
-                    <strong>${result.label}</strong><br/>
+                    <strong>${result.product_name}</strong><br/>
+                    맛: ${result.flavor ?? "-"}<br/>
                     브랜드: ${result.brand_name ?? "-"}<br/>
                     가격: ${result.price ?? "-"}원<br/>
                     사이즈: ${result.size ?? "-"}<br/>
@@ -145,3 +148,4 @@ def product_view():
     </html>
     """
     return html
+
