@@ -9,28 +9,55 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  Dimensions
 } from 'react-native';
+
+const { width, height } = Dimensions.get('window');
 
 const LoginScreen = ({ navigation }) => {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     // 간단한 유효성 검사
-    // if (!userId.trim()) {
-    //   Alert.alert('알림', '아이디를 입력해주세요.');
-    //   return;
-    // }
-    // if (!password.trim()) {
-    //   Alert.alert('알림', '비밀번호를 입력해주세요.');
-    //   return;
-    // }
+    if (!userId.trim()) {
+      Alert.alert('알림', '아이디를 입력해주세요.');
+      return;
+    }
+    if (!password.trim()) {
+      Alert.alert('알림', '비밀번호를 입력해주세요.');
+      return;
+    }
 
     // // 로그인 로직 (실제로는 API 호출)
-    // console.log('Login:', userId, password);
+    console.log('Login:', userId, password);
     
     // 로그인 성공 시 홈으로 이동 (뒤로가기 불가)
+     try {
+    const response = await fetch('http://192.168.2.12:8000/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        login_id: userId,
+        password: password,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      Alert.alert('로그인 실패', data.detail || '오류 발생');
+      return;
+    }
+
+    // ✅ 로그인 성공
     navigation.replace('Home');
+
+  } catch (error) {
+    Alert.alert('오류', '서버와 연결할 수 없습니다.');//디비에 있는데 왜 안될까
+  }
   };
 
   const handleSignup = () => {

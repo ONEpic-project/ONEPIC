@@ -1,45 +1,32 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  SafeAreaView,
-  Image,       
-  Dimensions
-} from 'react-native';
+import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 
 const { width, height } = Dimensions.get('window');
 
 const SignupCompleteScreen = ({ navigation }) => {
-  const handleGoHome = () => {
-    // 로그인 화면으로 이동 (스택 초기화)
-    navigation.reset({
-      index: 0,
-      routes: [{ name: 'LoginScreen' }],
-    });
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.content}>
         {/* 축하 이미지 */}
         <Image 
-          source={require('../assets/celebration.png')} // 실제 이미지 경로로 변경
+          source={require('../assets/paidcard.png')} // 실제 이미지 경로로 변경
           style={styles.celebrationImage}
           resizeMode="contain"
         />
         
         {/* 완료 메시지 */}
         <View style={styles.messageContainer}>
-          <Text style={styles.messageText}>회원가입이</Text>
+          <Text style={styles.messageText}>결제가</Text>
           <Text style={styles.messageText}>완료되었습니다!</Text>
         </View>
       </View>
 
       {/* 홈 화면 가기 버튼 */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.homeButton}>
+        <TouchableOpacity 
+        style={styles.homeButton} 
+        onPress={() => navigation.navigate('Home')}
+        >
           <Text style={styles.homeButtonText}>홈 화면 가기</Text>
         </TouchableOpacity>
       </View>
