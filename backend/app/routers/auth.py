@@ -2,9 +2,9 @@
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from app.database.database import get_db
+
 from app.core.dependencies import get_db
-from app.schemas.user import UserCreate
+from app.schemas.user import UserCreate, UserLogin
 from app.models.user import User
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
@@ -12,16 +12,20 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])
 # 회원가입 ================================================
 @router.post("/signup")
 def signup(user: UserCreate, db: Session = Depends(get_db)):
-    # 아이디 중복 체크
-    exists = db.query(User).filter(User.user_id == user.user_id).first()
+    # 로그인 아이디 중복 체크
+    exists = (
+        db.query(User)
+        .filter(User.login_id == user.login_id)
+        .first()
+    )
     if exists:
         raise HTTPException(status_code=400, detail="이미 존재하는 아이디입니다.")
 
     new_user = User(
-        name=user.name,
-        user_id=user.user_id,
-        password=user.password,  # 실무에선 해시!
-        contact=user.contact,
+        login_id=user.login_id,
+        password=user.password,   # 나중에 해시
+        username=user.username,
+        phone=user.phone,
     )
 
     db.add(new_user)

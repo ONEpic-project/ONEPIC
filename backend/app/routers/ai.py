@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from app.services.ai_service import analyze_image
 from app.core.dependencies import get_db
 from app.services.product_service import get_product_size
+from app.schemas.user import UserLogin
 
 
 router = APIRouter(tags=["AI"])
