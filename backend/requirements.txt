@@ -6,3 +6,7 @@ ultralytics
 opencv-python
 numpy
 torch
+pymysql
+dotenv
+easyocr
+python-multipart

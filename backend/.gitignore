@@ -8,7 +8,7 @@ fastapi_env/
 venv/
 .env/
 *.env
-
+.venv
 # Environment variables
 .env
 *.env
