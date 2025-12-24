@@ -95,7 +95,11 @@ const MyPageScreen = ({navigation}) => {
 
       {/* 하단 메뉴 이거는 시간이 되면...*/}
       <View style={styles.bottomMenu}>
-        <Text style={styles.logout}>로그아웃</Text>
+        <TouchableOpacity
+          onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={styles.logout}>로그아웃</Text>
+          </TouchableOpacity>
         <Text style={styles.withdraw}>탈퇴하기</Text>
       </View>
     </View>
