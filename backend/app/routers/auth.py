@@ -53,13 +53,6 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         data={"sub": str(db_user.user_id)}
     )
 
-    return {
-    "message": "🔥🔥🔥 THIS IS NEW SERVER 🔥🔥🔥",
-    "access_token": access_token,
-    "user_id": 999,
-    "username": "NEW_SERVER"
-    }
-
     # 3. 토큰 포함해서 응답
     return {
         "message": "로그인 성공",
