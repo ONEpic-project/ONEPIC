@@ -18,17 +18,6 @@ const { width, height } = Dimensions.get('window');
 const ReceiptScreen = ({ navigation }) => {
   const [selectedPeriod, setSelectedPeriod] = useState('current');
 
-  // 더미 데이터
-  const receipts = [
-    { id: '1', date: '2025-12-22', amount: '10,900', purchase: '구매' },
-    { id: '2', date: '2025-12-22', amount: '10,900', purchase: '구매' },
-    { id: '3', date: '2025-12-22', amount: '10,900', purchase: '구매' },
-    { id: '4', date: '2025-12-22', amount: '10,900', purchase: '구매' },
-    { id: '5', date: '2025-12-22', amount: '10,900', purchase: '구매' },
-    { id: '6', date: '2025-12-22', amount: '10,900', purchase: '구매' },
-    { id: '7', date: '2025-12-22', amount: '10,900', purchase: '구매' },
-  ];
-
   const handlePeriodChange = (period) => {
     setSelectedPeriod(period);
     // API 호출로 데이터 필터링
