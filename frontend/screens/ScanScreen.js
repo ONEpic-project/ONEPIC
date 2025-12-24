@@ -15,14 +15,12 @@ import {
   Modal
 } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const DRAWER_PEEK_HEIGHT = 200; // drawerBleeding과 동일
 const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.6; // 화면의 50%
-
-// API URL 설정
-const API_BASE_URL = 'http://13.125.214.120:8000/';
 
 export default function ScanScreen() {
   const [permission, requestPermission] = useCameraPermissions();
@@ -41,18 +39,6 @@ export default function ScanScreen() {
   // 모달 상태 추가
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-
-  // 예시 상품 데이터
-  const sampleProducts = [
-    { id: 1, name: '오리온 예감 오리지널', size: '64g', price: 1250, image: null },
-    { id: 2, name: '롯데 칙촉', size: '144g', price: 2500, image: null },
-    { id: 3, name: '농심 새우깡', size: '90g', price: 1500, image: null },
-    { id: 4, name: '해태 허니버터칩', size: '60g', price: 1800, image: null },
-    { id: 5, name: '크라운 쿠크다스', size: '108g', price: 2200, image: null },
-    { id: 6, name: '오뚜기 진라면', size: '120g', price: 1000, image: null },
-    { id: 7, name: '삼양 불닭볶음면', size: '140g', price: 1300, image: null },
-    { id: 8, name: '농심 신라면', size: '120g', price: 950, image: null },
-  ];
 
   // 스크롤 업 Bottom Drawer
   const panResponder = useRef(
