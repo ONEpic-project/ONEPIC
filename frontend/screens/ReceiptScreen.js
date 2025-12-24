@@ -38,7 +38,7 @@ const ReceiptScreen = ({ navigation }) => {
       </View>
       <TouchableOpacity
         style={styles.receiptButton}
-        onPress={() => handleReceiptDetail(item.id)}
+        onPress={() => navigation.navigate('ReceiptDetail')}
         activeOpacity={0.7}
       >
         <Text style={styles.receiptButtonText}>영수증 보기</Text>
