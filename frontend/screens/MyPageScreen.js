@@ -1,17 +1,40 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions 
   } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './components/Header';
 
 const { width, height } = Dimensions.get('window');
 
 const MyPageScreen = ({navigation}) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState('성이름');
-  const [phone, setPhone] = useState('01012345678');
-  const [username, setUsername] = useState('TheName');
-  const [password, setPassword] = useState('*******');
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [loginId, setLoginId] = useState('');
+  const [password, setPassword] = useState('');
+
+  // 화면 로드 시 AsyncStorage에서 사용자 정보 불러오기
+  useEffect(() => {
+  const loadUserInfo = async () => {
+    try {
+      const storedLoginId = await AsyncStorage.getItem('login_id');
+      const storedName = await AsyncStorage.getItem('username');
+      const storedPhone = await AsyncStorage.getItem('phone');
+
+      if (storedName) setName(storedName);          // 성명
+      if (storedPhone) setPhone(storedPhone);       // 연락처
+      if (storedLoginId) setLoginId(storedLoginId); // 아이디
+      setPassword('*******');                       // 비밀번호
+
+    } catch (error) {
+      console.log('회원 정보 불러오기 실패', error);
+    }
+  };
+
+  loadUserInfo();
+}, []);
+
 
   const handleEdit = () => {
     setIsEditing(true);
@@ -51,9 +74,9 @@ const MyPageScreen = ({navigation}) => {
 
         <TextInput
           style={styles.input}
-          value={username}
-          onChangeText={setUsername}
-          editable={isEditing}
+          value={loginId}
+          onChangeText={setLoginId}
+          editable={false}
         />
         <View style={styles.divider} />
 

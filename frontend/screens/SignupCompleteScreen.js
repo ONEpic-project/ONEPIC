@@ -13,10 +13,10 @@ const { width, height } = Dimensions.get('window');
 
 const SignupCompleteScreen = ({ navigation }) => {
   const handleGoHome = () => {
-    // 로그인 화면으로 이동 (스택 초기화)
+    // 로그인된 상태로 홈 화면으로 이동
     navigation.reset({
       index: 0,
-      routes: [{ name: 'LoginScreen' }],
+      routes: [{ name: 'Home' }],
     });
   };
 
@@ -39,7 +39,10 @@ const SignupCompleteScreen = ({ navigation }) => {
 
       {/* 홈 화면 가기 버튼 */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.homeButton}>
+        <TouchableOpacity
+        style={styles.homeButton}
+        onPress={handleGoHome}
+        >
           <Text style={styles.homeButtonText}>홈 화면 가기</Text>
         </TouchableOpacity>
       </View>

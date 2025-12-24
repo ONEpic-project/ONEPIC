@@ -12,6 +12,7 @@ import {
   Alert,
   Dimensions
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from './components/Header';
 import { API_BASE_URL } from '../config/api';
@@ -70,6 +71,11 @@ const SignupScreen = ({ navigation }) => {
       Alert.alert('회원가입 실패', data.detail || '오류 발생');
       return;
     }
+
+    // 회원가입 성공 - 사용자 정보 저장
+    await AsyncStorage.setItem('login_id', userId);
+    await AsyncStorage.setItem('username', name);
+    await AsyncStorage.setItem('phone', contact);
 
     navigation.navigate('SignupComplete');
   } catch (error) {
