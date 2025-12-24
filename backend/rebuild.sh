@@ -16,5 +16,5 @@ docker run -d \
 echo "Done"
 docker ps
 
-# chmod +x rebuild.sh
-# ./rebuild.sh
+# chmod +x rebuild.sh → 처음 세팅 때 한 번
+# ./rebuild.sh → 이후 매번 빌드할 때
