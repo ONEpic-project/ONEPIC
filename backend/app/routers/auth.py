@@ -1,6 +1,6 @@
 # app/routers/auth.py
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db
@@ -35,6 +35,11 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+
+    # 토큰 생성
+    access_token = create_access_token(
+        data={"sub": str(new_user.user_id)}
+    )
 
     return {
         "message": "회원가입 성공",
