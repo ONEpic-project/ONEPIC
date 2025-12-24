@@ -13,6 +13,7 @@ import {
   ActivityIndicator
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import { API_BASE_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
@@ -66,6 +67,9 @@ const LoginScreen = ({ navigation }) => {
         await AsyncStorage.setItem('user_id', data.user_id.toString());
         await AsyncStorage.setItem('username', data.username);
         await AsyncStorage.setItem('login_id', userId);
+
+        // 토큰 저장, 추후 인증 헤더에 사용 예정
+        await AsyncStorage.setItem('access_token', data.access_token);
 
         console.log('로그인 성공:', data);
         

@@ -9,6 +9,7 @@ import {
   Dimensions,
   Image
 } from 'react-native';
+import { verticalScale, scale, moderateScale } from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
 
