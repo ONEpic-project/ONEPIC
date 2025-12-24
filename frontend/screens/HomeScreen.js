@@ -1,4 +1,5 @@
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 import {
   View,
   Text,
@@ -9,7 +10,7 @@ import {
   Dimensions,
   Image
 } from 'react-native';
-import { verticalScale, scale, moderateScale } from 'react-native-size-matters';
+import { verticalScale, scale, moderateScale} from 'react-native-size-matters';
 
 const { width, height } = Dimensions.get('window');
 

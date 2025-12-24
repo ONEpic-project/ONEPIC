@@ -11,7 +11,7 @@ from app.core.security import create_access_token
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 # 회원가입 ================================================
-@router.post("/signup")
+@router.post("/signup", status_code=status.HTTP_201_CREATED)
 def signup(user: UserCreate, db: Session = Depends(get_db)):
     # 로그인 아이디 중복 체크
     exists = (
@@ -20,7 +20,10 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
         .first()
     )
     if exists:
-        raise HTTPException(status_code=400, detail="이미 존재하는 아이디입니다.")
+        raise HTTPException(
+            status_code=400, 
+            detail="이미 존재하는 아이디입니다."
+        )
 
     new_user = User(
         login_id=user.login_id,
@@ -33,7 +36,14 @@ def signup(user: UserCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(new_user)
 
-    return {"message": "회원가입 성공"}
+    return {
+        "message": "회원가입 성공",
+        "user": {
+            "user_id": new_user.user_id,
+            "login_id": new_user.login_id,
+            "username": new_user.username,
+        }
+    }
 
 # 로그인 ================================================
 @router.post("/login")
