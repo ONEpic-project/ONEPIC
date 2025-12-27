@@ -16,6 +16,8 @@ import Paid from './screens/PaidScreen';
 import Cart from './screens/CartScreen';
 import MyPage from './screens/MyPageScreen';
 import Receipt from './screens/ReceiptScreen';
+import ReceiptDetail from './screens/ReceiptDetailScreen';
+
 import Period from './screens/components/PeriodDropdown';
 
 const Stack = createStackNavigator();
@@ -99,6 +101,12 @@ const App = () => {
         <Stack.Screen 
           name="Receipt" 
           component={Receipt}
+        />
+
+        {/* 영수증  내역 */}
+        <Stack.Screen 
+          name="ReceiptDetail" 
+          component={ReceiptDetail}
         />
 
         {/* 전자영수증 드롭다운 */}
