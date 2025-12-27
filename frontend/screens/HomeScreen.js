@@ -8,7 +8,8 @@ import {
   ScrollView,
   ImageBackground,
   Dimensions,
-  Image
+  Image,
+  SafeAreaView
 } from 'react-native';
 import { verticalScale, scale, moderateScale} from 'react-native-size-matters';
 
@@ -21,7 +22,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.topSection}>
         {/* 환영 텍스트 */}
         <Text style={styles.welcomeText}>
-          반갑습니다!{'\n'}<Text style={styles.BoldText}>테스트</Text> 님
+          반갑습니다!{'\n'}<Text style={styles.BoldText}>$중괄호테스트</Text> 님
         </Text>
 
         {/* 마켓 일러스트레이션 이미지 */}
@@ -38,31 +39,30 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.mainSection}>
         {/* 스캔 프로모션 카드 */}
         <View style={styles.scanCard}>
-          <Image
-            source={require('../assets/scanbg.png')}
-            style={styles.scanImage}
-            resizeMode="cover"
-          />
-          
           <View style={styles.scanOverlay}>
-            <Text style={styles.scanTitle}>
-              줄 안 서고 결제{'\n'}<Text style={styles.SmallText}>지금 사용해 보세요</Text>
-            </Text>
-            
-            {/* 스캔하기 버튼 */}
-            <TouchableOpacity 
-              style={styles.scanButton}
-              onPress={() => navigation.navigate('Scan')}
-              activeOpacity={0.8}
+            <ImageBackground
+              source={require('../assets/scanbg.png')}
+              style={styles.scanImage}
+              //resizeMode="cover"
             >
-              <Text style={styles.scanButtonText}>스캔하기 →</Text>
-            </TouchableOpacity>
+              <Text style={styles.scanTitle}>
+                줄 안 서고 결제{'\n'}<Text style={styles.SmallText}>지금 사용해 보세요</Text>
+              </Text>
+              
+              {/* 스캔하기 버튼 */}
+              <TouchableOpacity 
+                style={styles.scanButton}
+                onPress={() => navigation.navigate('Scan')}
+                activeOpacity={0.8}
+              >
+                <Text style={styles.scanButtonText}>스캔하기 →</Text>
+              </TouchableOpacity>
+             </ImageBackground>
           </View>
         </View>
 
-        {/* 하단 메뉴 버튼들 */}
+        {/* 장바구니 버튼 */}
         <View style={styles.menuContainer}>
-          {/* 장바구니 버튼 */}
           <TouchableOpacity
             style={styles.menuButton}
             onPress={() => navigation.navigate('Cart')}
@@ -71,8 +71,11 @@ const HomeScreen = ({ navigation }) => {
             <Ionicons name="cart-outline" size={moderateScale(30)} color="#2C2C2C" style={styles.menuIcon} />
             <Text style={styles.menuText}>장바구니</Text>
           </TouchableOpacity>
+        </View>
 
-          {/* 전자영수증 버튼 */}
+        {/* 전자영수증 버튼 */}
+        <View style={styles.menuContainer}>
+          
           <TouchableOpacity
             style={styles.menuButton}
             onPress={() => navigation.navigate('Receipt')}
@@ -152,22 +155,27 @@ const styles = StyleSheet.create({
   },
   scanCard: {
     width: width - scale(36),
-    height: verticalScale(263),
+    height: verticalScale(200),
     borderRadius: moderateScale(20),
     overflow: 'hidden',
     position: 'relative',
     marginBottom: verticalScale(29),
+    backgroundColor: 'rgba(183, 44, 44, 0.9)',
   },
   scanImage: {
     width: '100%',
     height: '100%',
   },
   scanOverlay: {
-    position: 'absolute',
+    //position: 'absolute',
     width: '100%',
     height: '100%',
     justifyContent: 'space-between',
-    padding: scale(30),
+    //position: 'relative',
+    //paddingHorizontal: width * 0.06,
+    //paddingVertical: height * 0.04,
+    zIndex: 1,
+    //padding: scale(30),
   },
   scanTitle: {
     fontSize: moderateScale(24),
@@ -176,6 +184,40 @@ const styles = StyleSheet.create({
     color: '#F2F2F2',
   },
   scanButton: {
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(183, 44, 44, 0.9)',
+    paddingHorizontal: width * 0.05,
+    paddingVertical: height * 0.015,
+    borderRadius: width * 0.06,
+    marginTop: 'auto',
+    transform: [{ translateY: -10 }],
+    right: width * -0.45,
+  },
+  scanButtonText: {
+    fontSize: width * 0.04,
+    fontWeight: '600',
+    color: '#333',
+  },
+  menuCard: {
+    width: '100%',
+    height: height * 0.12,
+    backgroundColor: '#FFF5E6',
+    borderRadius: width * 0.05,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: width * 0.06,
+    marginBottom: height * 0.02,
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+  },
+  iconContainer: {
+    width: width * 0.12,
+    height: width * 0.12,
+    backgroundColor: '#FFFFFF',
+    borderRadius: width * 0.06,
     alignSelf: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
     borderWidth: moderateScale(3),

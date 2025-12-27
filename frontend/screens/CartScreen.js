@@ -11,67 +11,42 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Header from './components/Header';
+//import { cartItems } from '../data/dummyData';
 
 const { width, height } = Dimensions.get('window');
 
 const CartScreen = ({ navigation }) => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: '1',
-      name: '오리온 초코송이 50g',
-      description: '오리온 초코송이 50g\nqgihfgjhfbsbcxvb',
-      price: 990,
-      quantity: 2,
-      image: require('../assets/product.png'),
-    },
-    {
-      id: '2',
-      name: '오리온 초코송이 50g',
-      description: '오리온 초코송이 50g\nqgihfgjhfbsbcxvb',
-      price: 990,
-      quantity: 2,
-      image: require('../assets/product.png'),
-    },
-    {
-      id: '3',
-      name: '오리온 초코송이 50g',
-      description: '오리온 초코송이 50g\nqgihfgjhfbsbcxvb',
-      price: 990,
-      quantity: 2,
-      image: require('../assets/product.png'),
-    },
-    {
-      id: '4',
-      name: '오리온 초코송이 50g',
-      description: '오리온 초코송이 50g\nqgihfgjhfbsbcxvb',
-      price: 990,
-      quantity: 2,
-      image: require('../assets/product.png'),
-    },
-    {
-      id: '5',
-      name: '오리온 초코송이 50g',
-      description: '오리온 초코송이 50g\nqgihfgjhfbsbcxvb',
-      price: 990,
-      quantity: 2,
-      image: require('../assets/product.png'),
-    },
-    {
-      id: '6',
-      name: '오리온 초코송이 50g',
-      description: '오리온 초코송이 50g\nqgihfgjhfbsbcxvb',
-      price: 990,
-      quantity: 2,
-      image: require('../assets/product.png'),
-    },
-  ]);
+  const handleCheckout = () => {
+  // scannedProducts는 AI 인식 결과를 기반으로 생성된 장바구니 데이터
+    const paymentProducts = scannedProducts.map(item => ({
+      id: item.product_id,
+      name: item.product_name,
+      brand: item.brand_name || '브랜드 미상',
+      price: item.price,
+      size: item.size || '-',
+      quantity: item.quantity,
+      image: item.product_id 
+        ? { uri: `${API_BASE_URL}/static/products/${item.product_id}/main.jpg` }
+        : null
+    }));
 
-  // 수량 증가
-  const increaseQuantity = (id) => {
-    setCartItems(cartItems.map(item => 
-      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-    ));
-  };
+    const total = scannedProducts.reduce(
+      (sum, item) => sum + (item.price * item.quantity),
+      0
+    );
+
+    navigation.navigate('Payment', {
+      products: paymentProducts,
+      total: total
+    });
+    };
+
+    // 수량 증가
+    const increaseQuantity = (id) => {
+      setCartItems(cartItems.map(item => 
+        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+      ));
+    };
 
   // 수량 감소
   const decreaseQuantity = (id) => {

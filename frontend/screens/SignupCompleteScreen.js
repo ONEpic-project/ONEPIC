@@ -39,10 +39,8 @@ const SignupCompleteScreen = ({ navigation }) => {
 
       {/* 홈 화면 가기 버튼 */}
       <View style={styles.buttonContainer}>
-        <TouchableOpacity
-        style={styles.homeButton}
-        onPress={handleGoHome}
-        >
+
+        <TouchableOpacity style={styles.homeButton} onPress={() => navigation.navigate('Home')}>
           <Text style={styles.homeButtonText}>홈 화면 가기</Text>
         </TouchableOpacity>
       </View>

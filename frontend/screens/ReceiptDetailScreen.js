@@ -23,7 +23,7 @@ const ReceiptDetailScreen = ({ navigation }) => {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* 매장 정보 */}
         <View style={styles.storeSection}>
-          <Text style={styles.storeName}>원핑마트 동대구점</Text>
+          <Text style={styles.storeName}>원픽마트 동대구점</Text>
           <Text style={styles.storeAddress}>대구광역시 중구 동내구로 566</Text>
           
           <View style={styles.infoRow}>

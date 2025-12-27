@@ -17,12 +17,16 @@ import {
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
+import Header from './components/Header';
+import sampleProducts from './sampleProducts';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const DRAWER_PEEK_HEIGHT = 200; // drawerBleeding과 동일
-const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.6; // 화면의 50%
+const { width, height } = Dimensions.get('window');
+const CAPTURE_BUTTON_AREA_HEIGHT = 300;  // 촬영 버튼 전용 영역 (새로 추가)
+const DRAWER_PEEK_HEIGHT = 150; // 모달 열기 전
+const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.62; // 화면의 50%
 
-export default function ScanScreen() {
+export default function ScanScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [isLoading, setIsLoading] = useState(false);
   const [detectedImage, setDetectedImage] = useState(null);
@@ -223,8 +227,6 @@ export default function ScanScreen() {
     setIsModalVisible(false);
   };
 
-
-
   // 권한 확인
   if (!permission) {
     return (
@@ -271,30 +273,29 @@ export default function ScanScreen() {
         </View>
       ) : (
         <>
-          <CameraView
-            style={styles.camera}
-            facing="back"
-            ref={cameraRef}
-          >
-            <View style={styles.cameraOverlay}>
-              {/* 스캔 가이드 */}
-              <View style={styles.scanGuide}>
-                <View style={[styles.scanCorner, styles.topLeft]} />
-                <View style={[styles.scanCorner, styles.topRight]} />
-                <View style={[styles.scanCorner, styles.bottomLeft]} />
-                <View style={[styles.scanCorner, styles.bottomRight]} />
-              </View>
+            <CameraView
+              style={styles.camera}
+              facing="back"
+              ref={cameraRef}
+            >
+              <View style={styles.cameraOverlay}>
+                {/* 스캔 가이드 */}
+                <View style={styles.scanGuide}>
+                  <View style={[styles.scanCorner, styles.topLeft]} />
+                  <View style={[styles.scanCorner, styles.topRight]} />
+                  <View style={[styles.scanCorner, styles.bottomLeft]} />
+                  <View style={[styles.scanCorner, styles.bottomRight]} />
+                </View>
 
-              {/* 안내 텍스트 */}
-              <View style={styles.instructionContainer}>
-                <Text style={styles.instructionText}>
-                  상품을 프레임 안에 위치시켜주세요
-                </Text>
+                {/* 헤더 위치 */}
+                <Header 
+                  navigation={navigation}
+                  title="스캔하기"
+                />
               </View>
-            </View>
-          </CameraView>
+            </CameraView>
 
-          {/* 하단 컨트롤 */}
+          {/* 카메라 촬영 버튼 */}
           <View style={styles.controls}>
             <TouchableOpacity
               style={[styles.captureButton, isLoading && styles.captureButtonDisabled]}
@@ -331,15 +332,14 @@ export default function ScanScreen() {
         {/* Drawer Header (항상 보이는 부분) */}
         <View style={styles.drawerHeader} {...panResponder.panHandlers}>
           {/* Puller (드래그 핸들) */}
-          <View style={styles.puller} />
-          <Text style={styles.drawerHeaderText}>51 results</Text>
+          <View style={styles.puller}/>
         </View>
 
-        {/* Drawer Content */}
-        <ScrollView style={styles.drawerContent}>
-          <View style={styles.contentPlaceholder}>
+          {/* 스크롤 컨텐츠 영역 */}
+          <ScrollView style={styles.drawerContent}>
+            <View style={styles.contentPlaceholder}>
 
-        {/* 상품 리스트 */}
+            {/* 상품 리스트 */}
             {sampleProducts.map((product) => {
               const quantity = getQuantity(product.id);
               const displayPrice = quantity > 0 ? product.price * quantity : product.price;
@@ -382,6 +382,16 @@ export default function ScanScreen() {
         </ScrollView>
       </Animated.View>
 
+      <View style={styles.purchaseArea}>
+        <Text> 합계 00,000원</Text>
+        <TouchableOpacity 
+          style={styles.purchaseButton}
+          onPress={() => navigation.navigate('Cart')}
+        >
+          <Text style={styles.purchaseButtonText}>구매하기</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Drawer Overlay (열렸을 때 배경 어둡게) */}
       {isDrawerOpen && (
         <TouchableOpacity
@@ -423,7 +433,7 @@ export default function ScanScreen() {
 
             {/* 상품명 */}
             <Text style={styles.modalProductName}>
-              {selectedProduct?.label || '오리온 초코송이'} {selectedProduct?.size || '50g'}
+              {selectedProduct?.label || '가짜 데이터'} {selectedProduct?.size || '50g'}
             </Text>
 
             {/* 질문 텍스트 */}
@@ -462,9 +472,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
+  cameraOverlay: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    justifyContent: 'space-between',
+  },
   camera: {
     flex: 1,
     width: '100%',
+    //zIndex: 30,
   },
   cameraOverlay: {
     flex: 1,
@@ -482,7 +498,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 40,
     height: 40,
-    borderColor: '#4A90E2',
+    borderColor: '#FF9500',
     borderWidth: 4,
   },
   topLeft: {
@@ -518,14 +534,14 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    marginTop: 50,
   },
   controls: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: '#000',
-    paddingVertical: 30,
-    paddingHorizontal: 20,
+    height: CAPTURE_BUTTON_AREA_HEIGHT,
   },
   controlButton: {
     width: 60,
@@ -542,11 +558,12 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#4A90E2',
+    backgroundColor: '#FF9500',
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 4,
     borderColor: '#fff',
+    marginBottom: CAPTURE_BUTTON_AREA_HEIGHT - 120, // 촬영 버튼 전용 영역에서 가운데 정렬
   },
   captureButtonDisabled: {
     backgroundColor: '#999',
@@ -711,9 +728,31 @@ const styles = StyleSheet.create({
     color: '#666',
     fontWeight: '500',
   },
-  drawerContent: {
-    flex: 1,
+  // drawerContent: {
+  //   flex: 1,
+  //   backgroundColor: '#fff',
+  // },
+  purchaseArea: {
+    position: 'absolute',  // 화면에 고정
+    bottom: 0,            // 최하단 배치
+    zIndex: 30, 
+    alignItems: 'center',
+    height: 120,
+    width: '100%',
     backgroundColor: '#fff',
+  },
+  purchaseButton: {
+    width: '85%',
+    height: height * 0.06,
+    backgroundColor: '#FF9500',
+    borderRadius: width * 0.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  purchaseButtonText: {
+    fontSize: width * 0.045,
+    fontWeight: '600',
+    color: '#FFFFFF',
   },
   emptyCart: {
     flex: 1,
@@ -830,6 +869,7 @@ const styles = StyleSheet.create({
   },
   contentPlaceholder: {
     padding: 16,
+    paddingBottom: 140,
   },
   placeholderText: {
     fontSize: 16,
@@ -837,7 +877,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginBottom: 20,
   },
-
   // 모달 스타일
   modalOverlay: {
     flex: 1,

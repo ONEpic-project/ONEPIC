@@ -18,12 +18,21 @@ export default function PaymentScreen({ route, navigation }) {
   const { products, total } = route.params;
   const [selectedPayment, setSelectedPayment] = useState(null);
 
-  const paymentMethods = [
-    { id: 'card', name: '신용/체크카드', icon: 'card-outline' },
-    { id: 'kakao', name: '카카오페이', icon: 'chatbubble-outline' },
-    { id: 'naver', name: '네이버페이', icon: 'logo-snapchat' },
-    { id: 'toss', name: '토스페이', icon: 'wallet-outline' },
-  ];
+  // CartScreen에서 PaymentScreen으로 navigate할 때
+  navigation.navigate('Payment', {
+    products: [
+      {
+        id: product.product_id,           // AI API의 product_id
+        name: product.product_name,       // AI API의 product_name
+        brand: product.brand_name,        // AI API의 brand_name
+        price: product.price,             // AI API의 price
+        size: product.size,               // AI API의 size
+        quantity: cartItem.quantity,      // 장바구니에서 관리하는 수량
+        image: `/static/products/${product.product_id}/main.jpg` // 상품 이미지 경로
+      }
+    ],
+    total: calculateTotal() // 총 금액
+  });
 
   const handlePayment = () => {
     if (!selectedPayment) {
