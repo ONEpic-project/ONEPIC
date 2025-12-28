@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import {
   View,
@@ -16,13 +17,30 @@ import { verticalScale, scale, moderateScale} from 'react-native-size-matters';
 const { width, height } = Dimensions.get('window');
 
 const HomeScreen = ({ navigation }) => {
-   return (
+  const [username, setUsername] = useState('');
+
+  useEffect(() => {
+  const loadUser = async () => {
+    try {
+      const storedUsername = await AsyncStorage.getItem('username');
+      if (storedUsername) {
+        setUsername(storedUsername);
+      }
+    } catch (e) {
+      console.log('username 불러오기 실패', e);
+    }
+  };
+
+  loadUser();
+}, []);
+
+  return (
     <View style={styles.container}>
       {/* 상단 오렌지 배경 */}
       <View style={styles.topSection}>
         {/* 환영 텍스트 */}
         <Text style={styles.welcomeText}>
-          반갑습니다!{'\n'}<Text style={styles.BoldText}>$중괄호테스트</Text> 님
+          반갑습니다!{'\n'}<Text style={styles.BoldText}>{username}</Text> 님
         </Text>
 
         {/* 마켓 일러스트레이션 이미지 */}
@@ -57,7 +75,7 @@ const HomeScreen = ({ navigation }) => {
               >
                 <Text style={styles.scanButtonText}>스캔하기 →</Text>
               </TouchableOpacity>
-             </ImageBackground>
+              </ImageBackground>
           </View>
         </View>
 
