@@ -181,10 +181,12 @@ def analyze_image(image_bytes: bytes, db):
         img, imgsz=YOLO_IMGSZ, conf=YOLO_CONF, iou=YOLO_IOU, verbose=False
     )[0]
 
-    if not results.boxes or len(results.boxes) == 0:
+    boxes = results.boxes
+    if boxes is None or len(boxes) == 0:
         return FAIL
 
-    box = results.boxes[int(torch.argmax(results.boxes.conf))]
+    box = boxes[int(torch.argmax(boxes.conf))]
+
     crop = safe_crop(img, *map(int, box.xyxy[0]))
     if crop is None:
         return FAIL
@@ -211,11 +213,31 @@ def analyze_image(image_bytes: bytes, db):
         )
         if not product:
             return FAIL
+        
+        # 맛(flavor) 조회
+        FLAVOR_ATTR_ID = 1  # 맛 attribute_id
+        flavor = None
+
+        try:
+            flavor_row = (
+                db.query(ProductAttributeValue)
+                .filter(
+                    ProductAttributeValue.product_id == product.product_id,
+                    ProductAttributeValue.attribute_id == FLAVOR_ATTR_ID,
+                )
+                .first()
+            )
+            if flavor_row:
+                flavor = flavor_row.value
+        except SQLAlchemyError:
+            pass
 
     except SQLAlchemyError:
         return FAIL
 
     size = extract_size(ocr_text)
+    display_name = f"{product.name} {flavor}" if flavor else product.name
+
 
     try:
         db.add(
@@ -230,7 +252,7 @@ def analyze_image(image_bytes: bytes, db):
 
     return {
         "product_id": product.product_id,
-        "product_name": product.name,
+        "product_name": display_name,
         "brand_name": product.brand.name if product.brand else None,
         "image_url": f"/static/products/{product.product_id}.jpg",
         "size": size,
