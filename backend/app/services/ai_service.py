@@ -351,18 +351,18 @@ def analyze_image(image_bytes: bytes, db):
 
     # 상품명 + 맛 합치기
     display_name = (
-        f"{first['product_name']} {first['flavor']}"
-        if first.get("flavor")
-        else first["product_name"]
+        f"{product.name} {db_flavor}"
+        if db_flavor
+        else product.name
     )
 
     return {
         "result": {
-            "product_id": first["product_id"],
-            "name": display_name,          # ✅ 프론트용 이름
-            "brand": first["brand_name"],  # ✅ 브랜드
-            "size": first["size"],         # ✅ 용량
-            "price": first["price"],       # ✅ 가격
-            "confidence": first["confidence"],
+            "product_id": product.product_id,
+            "name": display_name,      # 상품명 + 맛
+            "brand": db_brand,         # 브랜드
+            "size": final_size,        # 용량
+            "price": product.price,    # 가격
+            "confidence": round(final_conf, 4),
         }
     }
