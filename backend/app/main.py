@@ -5,6 +5,7 @@ from app.routers import health
 from app.routers import auth
 
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 app = FastAPI()
 
@@ -22,9 +23,18 @@ app.include_router(ai.router, prefix="/api/ai")     # 필수로 존재해야 함
 app.include_router(products.router, prefix="/api/products")
 app.include_router(auth.router)
 
+# 데이터베이스 테이블 생성
+app.mount(
+    "/static",
+    StaticFiles(directory="app/static"),
+    name="static"
+)
+
 @app.get("/")
 def root():
     return {"message": "ONEPIC Backend Running!"}
+
+
 
 
 # 가상환경 접속

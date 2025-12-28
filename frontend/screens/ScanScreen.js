@@ -19,7 +19,7 @@ import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
 import Header from './components/Header';
 
-
+const SERVER_URL = API_BASE_URL;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const { width, height } = Dimensions.get('window');
 const CAPTURE_BUTTON_AREA_HEIGHT = 300;  // 촬영 버튼 전용 영역 (새로 추가)
@@ -29,7 +29,6 @@ const DRAWER_HEIGHT = SCREEN_HEIGHT * 0.62; // 화면의 50%
 export default function ScanScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [isLoading, setIsLoading] = useState(false);
-  const [detectedImage, setDetectedImage] = useState(null);
   // const [detectionResult, setDetectionResult] = useState(null);
   const cameraRef = useRef(null);
   // AI로 인식된 상품 리스트 (Drawer용)
@@ -129,9 +128,9 @@ export default function ScanScreen({ navigation }) {
   };
 
   // ✅ 상품 삭제 함수
-  const removeProduct = (id) => {
+  const removeProduct = (productId) => {
     setScannedProducts((products) =>
-      products.filter((product) => product.id !== id)
+      products.filter((product) => product.product_id !== productId)
     );
   };
 
@@ -226,8 +225,7 @@ export default function ScanScreen({ navigation }) {
   };
 
   const resetCamera = () => {
-    setDetectedImage(null);
-    setSelectedProduct(null);  // ✅ 추가
+    setSelectedProduct(null);
     setIsModalVisible(false);
   };
 
@@ -260,64 +258,45 @@ export default function ScanScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* 스캔 화면 */}
-      {detectedImage ? (
-        <View style={styles.resultContainer}>
-          <Image
-            source={{ uri: detectedImage }}
-            style={styles.resultImage}
-            resizeMode="contain"
-          />
-          <TouchableOpacity
-            style={styles.resetButton}
-            onPress={resetCamera}
-          >
-            <Text style={styles.resetButtonText}>다시 스캔하기</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <>
-            <CameraView
-              style={styles.camera}
-              facing="back"
-              ref={cameraRef}
-            >
-              <View style={styles.cameraOverlay}>
-                {/* 스캔 가이드 */}
-                <View style={styles.scanGuide}>
-                  <View style={[styles.scanCorner, styles.topLeft]} />
-                  <View style={[styles.scanCorner, styles.topRight]} />
-                  <View style={[styles.scanCorner, styles.bottomLeft]} />
-                  <View style={[styles.scanCorner, styles.bottomRight]} />
-                </View>
-
-                {/* 헤더 위치 */}
-                <Header 
-                  navigation={navigation}
-                  title="스캔하기"
-                />
-              </View>
-            </CameraView>
-
-          {/* 카메라 촬영 버튼 */}
-          <View style={styles.controls}>
-            <TouchableOpacity
-              style={[styles.captureButton, isLoading && styles.captureButtonDisabled]}
-              onPress={takePicture}
-              disabled={isLoading}
-            >
-              {isLoading ? (
-                <ActivityIndicator size="large" color="#fff" />
-              ) : (
-                <View style={styles.captureButtonInner} />
-              )}
-            </TouchableOpacity>
+      <CameraView
+        style={styles.camera}
+        facing="back"
+        ref={cameraRef}
+      >
+        <View style={styles.cameraOverlay}>
+          {/* 스캔 가이드 */}
+          <View style={styles.scanGuide}>
+            <View style={[styles.scanCorner, styles.topLeft]} />
+            <View style={[styles.scanCorner, styles.topRight]} />
+            <View style={[styles.scanCorner, styles.bottomLeft]} />
+            <View style={[styles.scanCorner, styles.bottomRight]} />
           </View>
-        </>
-      )}
+
+          {/* 헤더 위치 */}
+          <Header 
+            navigation={navigation}
+            title="스캔하기"
+          />
+        </View>
+      </CameraView>
+
+    {/* 카메라 촬영 버튼 */}
+    <View style={styles.controls}>
+      <TouchableOpacity
+        style={[styles.captureButton, isLoading && styles.captureButtonDisabled]}
+        onPress={takePicture}
+        disabled={isLoading}
+      >
+        {isLoading ? (
+          <ActivityIndicator size="large" color="#fff" />
+        ) : (
+          <View style={styles.captureButtonInner} />
+        )}
+      </TouchableOpacity>
+    </View>
 
       {/* 로딩 오버레이 */}
-      {isLoading && !detectedImage && (
+      {isLoading && (
         <View style={styles.loadingOverlay}>
           <ActivityIndicator size="large" color="#fff" />
           <Text style={styles.loadingOverlayText}>AI가 상품을 인식 중입니다...</Text>
@@ -351,6 +330,12 @@ export default function ScanScreen({ navigation }) {
               return (
                 <View key={`${product.product_id}-${index}`} style={styles.resultItem}>
                   <View style={styles.resultItemInfo}>
+                    <Image
+                      source={{ uri: `${API_BASE_URL}${product.image_url}` }}
+                      style={styles.resultItemImage}
+                      resizeMode="contain"
+                    />
+
                     <Text style={styles.resultItemTitle}>
                       {product.product_name}
                     </Text>
@@ -435,9 +420,9 @@ export default function ScanScreen({ navigation }) {
 
             {/* 상품 이미지 */}
             <View style={styles.modalImageContainer}>
-              {detectedImage ? (
+              {selectedProduct?.image_url ? (
                 <Image
-                  source={{ uri: detectedImage }}
+                  source={{ uri: `${SERVER_URL}${selectedProduct.image_url}` }}
                   style={styles.modalProductImage}
                   resizeMode="contain"
                 />
@@ -445,6 +430,7 @@ export default function ScanScreen({ navigation }) {
                 <View style={styles.modalProductImage} />
               )}
             </View>
+
 
             {/* 상품명 */}
             <Text style={styles.modalProductName}>

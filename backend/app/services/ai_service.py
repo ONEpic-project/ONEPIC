@@ -359,6 +359,7 @@ def analyze_image(image_bytes: bytes, db):
     return {
         "result": {
             "product_id": product.product_id,
+            "image_url": f"/static/products/{product.product_id}.jpg",
             "name": display_name,      # 상품명 + 맛
             "brand": db_brand,         # 브랜드
             "size": final_size,        # 용량
