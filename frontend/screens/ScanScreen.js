@@ -145,7 +145,7 @@ export default function ScanScreen({ navigation }) {
 
   // 현재 수량 가져오기
   const getQuantity = (productId) => {
-    return productQuantities[productId] || 1;
+    return productQuantities[productId] ?? 1;
   };
 
   // 사진 촬영
@@ -190,9 +190,14 @@ export default function ScanScreen({ navigation }) {
 
         console.log('AI 결과:', result);
 
+        // 인식 실패 분기
+        if (!result.product_id) {
+          Alert.alert('인식 실패', '상품 인식에 실패했습니다.');
+          return;
+        }
+
         setSelectedProduct(result);
         setIsModalVisible(true);
-
       }
     } catch (error) {
       console.error('상품 인식 오류:', error);
