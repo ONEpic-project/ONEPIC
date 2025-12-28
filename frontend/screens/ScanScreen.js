@@ -18,7 +18,7 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { API_BASE_URL } from '../config/api';
 import axios from 'axios';
 import Header from './components/Header';
-import sampleProducts from './sampleProducts';
+
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const { width, height } = Dimensions.get('window');
@@ -30,8 +30,11 @@ export default function ScanScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [isLoading, setIsLoading] = useState(false);
   const [detectedImage, setDetectedImage] = useState(null);
-  const [detectionResult, setDetectionResult] = useState(null);
+  // const [detectionResult, setDetectionResult] = useState(null);
   const cameraRef = useRef(null);
+  // AI로 인식된 상품 리스트 (Drawer용)
+  const [scannedProducts, setScannedProducts] = useState([]);
+
 
   // Bottom Drawer 상태
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -133,12 +136,13 @@ export default function ScanScreen({ navigation }) {
   };
 
     // ✅ 합계 계산 함수
-  const calculateTotal = () => {
-    return scannedProducts.reduce(
-      (sum, product) => sum + product.price * product.quantity,
-      0
-    );
-  };
+    const calculateTotal = () => {
+      return scannedProducts.reduce((sum, product) => {
+        const qty = productQuantities[product.product_id] ?? 1;
+        return sum + product.price * qty;
+      }, 0);
+    };
+
 
   // 현재 수량 가져오기
   const getQuantity = (productId) => {
@@ -188,8 +192,8 @@ export default function ScanScreen({ navigation }) {
         console.log('AI 결과:', result);
 
         setSelectedProduct(result);
-        setDetectionResult(result);
         setIsModalVisible(true);
+
       }
     } catch (error) {
       console.error('상품 인식 오류:', error);
@@ -199,17 +203,30 @@ export default function ScanScreen({ navigation }) {
     }
   };
 
-
   const addToCart = (product) => {
-    console.log('장바구니에 추가:', product);
-    setIsModalVisible(false);  // ✅ 모달 먼저 닫기
+    setScannedProducts(prev => {
+      const exists = prev.find(p => p.product_id === product.product_id);
+
+      if (exists) {
+        // 이미 있으면 수량 +1
+        setProductQuantities(qty => ({
+          ...qty,
+          [product.product_id]: (qty[product.product_id] || 1) + 1,
+        }));
+        return prev; // 배열 자체는 그대로
+      }
+
+      // 없으면 새로 추가
+      return [...prev, product];
+    });
+
+    setIsModalVisible(false);
     Alert.alert('알림', '장바구니에 상품이 추가되었습니다!');
     resetCamera();
   };
 
   const resetCamera = () => {
     setDetectedImage(null);
-    setDetectionResult(null);
     setSelectedProduct(null);  // ✅ 추가
     setIsModalVisible(false);
   };
@@ -327,37 +344,45 @@ export default function ScanScreen({ navigation }) {
             <View style={styles.contentPlaceholder}>
 
             {/* 상품 리스트 */}
-            {sampleProducts.map((product) => {
-              const quantity = getQuantity(product.id);
-              const displayPrice = quantity > 0 ? product.price * quantity : product.price;
-              
+            {scannedProducts.map((product, index) => {
+              const quantity = getQuantity(product.product_id);
+              const displayPrice = product.price * quantity;
+
               return (
-                <View key={product.id} style={styles.resultItem}>
-                  <View style={styles.resultItemImage} />
+                <View key={`${product.product_id}-${index}`} style={styles.resultItem}>
                   <View style={styles.resultItemInfo}>
                     <Text style={styles.resultItemTitle}>
-                      {product.name}
+                      {product.product_name}
                     </Text>
-                    <Text style={styles.resultItemSize}>{product.size}</Text>
+
+                    <Text style={{ fontSize: 13, color: '#888' }}>
+                      {product.brand_name}
+                    </Text>
+
+                    <Text style={styles.resultItemSize}>
+                      {product.size ?? ''}
+                    </Text>
+
                     <Text style={styles.resultItemPrice}>
                       {displayPrice.toLocaleString()}원
                     </Text>
                   </View>
+
                   <View style={styles.quantityControl}>
                     <TouchableOpacity
                       style={styles.quantityButton}
-                      onPress={() => decreaseQuantity(product.id)}
+                      onPress={() => decreaseQuantity(product.product_id)}
                     >
                       <Text style={styles.quantityButtonText}>−</Text>
                     </TouchableOpacity>
-                    
+
                     <View style={styles.quantityDisplay}>
                       <Text style={styles.quantityText}>{quantity}개</Text>
                     </View>
-                    
+
                     <TouchableOpacity
                       style={styles.quantityButton}
-                      onPress={() => increaseQuantity(product.id)}
+                      onPress={() => increaseQuantity(product.product_id)}
                     >
                       <Text style={styles.quantityButtonText}>+</Text>
                     </TouchableOpacity>
@@ -365,12 +390,15 @@ export default function ScanScreen({ navigation }) {
                 </View>
               );
             })}
+
           </View>
         </ScrollView>
       </Animated.View>
 
       <View style={styles.purchaseArea}>
-        <Text> 합계 00,000원</Text>
+        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>
+          합계 {calculateTotal().toLocaleString()}원
+        </Text>
         <TouchableOpacity 
           style={styles.purchaseButton}
           onPress={() => navigation.navigate('Cart')}
@@ -420,10 +448,10 @@ export default function ScanScreen({ navigation }) {
 
             {/* 상품명 */}
             <Text style={styles.modalProductName}>
-              {selectedProduct?.name}
+              {selectedProduct?.product_name}
             </Text>
             <Text style={styles.modalProductBrand}>
-              {selectedProduct?.brand}
+              {selectedProduct?.brand_name}
             </Text>
             <Text style={styles.modalProductSize}>
               {selectedProduct?.size}
