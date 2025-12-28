@@ -177,41 +177,28 @@ export default function ScanScreen({ navigation }) {
         `${API_BASE_URL}/api/ai/detect`,
         formData,
         {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-          },
+          headers: { 'Content-Type': 'multipart/form-data' },
           timeout: 30000,
         }
       );
 
       if (apiResponse.data && apiResponse.data.result) {
         const result = apiResponse.data.result;
-        
-        if (result.image_base64) {
-          setDetectedImage(`data:image/png;base64,${result.image_base64}`);
-        }
-        
-        setDetectionResult(result);
-        
-        // Alert 대신 모달 표시
+
+        console.log('AI 결과:', result);
+
         setSelectedProduct(result);
+        setDetectionResult(result);
         setIsModalVisible(true);
       }
     } catch (error) {
       console.error('상품 인식 오류:', error);
-      
-      let errorMessage = '상품 인식에 실패했습니다.';
-      if (error.response) {
-        errorMessage += `\n상태 코드: ${error.response.status}`;
-      } else if (error.request) {
-        errorMessage += '\n서버에 연결할 수 없습니다.';
-      }
-      
-      Alert.alert('오류', errorMessage);
+      Alert.alert('오류', '상품 인식에 실패했습니다.');
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const addToCart = (product) => {
     console.log('장바구니에 추가:', product);
@@ -433,7 +420,16 @@ export default function ScanScreen({ navigation }) {
 
             {/* 상품명 */}
             <Text style={styles.modalProductName}>
-              {selectedProduct?.label || '가짜 데이터'} {selectedProduct?.size || '50g'}
+              {selectedProduct?.name}
+            </Text>
+            <Text style={styles.modalProductBrand}>
+              {selectedProduct?.brand}
+            </Text>
+            <Text style={styles.modalProductSize}>
+              {selectedProduct?.size}
+            </Text>
+            <Text style={styles.modalProductPrice}>
+              {selectedProduct?.price?.toLocaleString()}원
             </Text>
 
             {/* 질문 텍스트 */}
