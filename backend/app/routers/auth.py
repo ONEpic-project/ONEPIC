@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_db
+from app.core.dependencies import get_db, get_current_user
 from app.schemas.user import UserCreate, UserLogin
 from app.models.user import User
 from app.core.security import create_access_token
@@ -75,3 +75,14 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         "user_id": db_user.user_id,
         "username": db_user.username
     }
+
+# 회원 탈퇴 ================================================
+@router.delete("/me", tags=["Auth"])
+def delete_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    """
+    현재 로그인한 사용자 계정을 삭제합니다.
+    Authorization 헤더에 Bearer 토큰이 필요합니다.
+    """
+    db.delete(current_user)
+    db.commit()
+    return {"message": "회원탈퇴 완료"}

@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions 
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert 
   } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './components/Header';
+import { API_BASE_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
 
@@ -43,6 +44,50 @@ const MyPageScreen = ({navigation}) => {
   const handleSave = () => {
     // 여기에 저장 로직 추가
     setIsEditing(true);
+  };
+
+  const handleWithdraw = async () => {
+    try {
+      const confirm = await new Promise((resolve) => {
+        Alert.alert(
+          '회원탈퇴',
+          '정말로 탈퇴하시겠습니까?\n계정과 데이터가 삭제됩니다.',
+          [
+            { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+            { text: '확인', style: 'destructive', onPress: () => resolve(true) },
+          ]
+        );
+      });
+
+      if (!confirm) return;
+
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('오류', '로그인 토큰이 없습니다. 다시 로그인해주세요.');
+        return;
+      }
+
+      const resp = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        Alert.alert('탈퇴 실패', data.detail || '요청 처리 중 오류가 발생했습니다.');
+        return;
+      }
+
+      // 로컬 저장소 정리 및 로그인 화면으로 이동
+      await AsyncStorage.multiRemove(['user_id', 'username', 'login_id', 'access_token', 'phone']);
+      Alert.alert('알림', '회원탈퇴가 완료되었습니다.');
+      navigation.replace('Login');
+    } catch (e) {
+      console.log('회원탈퇴 에러', e);
+      Alert.alert('오류', '네트워크 또는 서버 오류입니다.');
+    }
   };
 
   return (
@@ -123,7 +168,9 @@ const MyPageScreen = ({navigation}) => {
           <Text style={styles.logout}>로그아웃</Text>
         </TouchableOpacity>
 
-        <Text style={styles.withdraw}>탈퇴하기</Text>
+        <TouchableOpacity onPress={handleWithdraw}>
+          <Text style={styles.withdraw}>탈퇴하기</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
