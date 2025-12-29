@@ -28,7 +28,9 @@ def custom_openapi():
     }
     # DELETE /api/auth/me에 보안 적용
     if "/api/auth/me" in openapi_schema.get("paths", {}):
-        openapi_schema["paths"]["/api/auth/me"]["delete"]["security"] = [{"Bearer": []}]
+        if "delete" in openapi_schema["paths"]["/api/auth/me"]:
+            openapi_schema["paths"]["/api/auth/me"]["delete"]["security"] = [{"Bearer": []}]
+
     
     app.openapi_schema = openapi_schema
     return app.openapi_schema
