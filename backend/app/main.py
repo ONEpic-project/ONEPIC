@@ -1,10 +1,11 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 from app.database import engine, Base
-from app.routers import products, ai, auth, health, cart
+from app.routers import products, ai, auth, health, cart, receipt
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
 
 app = FastAPI(
     swagger_ui_parameters={"persistAuthorization": True}
@@ -48,6 +49,8 @@ app.include_router(ai.router, prefix="/api/ai")     # 필수로 존재해야 함
 app.include_router(products.router, prefix="/api/products")
 app.include_router(auth.router, prefix="/api")
 app.include_router(cart.router, prefix="/api")
+app.include_router(receipt.router, prefix="/api")
+
 
 
 # 데이터베이스 테이블 생성
