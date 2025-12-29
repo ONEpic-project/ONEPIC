@@ -389,6 +389,7 @@ export default function ScanScreen({ navigation }) {
           </View>
           <TouchableOpacity
             style={styles.payBtn}
+<<<<<<< Updated upstream
             onPress={() =>
               navigation.navigate("Payment", {
                 products: scannedProducts,
@@ -396,6 +397,46 @@ export default function ScanScreen({ navigation }) {
                 totalPrice: calculateTotal(),
               })
             }
+=======
+            onPress={async () => {
+              if (scannedProducts.length === 0) {
+                Alert.alert('알림', '장바구니가 비어있습니다.');
+                return;
+              }
+
+              try {
+                const token = await AsyncStorage.getItem('token');
+                if (!token) {
+                  Alert.alert('오류', '로그인이 필요합니다.');
+                  return;
+                }
+
+                // 장바구니에 상품 추가 (여러 개)
+                for (const product of scannedProducts) {
+                  await axios.post(
+                    `${API_BASE_URL}/api/cart/items`,
+                    {
+                      product_id: product.product_id,
+                      quantity: productQuantities[product.product_id] || 1,
+                    },
+                    {
+                      headers: { Authorization: `Bearer ${token}` },
+                    }
+                  );
+                }
+
+                // Payment 화면으로 이동
+                navigation.navigate("Payment", {
+                  products: scannedProducts,
+                  quantities: productQuantities,
+                  totalPrice: calculateTotal(),
+                });
+              } catch (error) {
+                console.error('장바구니 저장 실패:', error);
+                Alert.alert('오류', '장바구니 저장에 실패했습니다.');
+              }
+            }}
+>>>>>>> Stashed changes
           >
             <Text style={styles.payBtnText}>구매하기</Text>
           </TouchableOpacity>

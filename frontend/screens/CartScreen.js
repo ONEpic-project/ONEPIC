@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -7,48 +7,119 @@ import {
   StyleSheet, 
   Dimensions,
   FlatList,
-  Alert 
+  Alert,
+  ActivityIndicator
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import Header from './components/Header';
-//import { cartItems } from '../data/dummyData';
+import { API_BASE_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
 
 const CartScreen = ({ navigation }) => {
-  const handleCheckout = () => {
-  // scannedProducts는 AI 인식 결과를 기반으로 생성된 장바구니 데이터
-    const paymentProducts = scannedProducts.map(item => ({
-      id: item.product_id,
-      name: item.product_name,
-      brand: item.brand_name || '브랜드 미상',
-      price: item.price,
-      size: item.size || '-',
-      quantity: item.quantity,
-      image: item.product_id 
-        ? { uri: `${API_BASE_URL}/static/products/${item.product_id}/main.jpg` }
-        : null
-    }));
+  const [cartItems, setCartItems] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const total = scannedProducts.reduce(
-      (sum, item) => sum + (item.price * item.quantity),
-      0
-    );
+  // 장바구니 조회
+  const fetchCart = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('오류', '로그인이 필요합니다.');
+        return;
+      }
 
-    navigation.navigate('Payment', {
-      products: paymentProducts,
-      total: total
+      const response = await axios.get(`${API_BASE_URL}/api/cart/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const items = response.data.items.map(item => ({
+        id: item.cart_item_id,
+        product_id: item.product_id,
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+        description: '',
+      }));
+
+      setCartItems(items);
+    } catch (error) {
+      console.error('장바구니 조회 실패:', error);
+      Alert.alert('오류', '장바구니를 불러올 수 없습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchCart();
     });
-    };
+    return unsubscribe;
+  }, [navigation]);
 
-    // 수량 증가
-    const increaseQuantity = (id) => {
-      setCartItems(cartItems.map(item => 
-        item.id === id ? { ...item, quantity: item.quantity + 1 } : item
-      ));
-    };
+  const handleCheckout = async () => {
+    if (cartItems.length === 0) {
+      Alert.alert('알림', '장바구니가 비어있습니다.');
+      return;
+    }
 
-  // 수량 감소
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('오류', '로그인이 필요합니다.');
+        return;
+      }
+
+      // 변경된 수량을 DB에 일괄 업데이트
+      for (const item of cartItems) {
+        await axios.patch(
+          `${API_BASE_URL}/api/cart/items/${item.id}`,
+          { quantity: item.quantity },
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+      }
+
+      const paymentProducts = cartItems.map(item => ({
+        product_id: item.product_id,
+        product_name: item.name,
+        brand_name: item.description || '브랜드 미상',
+        price: item.price,
+        size: '-',
+        quantity: item.quantity,
+        image_url: `/static/products/${item.product_id}/main.jpg`
+      }));
+
+      const total = cartItems.reduce(
+        (sum, item) => sum + (item.price * item.quantity),
+        0
+      );
+
+      navigation.navigate('Payment', {
+        products: paymentProducts,
+        quantities: cartItems.reduce((acc, item) => {
+          acc[item.product_id] = item.quantity;
+          return acc;
+        }, {}),
+        totalPrice: total
+      });
+    } catch (error) {
+      console.error('장바구니 업데이트 실패:', error);
+      Alert.alert('오류', '장바구니 업데이트에 실패했습니다.');
+    }
+  };
+
+  // 수량 증가 (로컬에서만)
+  const increaseQuantity = (id) => {
+    setCartItems(cartItems.map(item => 
+      item.id === id ? { ...item, quantity: item.quantity + 1 } : item
+    ));
+  };
+
+  // 수량 감소 (로컬에서만)
   const decreaseQuantity = (id) => {
     setCartItems(cartItems.map(item => 
       item.id === id && item.quantity > 1 
@@ -66,7 +137,20 @@ const CartScreen = ({ navigation }) => {
         { text: '취소', style: 'cancel' },
         { 
           text: '삭제', 
-          onPress: () => setCartItems(cartItems.filter(item => item.id !== id)),
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('token');
+              await axios.delete(
+                `${API_BASE_URL}/api/cart/items/${id}`,
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+
+              setCartItems(cartItems.filter(item => item.id !== id));
+            } catch (error) {
+              console.error('삭제 실패:', error);
+              Alert.alert('오류', '삭제에 실패했습니다.');
+            }
+          },
           style: 'destructive'
         }
       ]
@@ -82,7 +166,24 @@ const CartScreen = ({ navigation }) => {
         { text: '취소', style: 'cancel' },
         { 
           text: '전체 삭제', 
-          onPress: () => setCartItems([]),
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('token');
+              
+              // 각 아이템 삭제
+              for (const item of cartItems) {
+                await axios.delete(
+                  `${API_BASE_URL}/api/cart/items/${item.id}`,
+                  { headers: { Authorization: `Bearer ${token}` } }
+                );
+              }
+
+              setCartItems([]);
+            } catch (error) {
+              console.error('전체 삭제 실패:', error);
+              Alert.alert('오류', '삭제에 실패했습니다.');
+            }
+          },
           style: 'destructive'
         }
       ]
@@ -186,7 +287,11 @@ const CartScreen = ({ navigation }) => {
         </TouchableOpacity>
 
       {/* 장바구니 리스트 */}
-      {cartItems.length === 0 ? (
+      {loading ? (
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color="#FF9500" />
+        </View>
+      ) : cartItems.length === 0 ? (
         <View style={styles.emptyContainer}>
           <Text style={styles.emptyText}>장바구니가 비어있습니다</Text>
         </View>
