@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions 
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert 
   } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './components/Header';
+import { API_BASE_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
 
@@ -13,6 +14,11 @@ const MyPageScreen = ({navigation}) => {
   const [phone, setPhone] = useState('');
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
+  
+  // 원본 값 저장 (취소 시 복원용)
+  const [originalName, setOriginalName] = useState('');
+  const [originalPhone, setOriginalPhone] = useState('');
+  const [originalPassword, setOriginalPassword] = useState('');
 
   // 화면 로드 시 AsyncStorage에서 사용자 정보 불러오기
   useEffect(() => {
@@ -22,10 +28,17 @@ const MyPageScreen = ({navigation}) => {
       const storedName = await AsyncStorage.getItem('username');
       const storedPhone = await AsyncStorage.getItem('phone');
 
-      if (storedName) setName(storedName);          // 성명
-      if (storedPhone) setPhone(storedPhone);       // 연락처
-      if (storedLoginId) setLoginId(storedLoginId); // 아이디
-      setPassword('*******');                       // 비밀번호
+      if (storedName) {
+        setName(storedName);
+        setOriginalName(storedName);
+      }
+      if (storedPhone) {
+        setPhone(storedPhone);
+        setOriginalPhone(storedPhone);
+      }
+      if (storedLoginId) setLoginId(storedLoginId);
+      setPassword('*******');
+      setOriginalPassword('*******');
 
     } catch (error) {
       console.log('회원 정보 불러오기 실패', error);
@@ -37,12 +50,152 @@ const MyPageScreen = ({navigation}) => {
 
 
   const handleEdit = () => {
-    setIsEditing(true);
+    if (!isEditing) {
+      // 수정 모드 진입
+      setIsEditing(true);
+    } else {
+      // 수정 완료 (2차 클릭)
+      handleSave();
+    }
   };
 
-  const handleSave = () => {
-    // 여기에 저장 로직 추가
-    setIsEditing(true);
+  const handlePasswordFocus = () => {
+    // 비밀번호 필드 클릭 시 *******를 자동으로 제거
+    if (password === '*******') {
+      setPassword('');
+    }
+  };
+
+  const handleCancel = () => {
+    // 원본 값으로 복원
+    setName(originalName);
+    setPhone(originalPhone);
+    setPassword(originalPassword);
+    setIsEditing(false);
+  };
+
+  const handleSave = async () => {
+    // 유효성 검사
+    if (!name.trim()) {
+      Alert.alert('알림', '성명을 입력해주세요.');
+      return;
+    }
+    if (!phone.trim()) {
+      Alert.alert('알림', '연락처를 입력해주세요.');
+      return;
+    }
+    if (phone.length !== 11) {
+      Alert.alert('알림', '연락처는 11자리로 입력해주세요.');
+      return;
+    }
+    // 비밀번호를 입력했는데 6자 미만이면 에러
+    if (password && password !== '*******' && password.length < 6) {
+      Alert.alert('알림', '비밀번호는 6자 이상이어야 합니다.');
+      return;
+    }
+
+    // 수정 확인 Alert
+    const confirm = await new Promise((resolve) => {
+      Alert.alert(
+        '회원정보 수정',
+        '수정하시겠습니까?',
+        [
+          { text: '아니오', style: 'cancel', onPress: () => resolve(false) },
+          { text: '예', onPress: () => resolve(true) },
+        ]
+      );
+    });
+
+    if (!confirm) return;
+
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('오류', '로그인 토큰이 없습니다. 다시 로그인해주세요.');
+        return;
+      }
+
+      const resp = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: 'PATCH',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: name,
+          phone: phone,
+          password: (password && password !== '*******') ? password : null,
+        }),
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        Alert.alert('수정 실패', data.detail || '요청 처리 중 오류가 발생했습니다.');
+        return;
+      }
+
+      // AsyncStorage 업데이트
+      await AsyncStorage.setItem('username', name);
+      await AsyncStorage.setItem('phone', phone);
+      
+      // 원본 값도 업데이트
+      setOriginalName(name);
+      setOriginalPhone(phone);
+      if (password !== '*******') {
+        setOriginalPassword('*******');
+        setPassword('*******');
+      }
+
+      Alert.alert('알림', '회원정보가 수정되었습니다.');
+      setIsEditing(false);
+    } catch (e) {
+      console.log('회원정보 수정 에러', e);
+      Alert.alert('오류', '네트워크 또는 서버 오류입니다.');
+    }
+  };
+
+  const handleWithdraw = async () => {
+    try {
+      const confirm = await new Promise((resolve) => {
+        Alert.alert(
+          '회원탈퇴',
+          '정말로 탈퇴하시겠습니까?\n계정과 데이터가 삭제됩니다.',
+          [
+            { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+            { text: '확인', style: 'destructive', onPress: () => resolve(true) },
+          ]
+        );
+      });
+
+      if (!confirm) return;
+
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('오류', '로그인 토큰이 없습니다. 다시 로그인해주세요.');
+        return;
+      }
+
+      const resp = await fetch(`${API_BASE_URL}/api/auth/me`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      const data = await resp.json().catch(() => ({}));
+      if (!resp.ok) {
+        Alert.alert('탈퇴 실패', data.detail || '요청 처리 중 오류가 발생했습니다.');
+        return;
+      }
+
+      // 로컬 저장소 정리 및 로그인 화면으로 이동
+      await AsyncStorage.multiRemove(['user_id', 'username', 'login_id', 'access_token', 'phone']);
+      Alert.alert('알림', '회원탈퇴가 완료되었습니다.');
+      navigation.replace('Login');
+    } catch (e) {
+      console.log('회원탈퇴 에러', e);
+      Alert.alert('오류', '네트워크 또는 서버 오류입니다.');
+    }
   };
 
   return (
@@ -84,6 +237,7 @@ const MyPageScreen = ({navigation}) => {
           style={styles.input}
           value={password}
           onChangeText={setPassword}
+          onFocus={handlePasswordFocus}
           editable={isEditing}
           secureTextEntry
         />
@@ -106,13 +260,15 @@ const MyPageScreen = ({navigation}) => {
             </Text>
           </TouchableOpacity>
 
-          {/* 취소? 수정완료? */}
-          <TouchableOpacity
-            style={styles.cancelButton}
-            onPress={() => setIsEditing(false)}
-          >
-            <Text style={styles.cancelButtonText}>취소</Text>
-          </TouchableOpacity>
+          {/* 취소 버튼 - 수정 모드에서만 표시 */}
+          {isEditing && (
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleCancel}
+            >
+              <Text style={styles.cancelButtonText}>취소</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -123,7 +279,9 @@ const MyPageScreen = ({navigation}) => {
           <Text style={styles.logout}>로그아웃</Text>
         </TouchableOpacity>
 
-        <Text style={styles.withdraw}>탈퇴하기</Text>
+        <TouchableOpacity onPress={handleWithdraw}>
+          <Text style={styles.withdraw}>탈퇴하기</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
