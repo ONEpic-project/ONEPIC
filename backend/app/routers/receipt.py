@@ -3,7 +3,6 @@ from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_db
 from app.models.receipt import Receipt
-from app.models.receipt_item import ReceiptItem
 from app.schemas.receipt import ReceiptCreate
 
 router = APIRouter(
