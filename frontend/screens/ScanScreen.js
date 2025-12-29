@@ -192,52 +192,6 @@ export default function ScanScreen({ navigation }) {
         <View style={{ flex: 1 }}>
           <CameraView style={styles.camera} ref={cameraRef}>
             <Header navigation={navigation} title="상품 스캔하기" />
-            <View style={styles.scanGuide}>
-              <View
-                style={[
-                  styles.corner,
-                  {
-                    top: 0,
-                    left: 0,
-                    borderRightWidth: 0,
-                    borderBottomWidth: 0,
-                  },
-                ]}
-              />
-              <View
-                style={[
-                  styles.corner,
-                  {
-                    top: 0,
-                    right: 0,
-                    borderLeftWidth: 0,
-                    borderBottomWidth: 0,
-                  },
-                ]}
-              />
-              <View
-                style={[
-                  styles.corner,
-                  {
-                    bottom: 0,
-                    left: 0,
-                    borderRightWidth: 0,
-                    borderTopWidth: 0,
-                  },
-                ]}
-              />
-              <View
-                style={[
-                  styles.corner,
-                  {
-                    bottom: 0,
-                    right: 0,
-                    borderLeftWidth: 0,
-                    borderTopWidth: 0,
-                  },
-                ]}
-              />
-            </View>
           </CameraView>
 
           {/* 촬영 버튼 영역 */}
@@ -321,7 +275,7 @@ export default function ScanScreen({ navigation }) {
         {/* 결제 고정 하단바 */}
         <View style={styles.purchaseBar}>
           <View style={styles.totalInfo}>
-            <Text style={styles.totalLabel}>총 결제금액</Text>
+            <Text style={styles.totalLabel}>합계</Text>
             <Text style={styles.totalPriceText}>
               {calculateTotal().toLocaleString()}원
             </Text>
@@ -343,7 +297,7 @@ export default function ScanScreen({ navigation }) {
         <Modal visible={isModalVisible} transparent animationType="fade">
           <View style={styles.modalBg}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>상품이 맞나요?</Text>
+              
               {selectedProduct?.image_url && (
                 <Image
                   source={{
@@ -359,6 +313,7 @@ export default function ScanScreen({ navigation }) {
               <Text style={styles.modalPrice}>
                 {selectedProduct?.price?.toLocaleString()}원
               </Text>
+              <Text style={styles.modalTitle}>상품을 추가하시겠습니까?</Text>
               <View style={styles.modalBtnRow}>
                 <TouchableOpacity
                   style={styles.modalCancel}
