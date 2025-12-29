@@ -393,6 +393,7 @@ export default function ScanScreen({ navigation }) {
               navigation.navigate("Payment", {
                 products: scannedProducts,
                 quantities: productQuantities,
+                totalPrice: calculateTotal(),
               })
             }
           >

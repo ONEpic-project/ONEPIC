@@ -21,7 +21,7 @@ export default function PaymentScreen({ route, navigation }) {
   ============================ */
   const products = route?.params?.products ?? [];
   const quantities = route?.params?.quantities ?? {};
-  const totalPrice = route?.params?.totalPrice ?? 0;
+  //const totalPrice = route?.params?.totalPrice ?? 0; -> 251230 수정한 내용
 
   const [selectedPayment, setSelectedPayment] = useState(null);
 
@@ -37,6 +37,20 @@ export default function PaymentScreen({ route, navigation }) {
     quantity: quantities[p.product_id] ?? 1,
     image: `${API_BASE_URL}${p.image_url}`,
   }));
+
+    /* ============================
+     251230 수정한 내용 
+  ============================ */
+
+  const calculatedTotalPrice = normalizedProducts.reduce(
+    (sum, p) => sum + (p.price * p.quantity),
+    0
+  );
+
+  // 최종 화면에 표시할 가격 (계산된 값 우선 사용)
+  const totalPrice = calculatedTotalPrice > 0 ? calculatedTotalPrice : passedTotalPrice;
+
+
 
   const totalQuantity = normalizedProducts.reduce(
     (sum, p) => sum + p.quantity,
