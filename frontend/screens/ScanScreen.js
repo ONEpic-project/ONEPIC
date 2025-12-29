@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   quantityButton: {
-    backgroundColor: '#FF8C00',
+    backgroundColor: '#ff9500',
     width: 30,
     height: 30,
     borderRadius: 15,
@@ -876,10 +876,10 @@ const styles = StyleSheet.create({
   totalAmount: {
     fontSize: 24,
     fontWeight: 'bold',
-    color: '#FF8C00',
+    color: '#ff9500',
   },
   paymentButton: {
-    backgroundColor: '#FF8C00',
+    backgroundColor: '#ff9500',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',

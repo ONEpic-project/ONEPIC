@@ -140,7 +140,7 @@ export default function PaymentScreen({ route, navigation }) {
                 <Ionicons
                   name={method.icon}
                   size={24}
-                  color={selectedPayment === method.id ? '#FF8C00' : '#666'}
+                  color={selectedPayment === method.id ? '#ff9500' : '#666'}
                 />
                 <Text
                   style={[
@@ -155,7 +155,7 @@ export default function PaymentScreen({ route, navigation }) {
                   <Ionicons
                     name="checkmark-circle"
                     size={24}
-                    color="#FF8C00"
+                    color="#ff9500"
                     style={styles.checkIcon}
                   />
                 )}
@@ -233,18 +233,18 @@ const styles = StyleSheet.create({
   paymentMethod: { flexDirection: 'row', padding: 18 },
   paymentMethodSelected: { backgroundColor: '#FFF5EB' },
   paymentMethodText: { marginLeft: 12, flex: 1 },
-  paymentMethodTextSelected: { color: '#FF8C00', fontWeight: '600' },
+  paymentMethodTextSelected: { color: '#ff9500', fontWeight: '600' },
   checkIcon: { marginLeft: 'auto' },
   priceCard: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
   priceRow: { flexDirection: 'row', justifyContent: 'space-between' },
   totalLabel: { fontWeight: 'bold' },
-  totalPrice: { fontWeight: 'bold', color: '#FF8C00' },
+  totalPrice: { fontWeight: 'bold', color: '#ff9500' },
   bottomContainer: { backgroundColor: '#fff', padding: 20 },
   totalContainer: { flexDirection: 'row', justifyContent: 'space-between' },
   bottomTotalLabel: { fontWeight: '600' },
-  bottomTotalPrice: { fontSize: 22, fontWeight: 'bold', color: '#FF8C00' },
+  bottomTotalPrice: { fontSize: 22, fontWeight: 'bold', color: '#ff9500' },
   paymentButton: {
-    backgroundColor: '#FF8C00',
+    backgroundColor: '#ff9500',
     paddingVertical: 16,
     borderRadius: 12,
     alignItems: 'center',
