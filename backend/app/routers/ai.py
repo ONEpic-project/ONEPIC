@@ -4,7 +4,7 @@ from fastapi import APIRouter, UploadFile, File, Depends
 from sqlalchemy.orm import Session
 
 from app.services.ai_service import analyze_image
-from app.core.dependencies import get_db
+from app.deps import get_db
 
 
 router = APIRouter(tags=["AI"])

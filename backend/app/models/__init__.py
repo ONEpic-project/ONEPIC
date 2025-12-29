@@ -7,3 +7,5 @@ from app.models.recognition_log import RecognitionLog
 from app.models.ai_product_mapping import AIProductMapping
 from app.models.product_attribute_key import ProductAttributeKey
 from app.models.product_attribute_value import ProductAttributeValue
+from .cart import Cart
+from .cart_item import CartItem
