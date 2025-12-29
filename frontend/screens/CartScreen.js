@@ -26,7 +26,7 @@ const CartScreen = ({ navigation }) => {
   const fetchCart = async () => {
     try {
       setLoading(true);
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('access_token');
       if (!token) {
         Alert.alert('오류', '로그인이 필요합니다.');
         return;
@@ -68,7 +68,7 @@ const CartScreen = ({ navigation }) => {
     }
 
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem('access_token');
       if (!token) {
         Alert.alert('오류', '로그인이 필요합니다.');
         return;
@@ -139,7 +139,7 @@ const CartScreen = ({ navigation }) => {
           text: '삭제', 
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('token');
+              const token = await AsyncStorage.getItem('access_token');
               await axios.delete(
                 `${API_BASE_URL}/api/cart/items/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
@@ -168,7 +168,7 @@ const CartScreen = ({ navigation }) => {
           text: '전체 삭제', 
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('token');
+              const token = await AsyncStorage.getItem('access_token');
               
               // 각 아이템 삭제
               for (const item of cartItems) {

@@ -31,6 +31,7 @@ const MAX_Y = -DRAWER_MAX_HEIGHT + DRAWER_PEEK_HEIGHT;
 export default function ScanScreen({ navigation }) {
   const [permission, requestPermission] = useCameraPermissions();
   const [isLoading, setIsLoading] = useState(false);
+  const [products, setProducts] = useState([]);
   const [scannedProducts, setScannedProducts] = useState([]); // 중복 없는 상품 객체 리스트
   const [productQuantities, setProductQuantities] = useState({}); // { productId: quantity }
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -396,7 +397,7 @@ export default function ScanScreen({ navigation }) {
               }
 
               try {
-                const token = await AsyncStorage.getItem('token');
+                const token = await AsyncStorage.getItem('access_token');
                 if (!token) {
                   Alert.alert('오류', '로그인이 필요합니다.');
                   return;
