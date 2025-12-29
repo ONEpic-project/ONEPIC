@@ -14,7 +14,7 @@ import {
   PanResponder,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { API_BASE_URL } from "./config/api";
+import { API_BASE_URL } from "../config/api";
 import axios from "axios";
 import Header from "./components/Header";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
