@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   View,
+  ScrollView,
   Text,
   TextInput,
   TouchableOpacity,
@@ -110,76 +111,63 @@ const LoginScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.content}
+        style={{ flex: 1 }}
       >
-        {/* 로고 영역 */}
-        <View style={styles.logo}>
-        <Text style={styles.title}>ONE pic</Text>
-        <Text style={styles.subtitle}>마트에서 줄서기는 그만</Text>
-      </View>
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* 로고 영역 */}
+          <View style={styles.logo}>
+            <Text style={styles.title}>ONE pic</Text>
+            <Text style={styles.subtitle}>마트에서 줄서기는 그만</Text>
+          </View>
 
-        {/* 입력 필드 영역 */}
-        <View style={styles.formContainer}>
-          {/* 아이디 입력 */}
-          <View style={styles.inputGroup}>
+          {/* 입력 필드 영역 */}
+          <View style={styles.formContainer}>
             <TextInput
               style={styles.input}
               placeholder="아이디"
-              placeholderTextColor="#999"
               value={userId}
               onChangeText={setUserId}
               autoCapitalize="none"
               autoCorrect={false}
-              editable={!isLoading}
             />
-          </View>
 
-          {/* 비밀번호 입력 */}
-          <View style={styles.inputGroup}>
             <TextInput
               style={styles.input}
               placeholder="비밀번호"
-              placeholderTextColor="#999"
               secureTextEntry
               value={password}
               onChangeText={setPassword}
               autoCapitalize="none"
               autoCorrect={false}
-              editable={!isLoading}
             />
           </View>
-        </View>
 
-        {/* 로그인 버튼 */}
-        <TouchableOpacity 
-        style={[styles.loginButton, isLoading && styles.loginButtonDisabled]} 
-        onPress={handleLogin}
-        disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
+          {/* 로그인 버튼 */}
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={handleLogin}
+          >
             <Text style={styles.loginButtonText}>로그인 하기</Text>
-          )}
-        </TouchableOpacity>
-
-        {/* 하단 링크 */}
-        <View style={styles.footer}>
-          {/*회원가입*/}
-          <TouchableOpacity 
-            onPress={handleSignup}
-            disabled={isLoading}
-          >
-            <Text style={styles.signupText}>회원가입</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity 
-            onPress={handleForgotCredentials}
-            disabled={isLoading}
-          >
-            <Text style={styles.forgotText}>아이디/비밀번호를 잊으셨나요?</Text>
-          </TouchableOpacity>
-        </View>
+          {/* 하단 링크 */}
+          <View style={styles.footer}>
+            <TouchableOpacity onPress={handleSignup}>
+              <Text style={styles.signupText}>회원가입</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleForgotCredentials}>
+              <Text style={styles.forgotText}>
+                아이디/비밀번호를 잊으셨나요?
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
