@@ -8,7 +8,7 @@ from app.schemas.user import UserCreate, UserLogin
 from app.models.user import User
 from app.core.security import create_access_token
 
-router = APIRouter(prefix="/api/auth", tags=["Auth"])
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 # 회원가입 ================================================
 @router.post("/signup", status_code=status.HTTP_201_CREATED)
