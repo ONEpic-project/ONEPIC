@@ -14,7 +14,7 @@ from app.services.cart_service import (
     add_cart_item,
     update_cart_item_quantity,
     delete_cart_item,
-    preview_cart_from_scan,
+    create_cart_from_scan,
 )
 
 router = APIRouter(prefix="/cart", tags=["Cart"])
@@ -130,6 +130,6 @@ def preview_cart(
     db: Session = Depends(get_db),
 ):
     try:
-        return preview_cart_from_scan(db, payload.items)
+        return create_cart_from_scan(db, payload.items)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
