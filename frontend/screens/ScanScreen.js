@@ -520,8 +520,8 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   cartItem: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: "column",
+    //alignItems: "center",
     backgroundColor: "#fff",
     padding: 15,
     borderRadius: 15,

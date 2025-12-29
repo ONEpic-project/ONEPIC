@@ -201,7 +201,7 @@ export default function PaymentScreen({ route, navigation }) {
           onPress={handlePayment}
         >
           <Text style={styles.paymentButtonText}>
-            {totalPrice.toLocaleString()}원 결제하기
+            결제하기
           </Text>
         </TouchableOpacity>
       </View>
