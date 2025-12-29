@@ -137,9 +137,15 @@ export default function ScanScreen({ navigation }) {
     if (!cameraRef.current) return;
     try {
       setIsLoading(true);
+      console.log("[scan] takePicture start");
       const photo = await cameraRef.current.takePictureAsync({
         quality: 0.7,
         base64: true,
+      });
+      console.log("[scan] photo captured", {
+        uri: photo?.uri,
+        width: photo?.width,
+        height: photo?.height,
       });
       const formData = new FormData();
       formData.append("file", {
@@ -153,8 +159,11 @@ export default function ScanScreen({ navigation }) {
         timeout: 25000,
       });
 
+      console.log("[scan] api response", res?.data);
+
       if (res.data?.result) {
         const result = res.data.result;
+        console.log("[scan] result", result);
         // 정확도 0.8 미만이면 재촬영 안내
         if (typeof result.confidence === "number" && result.confidence < 0.8) {
           Alert.alert("알림", "상품을 인식할 수 없습니다.\n다시 스캔해주세요.");
@@ -166,9 +175,11 @@ export default function ScanScreen({ navigation }) {
         Alert.alert("알림", "상품을 인식할 수 없습니다.\n다시 스캔해주세요.");
       }
     } catch (e) {
+      console.log("[scan] error", e);
       Alert.alert("오류", "서버와 통신하는 중 문제가 발생했습니다.");
     } finally {
       setIsLoading(false);
+      console.log("[scan] takePicture end");
     }
   };
 
