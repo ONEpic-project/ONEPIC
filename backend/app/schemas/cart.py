@@ -10,7 +10,7 @@ class CartItemResponse(BaseModel):
     quantity: int
 
     class Config:
-        from_attributes = True   # SQLAlchemy ORM 대응
+        orm_mode = True
 
 
 class CartResponse(BaseModel):
@@ -19,7 +19,7 @@ class CartResponse(BaseModel):
     items: List[CartItemResponse]
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 class AddCartItemRequest(BaseModel):
     product_id: int

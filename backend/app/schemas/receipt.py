@@ -26,7 +26,7 @@ class ReceiptItemResponse(BaseModel):
     quantity: int
 
     class Config:
-        from_attributes = True
+        orm_mode = True
 
 
 class ReceiptResponse(BaseModel):
@@ -37,4 +37,4 @@ class ReceiptResponse(BaseModel):
     items: List[ReceiptItemResponse]
 
     class Config:
-        from_attributes = True
+        orm_mode = True
