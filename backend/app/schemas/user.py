@@ -13,3 +13,16 @@ class UserCreate(BaseModel):
 class UserLogin(BaseModel):
     login_id: str
     password: str
+
+# 아이디 찾기
+class FindIdRequest(BaseModel):
+    username: str
+    phone: str
+
+class FindIdResponse(BaseModel):
+    login_id: str
+
+# 비밀번호 찾기
+class FindPasswordRequest(BaseModel):
+    login_id: str
+    phone: str
