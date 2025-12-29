@@ -14,70 +14,49 @@ import {
   PanResponder,
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
-import { API_BASE_URL } from "../config/api";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { API_BASE_URL } from "./config/api";
 import axios from "axios";
 import Header from "./components/Header";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 
-// --- 제스처 및 애니메이션 라이브러리 ---
-import {
-  GestureHandlerRootView,
-  GestureDetector,
-  Gesture,
-} from "react-native-gesture-handler";
-// import Animated, {
-//   useSharedValue,
-//   useAnimatedStyle,
-//   withSpring,
-//   interpolate
-// } from 'react-native-reanimated';
-
-const SERVER_URL = API_BASE_URL;
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 
-// 상단 헤더와 하단 버튼 영역을 제외한 실제 이동 범위 계산
+// 레이아웃 상수
 const PURCHASE_AREA_HEIGHT = 130;
-const DRAWER_PEEK_HEIGHT = 70; // 닫혔을 때 노출될 높이
-const DRAWER_MAX_HEIGHT = SCREEN_HEIGHT * 0.6;
-const MIN_Y = 0; // 닫힌 상태 (상대값)
-const MAX_Y = -DRAWER_MAX_HEIGHT + DRAWER_PEEK_HEIGHT; // 열린 상태 (상대값)
+const DRAWER_PEEK_HEIGHT = 70;
+const DRAWER_MAX_HEIGHT = SCREEN_HEIGHT * 0.65;
+const MAX_Y = -DRAWER_MAX_HEIGHT + DRAWER_PEEK_HEIGHT;
 
 export default function ScanScreen({ navigation }) {
-  // 1. 상태 관리
   const [permission, requestPermission] = useCameraPermissions();
   const [isLoading, setIsLoading] = useState(false);
-  const [detectedImage, setDetectedImage] = useState(null);
-  const [detectionResult, setDetectionResult] = useState(null);
-  const [products, setProducts] = useState([]);
-  const [productQuantities, setProductQuantities] = useState({});
+  const [scannedProducts, setScannedProducts] = useState([]); // 중복 없는 상품 객체 리스트
+  const [productQuantities, setProductQuantities] = useState({}); // { productId: quantity }
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const cameraRef = useRef(null);
-  const [scannedProducts, setScannedProducts] = useState([]);
 
-  // 2. Animated 값 및 PanResponder 설정
+  // --- 드로워 애니메이션 및 제스처 로직 ---
   const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
-
   const panResponder = useRef(
     PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
       onMoveShouldSetPanResponder: () => true,
       onPanResponderGrant: () => {
-        pan.setOffset({ x: 0, y: pan.y._value }); // 시작 지점 고정
+        pan.setOffset({ x: 0, y: pan.y._value });
         pan.setValue({ x: 0, y: 0 });
       },
       onPanResponderMove: (e, gestureState) => {
-        // 이동 범위 제한 (열림과 닫힘 사이만 움직이게)
         const newY = gestureState.dy;
         const currentTotalY = pan.y._offset + newY;
-
+        // 드로워 이동 제한 범위 (위/아래)
         if (currentTotalY <= 0 && currentTotalY >= MAX_Y) {
           pan.setValue({ x: 0, y: newY });
         }
       },
       onPanResponderRelease: (e, gestureState) => {
-        pan.flattenOffset(); // 오프셋 합치기
-
-        // 위로 빠르게 올리거나 절반 이상 올렸을 때
+        pan.flattenOffset();
+        // 속도가 빠르거나 절반 이상 올렸을 때 끝까지 펼침
         if (gestureState.vy < -0.5 || pan.y._value < MAX_Y / 2) {
           Animated.spring(pan.y, {
             toValue: MAX_Y,
@@ -85,7 +64,6 @@ export default function ScanScreen({ navigation }) {
             friction: 8,
           }).start();
         } else {
-          // 아래로 내리거나 절반 미만일 때 닫기
           Animated.spring(pan.y, {
             toValue: 0,
             useNativeDriver: false,
@@ -96,179 +74,21 @@ export default function ScanScreen({ navigation }) {
     })
   ).current;
 
-  // 1. 페이지 진입 시 저장된 장바구니 불러오기
-  useEffect(() => {
-    const initData = async () => {
-      await loadProducts(); // 전체 상품 목록 로드
-      await loadCartFromStorage(); // 저장된 수량 로드
-    };
-    initData();
-  }, []);
-
-  // 2. 수량이 변경될 때마다 스토리지에 자동 저장
-  useEffect(() => {
-    if (Object.keys(productQuantities).length > 0) {
-      saveCartToStorage(productQuantities);
-    }
-  }, [productQuantities]);
-
-  const loadProducts = async () => {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/api/products/`);
-      setProducts(response.data);
-    } catch (e) {
-      console.error("로드 실패", e);
-    }
-  };
-
-  const saveCartToStorage = async (data) => {
-    try {
-      await AsyncStorage.setItem("@cart_data", JSON.stringify(data));
-    } catch (e) {
-      console.error("저장 실패", e);
-    }
-  };
-
-  const loadCartFromStorage = async () => {
-    try {
-      const savedData = await AsyncStorage.getItem("@cart_data");
-      if (savedData !== null) {
-        setProductQuantities(JSON.parse(savedData));
-      }
-    } catch (e) {
-      console.error("불러오기 실패", e);
-    }
-  };
-
-  // ====================여기까지
-
-  // 4. 상품 관련 로직 이거 없음
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const response = await axios.get(`${API_BASE_URL}/api/products/`);
-        setProducts(response.data);
-      } catch (error) {
-        console.error("데이터 로드 실패:", error);
-      }
-    };
-    loadProducts();
-  }, []);
-
-  // increaseQuantity 똑같음
-  const increaseQuantity = (productId) => {
-    setProductQuantities((prev) => ({
-      ...prev,
-      [productId]: (prev[productId] || 0) + 1,
-    }));
-  };
-
-  const decreaseQuantity = (productId) => {
-    setProductQuantities((prev) => {
-      if (prev[productId] > 0)
-        return {
-          ...prev,
-          [productId]: prev[productId] - 1,
-        };
-      return prev;
-    });
-  };
-
-  const removeProduct = (productId) => {
-    setProductQuantities((prev) => {
-      const newQty = { ...prev };
-      delete newQty[productId];
-      return newQty;
-    });
-  };
-
-<<<<<<< HEAD
-  const calculateTotal = () => {
-    return scannedProducts.reduce((sum, product) => {
-      const qty = productQuantities[product.product_id] || 0;
-      return sum + product.price * qty;
-    }, 0);
-=======
-  // ✅ 합계 계산 함수
-  const calculateTotal = () => {
-    return scannedProducts.reduce((sum, product) => {
-      const qty = productQuantities[product.product_id] ?? 1;
-      return sum + product.price * qty;
-    }, 0);
-  };
-
-
-  // 현재 수량 가져오기
-  const getQuantity = (productId) => {
-    return productQuantities[productId] ?? 1;
->>>>>>> dcdf68317ca2cd95c4240ca4482adf225225fc44
-  };
-
-  // 5. 카메라 및 인식 로직
-  const takePicture = async () => {
-    if (cameraRef.current) {
-      try {
-        setIsLoading(true);
-        const photo = await cameraRef.current.takePictureAsync({
-          quality: 0.8,
-          base64: true,
-        });
-        detectProduct(photo);
-      } catch (error) {
-        Alert.alert("오류", "사진 촬영에 실패했습니다.");
-        setIsLoading(false);
-      }
-    }
-  };
-
-  const detectProduct = async (photo) => {
-    try {
-      const formData = new FormData();
-      formData.append("file", {
-        uri: photo.uri,
-        type: "image/jpeg",
-        name: "product.jpg",
-      });
-      const res = await axios.post(`${API_BASE_URL}/api/ai/detect`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-        timeout: 30000,
-      });
-
-      //여기는 다름
-      if (res.data?.result) {
-        if (res.data.result.image_base64)
-          setDetectedImage(
-            `data:image/png;base64,${res.data.result.image_base64}`
-          );
-        setDetectionResult(res.data.result);
-        setSelectedProduct(res.data.result);
-        setIsModalVisible(true);
-      }
-      //여기까지 다름
-    } catch (error) {
-      Alert.alert("오류", "상품 인식에 실패했습니다.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  //여기 다름
+  // --- 장바구니 핵심 로직 ---
   const addToCart = (product) => {
     setScannedProducts((prev) => {
-      const exists = prev.find((p) => p.product_id === product.product_id);
-
-      if (exists) {
-        // 이미 있으면 수량 +1
-        setProductQuantities((qty) => ({
-          ...qty,
-          [product.product_id]: (qty[product.product_id] || 1) + 1,
+      const isExist = prev.find((p) => p.product_id === product.product_id);
+      if (isExist) {
+        // 1. 이미 있으면 수량만 1 증가
+        setProductQuantities((prevQty) => ({
+          ...prevQty,
+          [product.product_id]: (prevQty[product.product_id] || 1) + 1,
         }));
-        return prev; // 배열 자체는 유지
+        return prev;
       }
-
-      // 없으면 새로 추가 및 수량 1 설정
-      setProductQuantities((qty) => ({
-        ...qty,
+      // 2. 새로 추가되는 상품이면 목록에 넣고 수량 1로 설정
+      setProductQuantities((prevQty) => ({
+        ...prevQty,
         [product.product_id]: 1,
       }));
       return [...prev, product];
@@ -276,389 +96,283 @@ export default function ScanScreen({ navigation }) {
 
     setIsModalVisible(false);
     setSelectedProduct(null);
+    Alert.alert("장바구니", "상품이 성공적으로 추가되었습니다.");
   };
-  //여기까지 다름
 
-  // 6. 권한 렌더링 다름
-  if (!permission) {
+  const increaseQuantity = (productId) => {
+    setProductQuantities((prev) => ({
+      ...prev,
+      [productId]: (prev[productId] || 1) + 1,
+    }));
+  };
+
+  const decreaseQuantity = (productId) => {
+    setProductQuantities((prev) => {
+      if (prev[productId] > 1)
+        return { ...prev, [productId]: prev[productId] - 1 };
+      return prev;
+    });
+  };
+
+  const removeProduct = (productId) => {
+    setScannedProducts((prev) =>
+      prev.filter((p) => p.product_id !== productId)
+    );
+    setProductQuantities((prev) => {
+      const newQty = { ...prev };
+      delete newQty[productId];
+      return newQty;
+    });
+  };
+
+  const calculateTotal = () => {
+    return scannedProducts.reduce((sum, product) => {
+      const qty = productQuantities[product.product_id] || 0;
+      return sum + product.price * qty;
+    }, 0);
+  };
+
+  // --- 촬영 및 서버 통신 ---
+  const takePicture = async () => {
+    if (!cameraRef.current) return;
+    try {
+      setIsLoading(true);
+      const photo = await cameraRef.current.takePictureAsync({
+        quality: 0.7,
+        base64: true,
+      });
+      const formData = new FormData();
+      formData.append("file", {
+        uri: photo.uri,
+        type: "image/jpeg",
+        name: "scan.jpg",
+      });
+
+      const res = await axios.post(`${API_BASE_URL}/api/ai/detect`, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+        timeout: 25000,
+      });
+
+      if (res.data?.result) {
+        setSelectedProduct(res.data.result);
+        setIsModalVisible(true);
+      } else {
+        Alert.alert("알림", "상품을 인식할 수 없습니다.");
+      }
+    } catch (e) {
+      Alert.alert("오류", "서버와 통신하는 중 문제가 발생했습니다.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  if (!permission)
     return (
-      <View style={styles.container}>
-        <ActivityIndicator size="large" color="#4A90E2" />
-        <Text style={styles.loadingText}>카메라 권한 확인 중...</Text>
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="#FF9500" />
       </View>
     );
-  }
-
-  if (!permission.granted) {
+  if (!permission.granted)
     return (
-      <View style={styles.container}>
-        <Text style={styles.errorText}>카메라 권한이 필요합니다.</Text>
-        <Text style={styles.errorSubText}>
-          앱을 사용하려면 카메라 권한을 허용해주세요.
-        </Text>
+      <View style={styles.center}>
+        <Text>카메라 권한이 필요합니다.</Text>
         <TouchableOpacity
           style={styles.permissionButton}
           onPress={requestPermission}
         >
-          <Text style={styles.permissionButtonText}>권한 요청</Text>
+          <Text style={{ color: "#fff" }}>권한 요청</Text>
         </TouchableOpacity>
       </View>
     );
-  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
-        {/* 카메라 영역 */}
-        <View style={styles.cameraWrapper}>
-          <CameraView style={styles.camera} facing="back" ref={cameraRef}>
-            <Header navigation={navigation} title="상품 스캔" />
-            {/* <View style={styles.scanGuide}>
-              <View style={[styles.scanCorner, styles.topLeft]} />
-              <View style={[styles.scanCorner, styles.topRight]} />
-              <View style={[styles.scanCorner, styles.bottomLeft]} />
-              <View style={[styles.scanCorner, styles.bottomRight]} />
-            </View> */}
+        {/* 카메라 및 가이드 */}
+        <View style={{ flex: 1 }}>
+          <CameraView style={styles.camera} ref={cameraRef}>
+            <Header navigation={navigation} title="상품 스캔하기" />
+            <View style={styles.scanGuide}>
+              <View
+                style={[
+                  styles.corner,
+                  {
+                    top: 0,
+                    left: 0,
+                    borderRightWidth: 0,
+                    borderBottomWidth: 0,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.corner,
+                  {
+                    top: 0,
+                    right: 0,
+                    borderLeftWidth: 0,
+                    borderBottomWidth: 0,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.corner,
+                  {
+                    bottom: 0,
+                    left: 0,
+                    borderRightWidth: 0,
+                    borderTopWidth: 0,
+                  },
+                ]}
+              />
+              <View
+                style={[
+                  styles.corner,
+                  {
+                    bottom: 0,
+                    right: 0,
+                    borderLeftWidth: 0,
+                    borderTopWidth: 0,
+                  },
+                ]}
+              />
+            </View>
           </CameraView>
 
-          {/* 촬영 버튼 */}
+          {/* 촬영 버튼 영역 */}
           <View style={styles.captureArea}>
             <TouchableOpacity
-              style={styles.captureButton}
+              style={styles.captureBtn}
               onPress={takePicture}
               disabled={isLoading}
             >
               {isLoading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
-                <View style={styles.captureButtonInner} />
+                <View style={styles.captureBtnInner} />
               )}
             </TouchableOpacity>
           </View>
-<<<<<<< HEAD
         </View>
 
-        {/* 장바구니 바텀 시트 (스와이프 가능) */}
-=======
-
-          {/* 헤더 위치 */}
-          <Header
-            navigation={navigation}
-            title="스캔하기"
-          />
-        </View>
-      </CameraView>
-
-      {/* 카메라 촬영 버튼 */}
-      <View style={styles.controls}>
-        <TouchableOpacity
-          style={[styles.captureButton, isLoading && styles.captureButtonDisabled]}
-          onPress={takePicture}
-          disabled={isLoading}
-        >
-          {isLoading ? (
-            <ActivityIndicator size="large" color="#fff" />
-          ) : (
-            <View style={styles.captureButtonInner} />
-          )}
-        </TouchableOpacity>
-      </View>
-
-      {/* 로딩 오버레이 */}
-      {isLoading && (
-        <View style={styles.loadingOverlay}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.loadingOverlayText}>AI가 상품을 인식 중입니다...</Text>
-        </View>
-      )}
-
-      {/* Bottom Swipeable Drawer */}
-      <Animated.View
-        style={[
-          styles.drawer,
-          {
-            transform: [{ translateY }],
-          },
-        ]}
-      >
-        {/* Drawer Header (항상 보이는 부분) */}
-        <View style={styles.drawerHeader} {...panResponder.panHandlers}>
-          {/* Puller (드래그 핸들) */}
-          <View style={styles.puller} />
-        </View>
-
-        {/* 스크롤 컨텐츠 영역 */}
-        <ScrollView style={styles.drawerContent}>
-          <View style={styles.contentPlaceholder}>
->>>>>>> dcdf68317ca2cd95c4240ca4482adf225225fc44
-
+        {/* 바텀 드로워 (장바구니 리스트) */}
         <Animated.View
-          style={[
-            styles.drawer,
-            {
-              transform: [{ translateY: pan.y }],
-            },
-          ]}
+          style={[styles.drawer, { transform: [{ translateY: pan.y }] }]}
           {...panResponder.panHandlers}
         >
           <View style={styles.handleBar} />
-          {/* puller랑 handleBar 같음 */}
-          <Text style={styles.drawerTitle}>스캔된 상품 목록</Text>
-
-          <ScrollView
-            style={styles.drawerContent}
-            contentContainerStyle={{ paddingBottom: 200 }} // 버튼에 가려지지 않게 넉넉히
-            showsVerticalScrollIndicator={false}
-          >
-            {scannedProducts.filter(
-              (p) => (productQuantities[p.product_id] || 0) > 0
-            ).length === 0 ? (
-              <View style={styles.emptyCart}>
-                <Text style={styles.emptyText}>장바구니가 비어 있습니다.</Text>
-              </View>
+          <Text style={styles.drawerHeader}>
+            내 장바구니 ({scannedProducts.length})
+          </Text>
+          <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
+            {scannedProducts.length === 0 ? (
+              <Text style={styles.emptyText}>
+                스캔한 상품이 여기 표시됩니다.
+              </Text>
             ) : (
-              scannedProducts
-                .map((product, index) => (
-                  <View
-                    key={`${product.product_id}-${index}`}
-                    style={styles.resultItem}
-                  >
-                    {/* 상단: 상품명 및 삭제 버튼 */}
-                    <View style={styles.itemHeader}>
-                      <Text style={styles.headerProductName}>
-                        {product.product_name}
-                      </Text>
-                      <TouchableOpacity
-                        onPress={() => removeProduct(product.product_id)}
-                      >
-                        <Text style={styles.closeIcon}>✕</Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {/* 중간: 이미지 + (브랜드, 상품명, 사이즈) */}
-                    <View style={styles.itemBody}>
-                      <Image
-                        source={{ uri: `${API_BASE_URL}${product.image_url}` }}
-                        style={styles.productThumbnail}
-                        resizeMode="cover"
-                      />
-                      <View style={styles.itemInfoContent}>
-                        <Text style={styles.infoText}>
-                          {product.brand_name}
-                        </Text>
-                        <Text style={styles.infoText}>
-                          {product.product_name}
-                        </Text>
-                        <Text style={styles.infoText}>
-                          {product.size ?? ""}
-                        </Text>
-                      </View>
-                    </View>
-
-                    {/* 하단: 가격 + 수량 조절 버튼 */}
-                    <View style={styles.itemFooter}>
-                      <Text style={styles.footerPrice}>
-                        {(
-                          product.price *
-                          (productQuantities[product.product_id] || 0)
-                        ).toLocaleString()}
-                        원
-                      </Text>
-                      <View style={styles.quantityControl}>
-                        <TouchableOpacity
-                          onPress={() => decreaseQuantity(product.product_id)}
-                          style={styles.qBtn}
-                        >
-                          <Text style={styles.qBtnText}>-</Text>
-                        </TouchableOpacity>
-                        <Text style={styles.qText}>
-                          {productQuantities[product.product_id]}개
-                        </Text>
-                        <TouchableOpacity
-                          onPress={() => increaseQuantity(product.product_id)}
-                          style={styles.qBtn}
-                        >
-                          <Text style={styles.qBtnText}>+</Text>
-                        </TouchableOpacity>
-                      </View>
-                    </View>
+              scannedProducts.map((item) => (
+                <View key={item.product_id} style={styles.cartItem}>
+                  <Image
+                    source={{ uri: `${API_BASE_URL}${item.image_url}` }}
+                    style={styles.itemImg}
+                  />
+                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    <Text style={styles.itemName} numberOfLines={1}>
+                      {item.product_name}
+                    </Text>
+                    <Text style={styles.itemPrice}>
+                      {(
+                        item.price * productQuantities[item.product_id]
+                      ).toLocaleString()}
+                      원
+                    </Text>
                   </View>
-                ))
+                  <View style={styles.qtyControl}>
+                    <TouchableOpacity
+                      onPress={() => decreaseQuantity(item.product_id)}
+                      style={styles.qtyBtn}
+                    >
+                      <Text>-</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.qtyText}>
+                      {productQuantities[item.product_id]}
+                    </Text>
+                    <TouchableOpacity
+                      onPress={() => increaseQuantity(item.product_id)}
+                      style={styles.qtyBtn}
+                    >
+                      <Text>+</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => removeProduct(item.product_id)}
+                      style={{ marginLeft: 10 }}
+                    >
+                      <Text style={{ color: "#ccc" }}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              ))
             )}
+            <View style={{ height: 100 }} />
           </ScrollView>
         </Animated.View>
 
-        {/* 하단 고정 결제 영역 */}
-        <View style={styles.purchaseArea}>
-          <View style={styles.totalRow}>
-            <Text style={styles.totalLabel}>합계</Text>
-            <Text style={styles.totalAmount}>
+        {/* 결제 고정 하단바 */}
+        <View style={styles.purchaseBar}>
+          <View style={styles.totalInfo}>
+            <Text style={styles.totalLabel}>총 결제금액</Text>
+            <Text style={styles.totalPriceText}>
               {calculateTotal().toLocaleString()}원
             </Text>
           </View>
-<<<<<<< HEAD
           <TouchableOpacity
-            style={styles.purchaseButton}
-            onPress={() => navigation.navigate("Payment")}
+            style={styles.payBtn}
+            onPress={() =>
+              navigation.navigate("Payment", {
+                products: scannedProducts,
+                quantities: productQuantities,
+              })
+            }
           >
-            <Text style={styles.purchaseButtonText}>결제하기</Text>
+            <Text style={styles.payBtnText}>구매하기</Text>
           </TouchableOpacity>
-=======
-        </ScrollView>
-      </Animated.View>
-
-      <View style={styles.purchaseArea}>
-        <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>
-          합계 {calculateTotal().toLocaleString()}원
-        </Text>
-        <TouchableOpacity
-          style={styles.purchaseButton}
-          onPress={() =>
-            navigation.navigate('Payment', {
-              products: scannedProducts,
-              quantities: productQuantities,
-              totalPrice: calculateTotal(),
-            })
-          }
-        >
-          <Text style={styles.purchaseButtonText}>구매하기</Text>
-        </TouchableOpacity>
-
-      </View>
-
-      {/* Drawer Overlay (열렸을 때 배경 어둡게) */}
-      {isDrawerOpen && (
-        <TouchableOpacity
-          style={styles.drawerOverlay}
-          activeOpacity={1}
-          onPress={closeDrawer}
-        />
-      )}
-
-      {/* 장바구니 추가 확인 모달 */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            {/* 닫기 버튼 */}
-            <TouchableOpacity
-              style={styles.modalCloseButton}
-              onPress={() => setIsModalVisible(false)}
-            >
-              <Text style={styles.modalCloseText}>✕</Text>
-            </TouchableOpacity>
-
-            {/* 상품 이미지 */}
-            <View style={styles.modalImageContainer}>
-              {selectedProduct?.image_url ? (
-                <Image
-                  source={{ uri: `${SERVER_URL}${selectedProduct.image_url}` }}
-                  style={styles.modalProductImage}
-                  resizeMode="contain"
-                />
-              ) : (
-                <View style={styles.modalProductImage} />
-              )}
-            </View>
-
-
-            {/* 상품명 */}
-            <Text style={styles.modalProductName}>
-              {selectedProduct?.product_name}
-            </Text>
-            <Text style={styles.modalProductBrand}>
-              {selectedProduct?.brand_name}
-            </Text>
-            <Text style={styles.modalProductSize}>
-              {selectedProduct?.size}
-            </Text>
-            <Text style={styles.modalProductPrice}>
-              {selectedProduct?.price?.toLocaleString()}원
-            </Text>
-
-            {/* 질문 텍스트 */}
-            <Text style={styles.modalQuestionText}>
-              장바구니에 추가하시겠습니까?
-            </Text>
-
-            {/* 버튼 영역 */}
-            <View style={styles.modalButtonContainer}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalButtonNo]}
-                onPress={() => {
-                  setIsModalVisible(false);
-                  resetCamera();
-                }}
-              >
-                <Text style={styles.modalButtonNoText}>아니오</Text>
-              </TouchableOpacity>
-
-              <TouchableOpacity
-                style={[styles.modalButton, styles.modalButtonYes]}
-                onPress={() => addToCart(selectedProduct)}
-              >
-                <Text style={styles.modalButtonYesText}>네</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
->>>>>>> dcdf68317ca2cd95c4240ca4482adf225225fc44
         </View>
 
-        {/* AI 인식 확인 모달 */}
+        {/* 인식 확인 모달 */}
         <Modal visible={isModalVisible} transparent animationType="fade">
-          <View style={styles.modalOverlay}>
+          <View style={styles.modalBg}>
             <View style={styles.modalContent}>
-              <Text style={styles.modalTitle}>
-                장바구니에 추가하시겠습니까?
-              </Text>
-              <Image
-                source={{
-                  uri: selectedProduct
-                    ? `${SERVER_URL}${selectedProduct.image_url}`
-                    : null,
-                }}
-                style={styles.modalImage}
-                resizeMode="contain"
-              />
-              {/* 제미나이가 찾아준 거 */}
-              {/* <Text style={styles.modalName}>
-                {selectedProduct?.brand_name || selectedProduct?.label}
-              </Text>
+              <Text style={styles.modalTitle}>상품이 맞나요?</Text>
+              {selectedProduct?.image_url && (
+                <Image
+                  source={{
+                    uri: `${API_BASE_URL}${selectedProduct.image_url}`,
+                  }}
+                  style={styles.modalImg}
+                  resizeMode="contain"
+                />
+              )}
               <Text style={styles.modalName}>
-                {selectedProduct?.product_name || selectedProduct?.label}
-              </Text>
-              <Text style={styles.modalName}>
-                {selectedProduct?.size || selectedProduct?.label}
-              </Text> */}
-              <Text style={styles.modalProductName}>
-                {selectedProduct?.brand_name}
                 {selectedProduct?.product_name}
-                {selectedProduct?.size}
               </Text>
-              <Text style={styles.modalProductBrand}></Text>
-              <Text style={styles.modalProductSize}></Text>
-              <Text style={styles.modalProductPrice}>
+              <Text style={styles.modalPrice}>
                 {selectedProduct?.price?.toLocaleString()}원
               </Text>
               <View style={styles.modalBtnRow}>
                 <TouchableOpacity
-                  style={styles.modalBtnCancel}
-                  onPress={() => {
-                    setIsModalVisible(false);
-                    resetCamera();
-                  }}
+                  style={styles.modalCancel}
+                  onPress={() => setIsModalVisible(false)}
                 >
                   <Text>취소</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  style={styles.modalBtnOk}
+                  style={styles.modalOk}
                   onPress={() => addToCart(selectedProduct)}
                 >
-                  <Text style={{ color: "#fff" }}>추가하기</Text>
+                  <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                    담기
+                  </Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -671,50 +385,51 @@ export default function ScanScreen({ navigation }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
-  center: { flex: 1, justifyContent: "center", alignItems: "center" },
-  cameraWrapper: { flex: 1 },
+  center: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
   camera: { flex: 0.8 },
   scanGuide: {
     position: "absolute",
     top: "25%",
     left: "15%",
     right: "15%",
-    height: "35%",
+    height: "30%",
   },
-  scanCorner: {
+  corner: {
     position: "absolute",
     width: 30,
     height: 30,
     borderColor: "#FF9500",
     borderWidth: 4,
   },
-  topLeft: { top: 0, left: 0, borderRightWidth: 0, borderBottomWidth: 0 },
-  topRight: { top: 0, right: 0, borderLeftWidth: 0, borderBottomWidth: 0 },
-  bottomLeft: { bottom: 0, left: 0, borderRightWidth: 0, borderTopWidth: 0 },
-  bottomRight: { bottom: 0, right: 0, borderLeftWidth: 0, borderTopWidth: 0 },
-
   captureArea: {
-    height: 180,
+    height: 160,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
   },
-  captureButton: {
+  captureBtn: {
     width: 70,
     height: 70,
     borderRadius: 35,
     backgroundColor: "#FF9500",
-    //padding: 5,
-    marginTop: -65,
+    marginTop: -60,
     justifyContent: "center",
     alignItems: "center",
+    elevation: 5,
   },
-  captureButtonInner: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+  captureBtnInner: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: "#fff",
   },
+
+  // 드로워
   drawer: {
     position: "absolute",
     top: SCREEN_HEIGHT - DRAWER_PEEK_HEIGHT - PURCHASE_AREA_HEIGHT,
@@ -725,10 +440,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -10 },
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
     elevation: 15,
   },
   handleBar: {
@@ -737,430 +448,108 @@ const styles = StyleSheet.create({
     backgroundColor: "#ddd",
     borderRadius: 3,
     alignSelf: "center",
-    marginVertical: 12,
+    marginVertical: 10,
   },
-  drawerTitle: {
-    fontSize: 17,
-    fontWeight: "bold",
-    marginBottom: 15,
-    color: "#333",
-  },
-  drawerContent: {
-    flex: 1,
-    marginBottom: PURCHASE_AREA_HEIGHT,
-  },
-  resultItem: {
-    //backgroundColor: "#FFF",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
-    borderWidth: 1,
-    //borderColor: "#F0F0F0",
-  },
-  itemHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-    color: "#333",
-  },
-  headerProductName: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  closeIcon: {
-    fontSize: 18,
-    color: "#999",
-  },
-  itemBody: {
-    flexDirection: "row",
-    justifyContent: "flex-start",
-  },
-  productThumbnail: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 15,
-    borderColor: "#fb0404ff",
-  },
-  itemInfoContent: {
-    flex: 1,
-    gap: 2,
-    justifyContent: "center",
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#666",
-    flexWrap: "wrap",
-  },
-  itemFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    //marginTop: 10,
-  },
-  footerPrice: {
-    fontSize: 13,
-    fontWeight: "bold",
-    color: "#FF9500",
-  },
-  quantityControl: {
+  drawerHeader: { fontSize: 18, fontWeight: "bold", marginVertical: 10 },
+  cartItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#F8F8F8",
-    borderRadius: 25,
-    padding: 5,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#eee",
   },
-  qBtn: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#FF9500",
-    justifyContent: "center",
-    alignItems: "center",
+  itemImg: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    backgroundColor: "#f5f5f5",
   },
-  qBtnText: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  qText: {
-    marginHorizontal: 12,
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#333",
-  },
-  productThumbnail: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    backgroundColor: "#F5F5F5",
-    marginRight: 12,
-  },
-  resultItemInfo: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "#cf2d2dff",
-  },
-  resultItemTitle: {
-    fontSize: 10,
-    fontWeight: "600",
-    color: "#333",
-    marginBottom: 4,
-  },
-  resultItemPrice: {
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#FF9500",
-  },
-  quantityControlArea: {
-    alignItems: "flex-end",
-    marginLeft: 10,
-    backgroundColor: "#cf2d2dff",
-  },
-<<<<<<< HEAD
-=======
-
-  // 수량 조절 버튼 스타일
->>>>>>> dcdf68317ca2cd95c4240ca4482adf225225fc44
-  quantityControl: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#F8F8F8",
-    borderRadius: 20,
-    padding: 2,
-    marginBottom: 5,
-  },
-  qBtn: {
+  itemName: { fontSize: 15, fontWeight: "500" },
+  itemPrice: { color: "#FF9500", fontWeight: "bold" },
+  qtyControl: { flexDirection: "row", alignItems: "center" },
+  qtyBtn: {
     width: 28,
     height: 28,
+    backgroundColor: "#f0f0f0",
     borderRadius: 14,
-    backgroundColor: "#FFF",
     justifyContent: "center",
     alignItems: "center",
-    elevation: 1,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
   },
-  qBtnText: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  qText: {
-    paddingHorizontal: 10,
-    fontSize: 14,
-    fontWeight: "bold",
-    color: "#333",
-  },
-<<<<<<< HEAD
-  removeBtn: {
-    paddingVertical: 2,
-    paddingHorizontal: 8,
-=======
+  qtyText: { marginHorizontal: 10, fontWeight: "bold" },
 
-  // Bottom Drawer 스타일
-  drawerOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    zIndex: 10,
->>>>>>> dcdf68317ca2cd95c4240ca4482adf225225fc44
-  },
-  removeBtnText: {
-    fontSize: 12,
-    color: "#FF4D4D",
-    textDecorationLine: "underline",
-  },
-
-  purchaseArea: {
+  // 하단 결제바
+  purchaseBar: {
     position: "absolute",
     bottom: 0,
-    left: 0,
-    right: 0,
-<<<<<<< HEAD
+    width: "100%",
     height: PURCHASE_AREA_HEIGHT,
     backgroundColor: "#fff",
-    paddingHorizontal: 20,
-    paddingTop: 15,
-=======
-    bottom: 0,
-    height: DRAWER_HEIGHT,
-    backgroundColor: '#fff',
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 10,
-    zIndex: 20,
-  },
-  drawerHeader: {
-    height: DRAWER_PEEK_HEIGHT,
-    borderTopLeftRadius: 16,
-    borderTopRightRadius: 16,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  puller: {
-    width: 30,
-    height: 6,
-    backgroundColor: '#bbb',
-    borderRadius: 3,
-    position: 'absolute',
-    top: 8,
-  },
-  drawerHeaderText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  // drawerContent: {
-  //   flex: 1,
-  //   backgroundColor: '#fff',
-  // },
-  purchaseArea: {
-    position: 'absolute',  // 화면에 고정
-    bottom: 0,            // 최하단 배치
-    zIndex: 30,
-    alignItems: 'center',
-    height: 120,
-    width: '100%',
-    backgroundColor: '#fff',
-  },
-  purchaseButton: {
-    width: '85%',
-    height: height * 0.06,
-    backgroundColor: '#FF9500',
-    borderRadius: width * 0.5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  purchaseButtonText: {
-    fontSize: width * 0.045,
-    fontWeight: '600',
-    color: '#FFFFFF',
-  },
-  emptyCart: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  emptyCartText: {
-    fontSize: 18,
-    color: '#666',
-    fontWeight: '600',
-    marginTop: 20,
-    marginBottom: 8,
-  },
-  emptyCartSubText: {
-    fontSize: 14,
-    color: '#999',
-    textAlign: 'center',
-  },
-  productList: {
-    paddingHorizontal: 20,
-    paddingTop: 15,
-    paddingBottom: 20,
-  },
-  productItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 12,
-  },
-  productImage: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: 12,
-  },
-  noImage: {
-    backgroundColor: '#e0e0e0',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  productInfo: {
-    flex: 1,
-  },
-  productName: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#333',
-    marginBottom: 4,
-  },
-  productPrice: {
-    fontSize: 14,
-    color: '#666',
-  },
-  quantityControl: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  quantityButton: {
-    backgroundColor: '#ff9500',
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityText: {
-    fontSize: 15,
-    fontWeight: '600',
-    marginHorizontal: 12,
-    minWidth: 35,
-    textAlign: 'center',
-  },
-  removeButton: {
-    padding: 5,
-  },
-  footer: {
->>>>>>> dcdf68317ca2cd95c4240ca4482adf225225fc44
+    padding: 20,
     borderTopWidth: 1,
     borderTopColor: "#eee",
-    zIndex: 999,
   },
-  totalRow: {
+  totalInfo: {
     flexDirection: "row",
     justifyContent: "space-between",
     marginBottom: 15,
-    alignItems: "center",
   },
-  totalLabel: { fontSize: 14, color: "#888" },
-  totalAmount: { fontSize: 20, fontWeight: "bold", color: "#333" },
-  purchaseButton: {
+  totalLabel: { color: "#888", fontSize: 14 },
+  totalPriceText: { fontSize: 22, fontWeight: "bold" },
+  payBtn: {
     backgroundColor: "#FF9500",
     height: 55,
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
   },
-<<<<<<< HEAD
-  purchaseButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  payBtnText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
 
-  emptyCart: { alignItems: "center", marginTop: 40 },
-  emptyText: { color: "#bbb", fontSize: 15 },
-  emptySubText: { color: "#ddd", fontSize: 12, marginTop: 5 },
-
-=======
-  totalAmount: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#ff9500',
-  },
-  paymentButton: {
-    backgroundColor: '#ff9500',
-    paddingVertical: 16,
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  paymentButtonText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-  contentPlaceholder: {
-    padding: 16,
-    paddingBottom: 140,
-  },
-  placeholderText: {
-    fontSize: 16,
-    color: '#999',
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  // 모달 스타일
->>>>>>> dcdf68317ca2cd95c4240ca4482adf225225fc44
-  modalOverlay: {
+  // 모달
+  modalBg: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
   },
   modalContent: {
-    width: "85%",
+    width: "80%",
     backgroundColor: "#fff",
     borderRadius: 20,
-    padding: 25,
+    padding: 20,
     alignItems: "center",
   },
   modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 15 },
-  modalImage: {
-    width: "100%",
-    height: 200,
-    borderRadius: 10,
-    marginBottom: 15,
+  modalImg: { width: "100%", height: 150, marginBottom: 15 },
+  modalName: { fontSize: 16, marginBottom: 5 },
+  modalPrice: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#FF9500",
+    marginBottom: 20,
   },
-  modalName: { fontSize: 16, marginBottom: 20 },
   modalBtnRow: { flexDirection: "row", gap: 10 },
-  modalBtnCancel: {
+  modalCancel: {
     flex: 1,
-    padding: 15,
-    alignItems: "center",
-    backgroundColor: "#eee",
+    height: 50,
+    backgroundColor: "#f0f0f0",
     borderRadius: 10,
-  },
-  modalBtnOk: {
-    flex: 1,
-    padding: 15,
+    justifyContent: "center",
     alignItems: "center",
+  },
+  modalOk: {
+    flex: 1,
+    height: 50,
     backgroundColor: "#FF9500",
     borderRadius: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
+
   permissionButton: {
-    padding: 15,
+    padding: 10,
     backgroundColor: "#FF9500",
-    borderRadius: 10,
-    marginTop: 20,
+    borderRadius: 5,
+    marginTop: 10,
   },
+  emptyText: { textAlign: "center", color: "#ccc", marginTop: 40 },
 });
