@@ -251,7 +251,7 @@ const styles = StyleSheet.create({
   priceRow: { flexDirection: 'row', justifyContent: 'space-between' },
   totalLabel: { fontWeight: 'bold' },
   totalPrice: { fontWeight: 'bold', color: '#ff9500' },
-  bottomContainer: { backgroundColor: '#fff', padding: 20 },
+  bottomContainer: { backgroundColor: '#fff', padding: 20, zIndex: 10 },
   totalContainer: { flexDirection: 'row', justifyContent: 'space-between' },
   bottomTotalLabel: { fontWeight: '600' },
   bottomTotalPrice: { fontSize: 22, fontWeight: 'bold', color: '#ff9500' },
