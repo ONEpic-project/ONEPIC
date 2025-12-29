@@ -92,6 +92,58 @@ def delete_me(current_user: User = Depends(get_current_user), db: Session = Depe
     return {"message": "회원탈퇴 완료"}
 
 
+# 회원정보 수정 ================================================
+@router.patch("/me", tags=["Auth"])
+def update_me(
+    update_data: dict,
+    current_user: User = Depends(get_current_user), 
+    db: Session = Depends(get_db)
+):
+    """
+    현재 로그인한 사용자의 정보를 수정합니다.
+    Authorization 헤더에 Bearer 토큰이 필요합니다.
+    
+    수정 가능한 필드: username, phone, password
+    - password가 None이거나 빈 문자열이면 비밀번호는 변경되지 않습니다.
+    """
+    # username 업데이트
+    if "username" in update_data and update_data["username"]:
+        if not update_data["username"].strip():
+            raise HTTPException(status_code=400, detail="성명을 입력해주세요.")
+        current_user.username = update_data["username"]
+    
+    # phone 업데이트
+    if "phone" in update_data and update_data["phone"]:
+        phone = update_data["phone"]
+        if not phone.strip():
+            raise HTTPException(status_code=400, detail="연락처를 입력해주세요.")
+        if len(phone) != 11:
+            raise HTTPException(status_code=400, detail="연락처는 11자리로 입력해주세요.")
+        current_user.phone = phone
+    
+    # password 업데이트 (None이 아니고 빈 문자열이 아닐 때만)
+    if "password" in update_data and update_data["password"]:
+        password = update_data["password"]
+        if len(password) < 6:
+            raise HTTPException(status_code=400, detail="비밀번호는 6자 이상이어야 합니다.")
+        current_user.password = password
+    
+    db.commit()
+    db.refresh(current_user)
+    
+    return {
+        "message": "회원정보 수정 완료",
+        "user": {
+            "user_id": current_user.user_id,
+            "login_id": current_user.login_id,
+            "username": current_user.username,
+            "phone": current_user.phone
+        }
+    }
+    db.commit()
+    return {"message": "회원탈퇴 완료"}
+
+
 #  아이디 찾기 ================================================
 from app.schemas.user import FindIdRequest
 
