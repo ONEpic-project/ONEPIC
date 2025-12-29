@@ -1,49 +1,28 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.core.dependencies import get_current_user, get_db
-from app.schemas.cart import CartResponse
-from app.models.cart import Cart
+from app.schemas.cart import (
+    CartResponse,
+    AddCartItemRequest,
+    UpdateCartItemQuantityRequest,
+)
 from app.services.cart_service import (
     get_cart_by_user_id,
-    calculate_cart_total
+    calculate_cart_total,
+    add_cart_item,
+    update_cart_item_quantity,
+    delete_cart_item,
 )
 
 router = APIRouter(prefix="/cart", tags=["Cart"])
 
 
-@router.get("/{user_id}", response_model=CartResponse)
-def get_cart(user_id: int, db: Session = Depends(get_db)):
-    cart = db.query(Cart).filter(Cart.user_id == user_id).first()
-
-    if not cart:
-        return {
-            "cart_id": None,
-            "total_price": 0,
-            "items": []
-        }
-
-    total_price = calculate_cart_total(cart)
-
-    return {
-        "cart_id": cart.cart_id,
-        "total_price": total_price,
-        "items": [
-            {
-                "cart_item_id": item.cart_item_id,
-                "product_id": item.product.product_id,
-                "name": item.product.name,
-                "price": item.product.price,
-                "quantity": item.quantity,
-            }
-            for item in cart.items
-        ]
-    }
-
+# 내 장바구니 조회
 @router.get("/me", response_model=CartResponse)
 def get_my_cart(
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user),
+    current_user=Depends(get_current_user),
 ):
     cart = get_cart_by_user_id(db, current_user.user_id)
 
@@ -51,14 +30,12 @@ def get_my_cart(
         return {
             "cart_id": None,
             "total_price": 0,
-            "items": []
+            "items": [],
         }
-
-    total_price = calculate_cart_total(cart)
 
     return {
         "cart_id": cart.cart_id,
-        "total_price": total_price,
+        "total_price": calculate_cart_total(cart),
         "items": [
             {
                 "cart_item_id": item.cart_item_id,
@@ -68,5 +45,70 @@ def get_my_cart(
                 "quantity": item.quantity,
             }
             for item in cart.items
-        ]
+        ],
     }
+
+
+# 상품 추가
+@router.post("/items", status_code=status.HTTP_201_CREATED)
+def add_item_to_cart(
+    payload: AddCartItemRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    try:
+        add_cart_item(
+            db=db,
+            user_id=current_user.user_id,
+            product_id=payload.product_id,
+            quantity=payload.quantity,
+        )
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="상품을 장바구니에 추가할 수 없습니다.",
+        )
+
+    return {"message": "장바구니에 추가되었습니다."}
+
+
+# 장바구니 상품 수량 변경 (0이면 삭제)
+@router.patch("/items/{cart_item_id}")
+def update_quantity(
+    cart_item_id: int,
+    payload: UpdateCartItemQuantityRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    item = update_cart_item_quantity(
+        db=db,
+        cart_item_id=cart_item_id,
+        quantity=payload.quantity,
+    )
+
+    # quantity > 0인데 None이면 "해당 item 없음"
+    if item is None and payload.quantity > 0:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="장바구니 상품을 찾을 수 없습니다.",
+        )
+
+    return {"message": "수량 변경 완료"}
+
+
+# 장바구니 상품 삭제
+@router.delete("/items/{cart_item_id}")
+def remove_item(
+    cart_item_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    ok = delete_cart_item(db, cart_item_id)
+
+    if not ok:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="장바구니 상품을 찾을 수 없습니다.",
+        )
+
+    return {"message": "삭제 완료"}

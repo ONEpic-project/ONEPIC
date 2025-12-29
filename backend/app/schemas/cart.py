@@ -19,3 +19,10 @@ class CartResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+class AddCartItemRequest(BaseModel):
+    product_id: int
+    quantity: int = 1
+
+class UpdateCartItemQuantityRequest(BaseModel):
+    quantity: int
