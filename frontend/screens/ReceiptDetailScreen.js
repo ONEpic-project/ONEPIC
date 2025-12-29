@@ -14,10 +14,14 @@ const { width } = Dimensions.get('window');
 const ReceiptDetailScreen = ({ navigation }) => {
   return (
     <View style={styles.container}>
-      {/* 헤더 */}
+
+      {/* ⭐ 이 화면에서만 헤더를 아래로 내리기 위한 spacer */}
+      <View style={{ height: 13 }} />
+
+      {/* 헤더 (그대로 사용) */}
       <Header 
-          navigation={navigation}
-          title="전자영수증"
+        navigation={navigation}
+        title="전자영수증"
       />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
