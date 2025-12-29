@@ -4,6 +4,8 @@ from sqlalchemy.orm import Session
 from app.core.dependencies import get_db
 from app.models.receipt import Receipt
 from app.schemas.receipt import ReceiptCreate
+from app.schemas.receipt import ReceiptResponse
+from app.models.receipt_items import ReceiptItem
 
 router = APIRouter(
     prefix="/receipts",
