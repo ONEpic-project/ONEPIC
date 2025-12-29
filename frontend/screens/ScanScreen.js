@@ -389,15 +389,6 @@ export default function ScanScreen({ navigation }) {
           </View>
           <TouchableOpacity
             style={styles.payBtn}
-<<<<<<< Updated upstream
-            onPress={() =>
-              navigation.navigate("Payment", {
-                products: scannedProducts,
-                quantities: productQuantities,
-                totalPrice: calculateTotal(),
-              })
-            }
-=======
             onPress={async () => {
               if (scannedProducts.length === 0) {
                 Alert.alert('알림', '장바구니가 비어있습니다.');
@@ -436,7 +427,6 @@ export default function ScanScreen({ navigation }) {
                 Alert.alert('오류', '장바구니 저장에 실패했습니다.');
               }
             }}
->>>>>>> Stashed changes
           >
             <Text style={styles.payBtnText}>구매하기</Text>
           </TouchableOpacity>
