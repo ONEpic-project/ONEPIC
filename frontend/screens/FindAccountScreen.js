@@ -11,8 +11,10 @@ import {
   Dimensions,
 } from 'react-native';
 
+import * as Clipboard from 'expo-clipboard';
+import { API_BASE_URL } from '../config/api';
+
 const { width, height } = Dimensions.get('window');
-const API_BASE_URL = 'http://서버IP:8000'; // ✅ 실제 서버 주소로 수정
 
 const FindAccountScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState('id');
@@ -28,6 +30,7 @@ const FindAccountScreen = ({ navigation }) => {
   const [foundPassword, setFoundPassword] = useState('');
   const [pwMessage, setPwMessage] = useState('');
 
+
   // ================== 아이디 찾기 ==================
   const handleFindId = async () => {
     if (!idName.trim() || !idPhone.trim()) {
@@ -36,7 +39,7 @@ const FindAccountScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/find-id`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/find-id`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -67,7 +70,7 @@ const FindAccountScreen = ({ navigation }) => {
     }
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/find-password`, {
+      const response = await fetch(`${API_BASE_URL}/api/auth/find-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -91,6 +94,17 @@ const FindAccountScreen = ({ navigation }) => {
       Alert.alert('오류', '서버와 연결할 수 없습니다.');
     }
   };
+
+    // 클립보드에 비밀번호 복사
+    const copyPassword = async () => {
+      if (!foundPassword) return;
+
+      await Clipboard.setStringAsync(foundPassword);
+      Alert.alert(
+        '복사 완료',
+        '임시 비밀번호가 클립보드에 복사되었습니다.'
+      );
+    };
 
   const goToLogin = () => {
     navigation.navigate('Login');
@@ -127,6 +141,7 @@ const FindAccountScreen = ({ navigation }) => {
             </Text>
           </TouchableOpacity>
         </View>
+        
 
         {/* ================== 아이디 찾기 ================== */}
         {activeTab === 'id' ? (
@@ -181,10 +196,18 @@ const FindAccountScreen = ({ navigation }) => {
 
             {foundPassword && (
               <View style={styles.resultContainer}>
-                <Text style={styles.resultText}>
-                  임시 비밀번호 : {foundPassword}
-                </Text>
+                <TouchableOpacity onPress={copyPassword}>
+                  <Text style={styles.resultText}>
+                    임시 비밀번호 :{' '}
+                    <Text style={{ textDecorationLine: 'underline' }}>
+                      {foundPassword}
+                    </Text>
+                  </Text>
+                </TouchableOpacity>
+
                 <Text style={styles.noticeText}>
+                  터치하면 비밀번호가 복사됩니다.
+                  {'\n'}
                   로그인 후 반드시 비밀번호를 변경해주세요.
                 </Text>
               </View>
@@ -205,5 +228,111 @@ const FindAccountScreen = ({ navigation }) => {
     </ScrollView>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  content: {
+    paddingHorizontal: width * 0.1,
+    paddingTop: height * 0.08,
+    paddingBottom: height * 0.05,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    marginBottom: height * 0.06,
+    borderRadius: height * 0.03,
+    borderWidth: 2,
+    borderColor: '#FF9500',
+    overflow: 'hidden',
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: height * 0.015,
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  activeTab: {
+    backgroundColor: '#FF9500',
+  },
+  tabText: {
+    fontSize: width * 0.04,
+    fontWeight: '600',
+    color: '#FF9500',
+  },
+  activeTabText: {
+    color: '#FFFFFF',
+  },
+  formContainer: {
+    width: '100%',
+  },
+  input: {
+    width: '100%',
+    height: height * 0.06,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    fontSize: width * 0.04,
+    color: '#333',
+    marginBottom: height * 0.035,
+    paddingVertical: 10,
+  },
+  resultContainer: {
+    alignItems: 'center',
+    marginVertical: height * 0.05,
+    minHeight: height * 0.03,
+  },
+  resultText: {
+    fontSize: width * 0.045,
+    color: '#FF9500',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  noticeText: {
+    marginTop: 10,
+    fontSize: width * 0.035,
+    color: '#999',
+    textAlign: 'center',
+  },
+  buttonContainer: {
+    width: '100%',
+  },
+  searchButton: {
+    width: '100%',
+    height: height * 0.06,
+    backgroundColor: '#FF9500',
+    borderRadius: height * 0.03,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: height * 0.02,
+  },
+  searchButtonText: {
+    fontSize: width * 0.045,
+    fontWeight: '600',
+    color: '#FFFFFF',
+  },
+  loginButton: {
+    width: '100%',
+    height: height * 0.06,
+    backgroundColor: '#FFFFFF',
+    borderRadius: height * 0.03,
+    borderWidth: 2,
+    borderColor: '#FF9500',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loginButtonText: {
+    fontSize: width * 0.045,
+    fontWeight: '600',
+    color: '#FF9500',
+  },
+    noticeText: {
+    marginTop: 10,
+    fontSize: width * 0.035,
+    color: '#999',
+    textAlign: 'center',
+  }
+});
 
 export default FindAccountScreen;
