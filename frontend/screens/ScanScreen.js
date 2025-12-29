@@ -315,7 +315,9 @@ export default function ScanScreen({ navigation }) {
                 />
               )}
               <Text style={styles.modalName}>
-                {selectedProduct?.product_name}
+                {selectedProduct?.brand_name}{" "}
+                {selectedProduct?.product_name}{" "}
+                {selectedProduct?.size}
               </Text>
               <Text style={styles.modalPrice}>
                 {selectedProduct?.price?.toLocaleString()}원
@@ -403,6 +405,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 30,
     paddingHorizontal: 20,
     elevation: 15,
+    border: 1,
+    borderColor: "#eee",
   },
   handleBar: {
     width: 40,
@@ -416,28 +420,67 @@ const styles = StyleSheet.create({
   cartItem: {
     flexDirection: "row",
     alignItems: "center",
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
+    backgroundColor: "#fff",
+    padding: 15,
+    borderRadius: 15,
+    marginBottom: 12,
+    // 그림자 효과 (iOS)
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+    // 그림자 효과 (Android)
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: "#f0f0f0",
   },
   itemImg: {
     width: 50,
     height: 50,
     borderRadius: 10,
     backgroundColor: "#f5f5f5",
+    resizeMode: "contain",
   },
-  itemName: { fontSize: 15, fontWeight: "500" },
-  itemPrice: { color: "#FF9500", fontWeight: "bold" },
-  qtyControl: { flexDirection: "row", alignItems: "center" },
+  itemName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#333",
+    marginBottom: 4,
+  },
+  itemPrice: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#FF9500",
+  },
+  qtyControl: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
+    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
   qtyBtn: {
     width: 28,
     height: 28,
-    backgroundColor: "#f0f0f0",
     borderRadius: 14,
+    backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    // 버튼 입체감
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 1,
   },
-  qtyText: { marginHorizontal: 10, fontWeight: "bold" },
+  qtyText: { 
+    fontSize: 14,
+    fontWeight: "bold",
+    color: "#333",
+    marginHorizontal: 12,
+    minWidth: 15,
+    textAlign: "center", },
 
   // 하단 결제바
   purchaseBar: {
@@ -459,10 +502,11 @@ const styles = StyleSheet.create({
   totalPriceText: { fontSize: 22, fontWeight: "bold" },
   payBtn: {
     backgroundColor: "#FF9500",
-    height: 55,
+    height: 50,
     borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
+    marginBottom: 30,
   },
   payBtnText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
 
