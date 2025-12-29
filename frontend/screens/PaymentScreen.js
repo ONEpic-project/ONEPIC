@@ -48,9 +48,7 @@ export default function PaymentScreen({ route, navigation }) {
   );
 
   // 최종 화면에 표시할 가격 (계산된 값 우선 사용)
-  const totalPrice = calculatedTotalPrice > 0 ? calculatedTotalPrice : passedTotalPrice;
-
-
+  const totalPrice = calculatedTotalPrice;
 
   const totalQuantity = normalizedProducts.reduce(
     (sum, p) => sum + p.quantity,
