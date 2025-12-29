@@ -67,6 +67,8 @@ const styles = StyleSheet.create({
   backButtonText: {
     fontSize: width * 0.06,
     color: '#676767',
+    marginTop: height * 0.02,
+    marginLeft: -width * 0.03,
   },
   headerTitle: {
     fontSize: width * 0.05,
@@ -74,6 +76,7 @@ const styles = StyleSheet.create({
     color: '#000000',
     flex: 1,
     textAlign: 'center',
+    marginTop: height * 0.02,
   },
   headerSpacer: {
     width: width * 0.1,
