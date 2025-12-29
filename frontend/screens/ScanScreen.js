@@ -154,10 +154,16 @@ export default function ScanScreen({ navigation }) {
       });
 
       if (res.data?.result) {
-        setSelectedProduct(res.data.result);
-        setIsModalVisible(true);
+        const result = res.data.result;
+        // 정확도 0.8 미만이면 재촬영 안내
+        if (typeof result.confidence === "number" && result.confidence < 0.8) {
+          Alert.alert("알림", "상품을 인식할 수 없습니다.\n다시 스캔해주세요.");
+        } else {
+          setSelectedProduct(result);
+          setIsModalVisible(true);
+        }
       } else {
-        Alert.alert("알림", "상품을 인식할 수 없습니다.");
+        Alert.alert("알림", "상품을 인식할 수 없습니다.\n다시 스캔해주세요.");
       }
     } catch (e) {
       Alert.alert("오류", "서버와 통신하는 중 문제가 발생했습니다.");
