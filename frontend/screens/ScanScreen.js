@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { API_BASE_URL } from "../config/api";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Header from "./components/Header";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -36,7 +37,7 @@ export default function ScanScreen({ navigation }) {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const cameraRef = useRef(null);
 
-  // --- 드로워 애니메이션 및 제스처 로직 ---
+  // --- 드로워 애니메이션 및 제스처 로직 =============================================================
   const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
   const panResponder = useRef(
     PanResponder.create({
@@ -74,7 +75,52 @@ export default function ScanScreen({ navigation }) {
     })
   ).current;
 
-  // --- 장바구니 핵심 로직 ---
+  // --- 로컬 저장 함수 =============================================================
+  // 1. 페이지 진입 시 저장된 장바구니 불러오기
+  useEffect(() => {
+    const initData = async () => {
+      await loadProducts(); // 전체 상품 목록 로드
+      await loadCartFromStorage(); // 저장된 수량 로드
+    };
+    initData();
+  }, []);
+
+  // 2. 수량이 변경될 때마다 스토리지에 자동 저장
+  useEffect(() => {
+    if (Object.keys(productQuantities).length > 0) {
+      saveCartToStorage(productQuantities);
+    }
+  }, [productQuantities]);
+
+  const loadProducts = async () => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/api/products/`);
+      setProducts(response.data);
+    } catch (e) {
+      console.error("로드 실패", e);
+    }
+  };
+
+  const saveCartToStorage = async (data) => {
+    try {
+      await AsyncStorage.setItem("@cart_data", JSON.stringify(data));
+    } catch (e) {
+      console.error("저장 실패", e);
+    }
+  };
+
+  const loadCartFromStorage = async () => {
+    try {
+      const savedData = await AsyncStorage.getItem("@cart_data");
+      if (savedData !== null) {
+        setProductQuantities(JSON.parse(savedData));
+      }
+    } catch (e) {
+      console.error("불러오기 실패", e);
+    }
+  };
+
+  // --- 장바구니 핵심 로직 =============================================================
   const addToCart = (product) => {
     setScannedProducts((prev) => {
       const isExist = prev.find((p) => p.product_id === product.product_id);
@@ -132,7 +178,7 @@ export default function ScanScreen({ navigation }) {
     }, 0);
   };
 
-  // --- 촬영 및 서버 통신 ---
+  // --- 촬영 및 서버 통신 =============================================================
   const takePicture = async () => {
     if (!cameraRef.current) return;
     try {
@@ -173,6 +219,7 @@ export default function ScanScreen({ navigation }) {
     }
   };
 
+  // --- 권한 및 렌더링 =============================================================
   if (!permission)
     return (
       <View style={styles.center}>
@@ -192,6 +239,7 @@ export default function ScanScreen({ navigation }) {
       </View>
     );
 
+  // --- UI 시작 =============================================================
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <View style={styles.container}>
@@ -234,11 +282,13 @@ export default function ScanScreen({ navigation }) {
             ) : (
               scannedProducts.map((item) => (
                 <View key={item.product_id} style={styles.cartItem}>
-                  <Image
+                  {/* 수정 전 */}
+                  {/* <Image
                     source={{ uri: `${API_BASE_URL}${item.image_url}` }}
                     style={styles.itemImg}
-                  />
-                  <View style={{ flex: 1, marginLeft: 10 }}>
+                    resizeMode="cover"
+                  /> */}
+                  {/* <View style={{ flex: 1, marginLeft: 10 }}>
                     <Text style={styles.itemName} numberOfLines={1}>
                       {item.product_name}
                     </Text>
@@ -248,8 +298,8 @@ export default function ScanScreen({ navigation }) {
                       ).toLocaleString()}
                       원
                     </Text>
-                  </View>
-                  <View style={styles.qtyControl}>
+                  </View> */}
+                  {/* <View style={styles.qtyControl}>
                     <TouchableOpacity
                       onPress={() => decreaseQuantity(item.product_id)}
                       style={styles.qtyBtn}
@@ -267,10 +317,60 @@ export default function ScanScreen({ navigation }) {
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={() => removeProduct(item.product_id)}
-                      style={{ marginLeft: 10 }}
                     >
                       <Text style={{ color: "#ccc" }}>✕</Text>
                     </TouchableOpacity>
+                  </View> */}
+
+                  {/* 상단: 상품명 및 삭제 버튼 */}
+                  <View style={styles.itemHeader}>
+                    <Text style={styles.itemName}>{item.product_name}</Text>
+                    <TouchableOpacity
+                      onPress={() => removeProduct(item.product_id)}
+                    >
+                      <Text style={{ color: "#ccc" }}>✕</Text>
+                    </TouchableOpacity>
+                  </View>
+
+                  {/* 중간: 이미지 + 상품 정보 */}
+                  <View style={styles.itemBody}>
+                    <Image
+                      source={{ uri: `${API_BASE_URL}${item.image_url}` }}
+                      style={styles.itemImg}
+                      resizeMode="cover"
+                    />
+                    <View style={{ flex: 1, marginLeft: 10 }}>
+                      <Text style={styles.itemName} numberOfLines={1}>
+                        {item.product_name}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {/* 하단: 가격 + 수량 조절 버튼 */}
+                  <View style={styles.itemFooter}>
+                    <Text style={styles.itemPrice}>
+                      {(
+                        item.price * productQuantities[item.product_id]
+                      ).toLocaleString()}
+                      원
+                    </Text>
+                    <View style={styles.qtyControl}>
+                      <TouchableOpacity
+                        onPress={() => decreaseQuantity(item.product_id)}
+                        style={styles.qtyBtn}
+                      >
+                        <Text>-</Text>
+                      </TouchableOpacity>
+                      <Text style={styles.qtyText}>
+                        {productQuantities[item.product_id]}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => increaseQuantity(item.product_id)}
+                        style={styles.qtyBtn}
+                      >
+                        <Text>+</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 </View>
               ))
@@ -304,7 +404,6 @@ export default function ScanScreen({ navigation }) {
         <Modal visible={isModalVisible} transparent animationType="fade">
           <View style={styles.modalBg}>
             <View style={styles.modalContent}>
-              
               {selectedProduct?.image_url && (
                 <Image
                   source={{
@@ -315,8 +414,7 @@ export default function ScanScreen({ navigation }) {
                 />
               )}
               <Text style={styles.modalName}>
-                {selectedProduct?.brand_name}{" "}
-                {selectedProduct?.product_name}{" "}
+                {selectedProduct?.brand_name} {selectedProduct?.product_name}{" "}
                 {selectedProduct?.size}
               </Text>
               <Text style={styles.modalPrice}>
@@ -416,7 +514,11 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginVertical: 10,
   },
-  drawerHeader: { fontSize: 18, fontWeight: "bold", marginVertical: 10 },
+  drawerHeader: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginVertical: 10,
+  },
   cartItem: {
     flexDirection: "row",
     alignItems: "center",
@@ -434,11 +536,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#f0f0f0",
   },
+  itemHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 10,
+  },
   itemImg: {
     width: 50,
     height: 50,
     borderRadius: 10,
-    backgroundColor: "#f5f5f5",
+    //backgroundColor: "#f5f5f5",
     resizeMode: "contain",
   },
   itemName: {
@@ -447,10 +555,20 @@ const styles = StyleSheet.create({
     color: "#333",
     marginBottom: 4,
   },
+  itemBody: {
+    flexDirection: "row",
+    justifyContent: "flex-start",
+  },
   itemPrice: {
     fontSize: 15,
     fontWeight: "bold",
     color: "#FF9500",
+  },
+  itemFooter: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    //marginTop: 10,
   },
   qtyControl: {
     flexDirection: "row",
@@ -474,13 +592,14 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 1,
   },
-  qtyText: { 
+  qtyText: {
     fontSize: 14,
     fontWeight: "bold",
     color: "#333",
     marginHorizontal: 12,
     minWidth: 15,
-    textAlign: "center", },
+    textAlign: "center",
+  },
 
   // 하단 결제바
   purchaseBar: {
