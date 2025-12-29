@@ -134,13 +134,13 @@ export default function ScanScreen({ navigation }) {
     );
   };
 
-    // ✅ 합계 계산 함수
-    const calculateTotal = () => {
-      return scannedProducts.reduce((sum, product) => {
-        const qty = productQuantities[product.product_id] ?? 1;
-        return sum + product.price * qty;
-      }, 0);
-    };
+  // ✅ 합계 계산 함수
+  const calculateTotal = () => {
+    return scannedProducts.reduce((sum, product) => {
+      const qty = productQuantities[product.product_id] ?? 1;
+      return sum + product.price * qty;
+    }, 0);
+  };
 
 
   // 현재 수량 가져오기
@@ -278,27 +278,27 @@ export default function ScanScreen({ navigation }) {
           </View>
 
           {/* 헤더 위치 */}
-          <Header 
+          <Header
             navigation={navigation}
             title="스캔하기"
           />
         </View>
       </CameraView>
 
-    {/* 카메라 촬영 버튼 */}
-    <View style={styles.controls}>
-      <TouchableOpacity
-        style={[styles.captureButton, isLoading && styles.captureButtonDisabled]}
-        onPress={takePicture}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator size="large" color="#fff" />
-        ) : (
-          <View style={styles.captureButtonInner} />
-        )}
-      </TouchableOpacity>
-    </View>
+      {/* 카메라 촬영 버튼 */}
+      <View style={styles.controls}>
+        <TouchableOpacity
+          style={[styles.captureButton, isLoading && styles.captureButtonDisabled]}
+          onPress={takePicture}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#fff" />
+          ) : (
+            <View style={styles.captureButtonInner} />
+          )}
+        </TouchableOpacity>
+      </View>
 
       {/* 로딩 오버레이 */}
       {isLoading && (
@@ -320,12 +320,12 @@ export default function ScanScreen({ navigation }) {
         {/* Drawer Header (항상 보이는 부분) */}
         <View style={styles.drawerHeader} {...panResponder.panHandlers}>
           {/* Puller (드래그 핸들) */}
-          <View style={styles.puller}/>
+          <View style={styles.puller} />
         </View>
 
-          {/* 스크롤 컨텐츠 영역 */}
-          <ScrollView style={styles.drawerContent}>
-            <View style={styles.contentPlaceholder}>
+        {/* 스크롤 컨텐츠 영역 */}
+        <ScrollView style={styles.drawerContent}>
+          <View style={styles.contentPlaceholder}>
 
             {/* 상품 리스트 */}
             {scannedProducts.map((product, index) => {
@@ -389,12 +389,19 @@ export default function ScanScreen({ navigation }) {
         <Text style={{ fontSize: 18, fontWeight: '600', marginBottom: 10 }}>
           합계 {calculateTotal().toLocaleString()}원
         </Text>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.purchaseButton}
-          onPress={() => navigation.navigate('Cart')}
+          onPress={() =>
+            navigation.navigate('Payment', {
+              products: scannedProducts,
+              quantities: productQuantities,
+              totalPrice: calculateTotal(),
+            })
+          }
         >
           <Text style={styles.purchaseButtonText}>구매하기</Text>
         </TouchableOpacity>
+
       </View>
 
       {/* Drawer Overlay (열렸을 때 배경 어둡게) */}
@@ -406,7 +413,7 @@ export default function ScanScreen({ navigation }) {
         />
       )}
 
-        {/* 장바구니 추가 확인 모달 */}
+      {/* 장바구니 추가 확인 모달 */}
       <Modal
         animationType="fade"
         transparent={true}
@@ -625,7 +632,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#000',
   },
-  
+
   // 수량 조절 버튼 스타일
   quantityControl: {
     flexDirection: 'row',
@@ -697,7 +704,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     paddingHorizontal: 40,
   },
-  
+
   // Bottom Drawer 스타일
   drawerOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -750,7 +757,7 @@ const styles = StyleSheet.create({
   purchaseArea: {
     position: 'absolute',  // 화면에 고정
     bottom: 0,            // 최하단 배치
-    zIndex: 30, 
+    zIndex: 30,
     alignItems: 'center',
     height: 120,
     width: '100%',
