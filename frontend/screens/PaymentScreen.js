@@ -48,9 +48,7 @@ export default function PaymentScreen({ route, navigation }) {
   );
 
   // 최종 화면에 표시할 가격 (계산된 값 우선 사용)
-  const totalPrice = calculatedTotalPrice > 0 ? calculatedTotalPrice : passedTotalPrice;
-
-
+  const totalPrice = calculatedTotalPrice;
 
   const totalQuantity = normalizedProducts.reduce(
     (sum, p) => sum + p.quantity,
@@ -253,7 +251,7 @@ const styles = StyleSheet.create({
   priceRow: { flexDirection: 'row', justifyContent: 'space-between' },
   totalLabel: { fontWeight: 'bold' },
   totalPrice: { fontWeight: 'bold', color: '#ff9500' },
-  bottomContainer: { backgroundColor: '#fff', padding: 20 },
+  bottomContainer: { backgroundColor: '#fff', padding: 20, zIndex: 10 },
   totalContainer: { flexDirection: 'row', justifyContent: 'space-between' },
   bottomTotalLabel: { fontWeight: '600' },
   bottomTotalPrice: { fontSize: 22, fontWeight: 'bold', color: '#ff9500' },
