@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 
+
 class CartItemResponse(BaseModel):
     cart_item_id: int
     product_id: int
@@ -13,7 +14,7 @@ class CartItemResponse(BaseModel):
 
 
 class CartResponse(BaseModel):
-    cart_id: int
+    cart_id: int | None
     total_price: int
     items: List[CartItemResponse]
 
@@ -26,3 +27,10 @@ class AddCartItemRequest(BaseModel):
 
 class UpdateCartItemQuantityRequest(BaseModel):
     quantity: int
+
+class ScanCartItemRequest(BaseModel):
+    product_id: int
+    quantity: int
+
+class CreateCartFromScanRequest(BaseModel):
+    items: List[ScanCartItemRequest]

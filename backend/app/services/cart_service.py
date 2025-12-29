@@ -1,6 +1,7 @@
 from sqlalchemy.orm import Session
 from app.models.cart import Cart
 from app.models.cart_item import CartItem
+from app.models.product import Product
 
 
 # 장바구니 총액 계산
@@ -120,3 +121,43 @@ def delete_cart_item(
     db.delete(item)
     db.commit()
     return True
+
+# 스캔한 상품들로 장바구니 생성
+def create_cart_from_scan(
+    db: Session,
+    user_id: int,
+    items: list,
+) -> Cart:
+    # 기존 장바구니 있으면 삭제 (정책 선택)
+    existing = (
+        db.query(Cart)
+        .filter(Cart.user_id == user_id)
+        .first()
+    )
+    if existing:
+        db.delete(existing)
+        db.commit()
+
+    cart = Cart(user_id=user_id)
+    db.add(cart)
+    db.commit()
+    db.refresh(cart)
+
+    for item in items:
+        product = db.query(Product).filter(
+            Product.product_id == item.product_id
+        ).first()
+
+        if not product:
+            raise ValueError("존재하지 않는 상품입니다.")
+
+        cart_item = CartItem(
+            cart_id=cart.cart_id,
+            product_id=product.product_id,
+            quantity=item.quantity,
+        )
+        db.add(cart_item)
+
+    db.commit()
+    db.refresh(cart)
+    return cart
