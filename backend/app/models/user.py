@@ -2,6 +2,7 @@
 
 from sqlalchemy import Column, Integer, String, DateTime, func
 from app.database.database import Base
+from sqlalchemy.orm import relationship
 
 class User(Base):
     __tablename__ = "user"
@@ -15,4 +16,10 @@ class User(Base):
         DateTime,
         nullable=False,
         server_default=func.now()
+    )
+    cart = relationship(
+        "Cart",
+        back_populates="user",
+        uselist=False,
+        cascade="all, delete-orphan"
     )
