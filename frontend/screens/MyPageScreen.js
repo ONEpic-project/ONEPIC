@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
+  SafeAreaView,
   KeyboardAvoidingView,
   ScrollView,
-  TouchableWithoutFeedback,
   Keyboard,
   Platform,
   View,
@@ -21,7 +21,6 @@ import { fontSizes } from '../config/typography';
 const { height } = Dimensions.get('window');
 
 const MyPageScreen = ({ navigation }) => {
-  const scrollRef = useRef(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -41,19 +40,48 @@ const MyPageScreen = ({ navigation }) => {
     password: '*******',
   });
 
-  /* 키보드 감지 + 스크롤 리셋 */
-  useEffect(() => {
-    const show = Keyboard.addListener('keyboardDidShow', () =>
-      setIsKeyboardVisible(true)
+  const scrollRef = useRef(null);
+
+  const isAutoScrolling = useRef(false);
+
+  const inputRefs = {
+    name: useRef(null),
+    phone: useRef(null),
+    password: useRef(null),
+  };
+
+  const scrollToInput = (inputRef) => {
+    if (!inputRef.current || !scrollRef.current) return;
+
+    isAutoScrolling.current = true;
+
+    inputRef.current.measureLayout(
+      scrollRef.current,
+      (x, y, width, height) => {
+        const screenCenter = Dimensions.get('window').height / 2;
+
+        scrollRef.current.scrollTo({
+          y: Math.max(0, y - screenCenter * 0.6),
+          animated: true,
+        });
+
+        setTimeout(() => {
+          isAutoScrolling.current = false;
+        }, 300);
+      },
+      () => {}
     );
-    const hide = Keyboard.addListener('keyboardDidHide', () => {
-      setIsKeyboardVisible(false);
-      scrollRef.current?.scrollTo({ y: 0, animated: false });
+  };
+
+  useEffect(() => {
+  const timer = setTimeout(() => {
+    scrollRef.current?.scrollTo({
+      y: 0,
+      animated: false,
     });
-    return () => {
-      show.remove();
-      hide.remove();
-    };
+  }, 0);
+
+  return () => clearTimeout(timer);
   }, []);
 
   /* 사용자 정보 로드 */
@@ -94,7 +122,11 @@ const MyPageScreen = ({ navigation }) => {
     setName(origin.name);
     setPhone(origin.phone);
     setPassword(origin.password);
+
     setPasswordError('');
+    setInfoMessage('');          // 안내 문구 제거
+    setInfoMessageType('info');  // 타입 초기화 (안전)
+
     setIsEditing(false);
     Keyboard.dismiss();
   };
@@ -135,6 +167,7 @@ const MyPageScreen = ({ navigation }) => {
         phone,
         password: password !== '*******' ? password : null,
       }),
+
     });
 
     setOrigin({ name, phone, password: '*******' });
@@ -142,6 +175,8 @@ const MyPageScreen = ({ navigation }) => {
     setIsEditing(false);
     Keyboard.dismiss();
   };
+
+  
 
   const handleLogout = async () => {
     await AsyncStorage.multiRemove([
@@ -196,36 +231,45 @@ const MyPageScreen = ({ navigation }) => {
 
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}
+      >
+        <View style={{ marginTop: -20 }}>
+          <Header navigation={navigation} title="회원 정보" />
+        </View>
+        
         <ScrollView
           ref={scrollRef}
-          scrollEnabled={true}
-          contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingBottom: 40,
+          }}
         >
           <View style={styles.container}>
-            <Header navigation={navigation} title="회원 정보" />
 
             <View style={styles.form}>
               <Field label="성명">
                 <TextInput
+                  ref={inputRefs.name}
                   style={styles.input}
                   value={name}
                   editable={isEditing}
+                  onFocus={() => scrollToInput(inputRefs.name)}
                   onChangeText={setName}
                 />
               </Field>
 
               <Field label="연락처">
                 <TextInput
+                  ref={inputRefs.phone}
                   style={styles.input}
                    value={phone ?? ''}
                   editable={isEditing}
                   keyboardType="phone-pad"
+                  onFocus={() => scrollToInput(inputRefs.phone)}
                   onChangeText={(text) => {
                     setPhone(text.replace(/[^0-9]/g, ''));
                   }}
@@ -246,11 +290,15 @@ const MyPageScreen = ({ navigation }) => {
                 messageType={passwordError ? 'error' : infoMessageType}
               >
                 <TextInput
+                  ref={inputRefs.password}
                   style={styles.input}
                   value={password}
                   editable={isEditing}
                   secureTextEntry
-                  onFocus={handlePasswordFocus}
+                  onFocus={() => {
+                    handlePasswordFocus();
+                    scrollToInput(inputRefs.password);
+                  }}
                   onChangeText={setPassword}
                 />
               </Field>
@@ -278,12 +326,11 @@ const MyPageScreen = ({ navigation }) => {
               <TouchableOpacity onPress={handleWithdraw}>
                 <Text style={styles.withdraw}>회원 탈퇴</Text>
               </TouchableOpacity>
-
             </View>
           </View>
         </ScrollView>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -310,10 +357,10 @@ const Field = ({ label, children, message, messageType }) => (
 
 /* styles */
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { backgroundColor: '#fff' },
   scroll: { flexGrow: 1, paddingBottom: height * 0.18 },
 
-  form: { marginTop: 70, width: 296, alignSelf: 'center' },
+  form: { marginTop: 45, width: 296, alignSelf: 'center' },
   field: { marginBottom: 15 },
   label: { fontSize: fontSizes.md, color: '#848484', marginBottom: 5 },
   input: { fontSize: fontSizes.lg, color: '#4B4B4B' },
@@ -352,7 +399,7 @@ const styles = StyleSheet.create({
   color: '#FF3B30',
   lineHeight: 18,
   minHeight: 18,
-},
+  },
 
   messageSlot: {
     marginTop: 8,
