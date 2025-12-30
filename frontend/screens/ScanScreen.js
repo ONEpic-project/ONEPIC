@@ -225,6 +225,53 @@ export default function ScanScreen({ navigation }) {
     });
   };
 
+  const handlePurchase = async () => {
+    if (scannedProducts.length === 0) {
+      Alert.alert("알림", "장바구니가 비어있습니다.");
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+      if (!token) {
+        Alert.alert("오류", "로그인이 필요합니다.");
+        return;
+      }
+
+      // 서버로 현재 장바구니 상태 동기화
+      const itemsToSync = scannedProducts.map(p => ({
+        product_id: p.product_id,
+        quantity: productQuantities[p.product_id] || 1
+      }));
+
+      await axios.post(
+        `${API_BASE_URL}/api/cart/scan/sync`,
+        { items: itemsToSync },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      // 결제 화면으로 이동
+      const paymentProducts = scannedProducts.map(p => ({
+        product_id: p.product_id,
+        product_name: p.product_name,
+        brand_name: p.brand_name || '',
+        price: p.price,
+        size: p.size || '',
+        quantity: productQuantities[p.product_id] || 1,
+        image_url: p.image_url
+      }));
+
+      navigation.navigate("Payment", {
+        products: paymentProducts,
+        quantities: productQuantities
+      });
+
+    } catch (e) {
+      console.error("Purchase Sync Error:", e);
+      Alert.alert("오류", "장바구니 동기화에 실패했습니다.");
+    }
+  };
+
   const calculateTotal = () => {
     return scannedProducts.reduce((sum, product) => {
       const qty = productQuantities[product.product_id] || 0;
@@ -253,18 +300,25 @@ export default function ScanScreen({ navigation }) {
         timeout: 25000,
       });
 
+      console.log('Scan Result:', res.data); // [LOG] 스캔 결과 로그 복구
+
       if (res.data?.result) {
         const result = res.data.result;
+        console.log('Detected Product:', result); // [LOG] 인식된 상품 정보
+
         if (typeof result.confidence === "number" && result.confidence < 0.8) {
+          console.log('Low Confidence:', result.confidence); // [LOG] 정확도 낮음
           Alert.alert("알림", "상품을 인식할 수 없습니다.\n다시 스캔해주세요.");
         } else {
           setSelectedProduct(result);
           setIsModalVisible(true);
         }
       } else {
+        console.log('No Result Data'); // [LOG] 결과 데이터 없음
         Alert.alert("알림", "상품을 인식할 수 없습니다.\n다시 스캔해주세요.");
       }
     } catch (e) {
+      console.error('Scan Error:', e); // [LOG] 스캔 에러
       Alert.alert("오류", "서버와 통신하는 중 문제가 발생했습니다.");
     } finally {
       setIsLoading(false);
@@ -420,7 +474,7 @@ export default function ScanScreen({ navigation }) {
               {calculateTotal().toLocaleString()}원
             </Text>
           </View>
-          <TouchableOpacity style={styles.payBtn}>
+          <TouchableOpacity style={styles.payBtn} onPress={handlePurchase}>
             <Text style={styles.payBtnText}>구매하기</Text>
           </TouchableOpacity>
         </View>

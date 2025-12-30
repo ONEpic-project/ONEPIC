@@ -113,7 +113,7 @@ const FindAccountScreen = ({ navigation }) => {
 
   return (
     <>
-    <Header navigation={navigation} title="회원가입" />
+    <Header navigation={navigation} title="아이디/비밀번호 찾기" />
     
     <ScrollView style={styles.container}>
       <View style={styles.content}>

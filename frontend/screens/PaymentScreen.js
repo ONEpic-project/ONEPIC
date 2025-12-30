@@ -87,6 +87,13 @@ export default function PaymentScreen({ route, navigation }) {
                 { headers: { Authorization: `Bearer ${token}` } }
               );
 
+              // [ADD] 최종 결제 시 장바구니 비활성화 (status -> False)
+              await axios.post(
+                `${API_BASE_URL}/api/cart/checkout`,
+                {},
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+
               Alert.alert('결제 완료', '결제가 완료되었습니다.', [
                 {
                   text: '확인',

@@ -15,6 +15,7 @@ from app.services.cart_service import (
     update_cart_item_quantity,
     delete_cart_item,
     create_cart_from_scan,
+    deactivate_cart_for_user,
 )
 
 router = APIRouter(prefix="/cart", tags=["Cart"])
@@ -123,13 +124,45 @@ def remove_item(
 
 
 
-# 장바구니 미리보기 (DB 저장 없음, 인증 불필요)
 @router.post("/preview")
 def preview_cart(
     payload: CreateCartFromScanRequest,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     try:
-        return create_cart_from_scan(db, payload.items)
+        return create_cart_from_scan(db, current_user.user_id, payload.items)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.post("/scan/sync")
+def sync_scanned_cart(
+    payload: CreateCartFromScanRequest,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    스캔 화면에서 '구매하기' 버튼 클릭 시 호출.
+    로컬에 저장된 장바구니 항목들을 DB에 덮어씁니다 (기존 Active Cart 교체).
+    """
+    create_cart_from_scan(db, current_user.user_id, payload.items)
+    return {"message": "장바구니가 동기화되었습니다."}
+
+
+@router.post("/checkout")
+def checkout_cart(
+    db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
+):
+    """
+    최종 결제 완료 시 호출.
+    현재 Active 상태인 Cart를 status=False로 변경합니다.
+    """
+    cart = deactivate_cart_for_user(db, current_user.user_id)
+    if not cart:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="진행 중인 장바구니가 없습니다.",
+        )
+    return {"message": "장바구니가 비활성화되었습니다."}
