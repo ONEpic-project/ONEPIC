@@ -28,6 +28,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # 나머지 소스 복사
 COPY . .
 
+# 환경 변수 설정 (모델 소스 체크 비활성화)
+ENV DISABLE_MODEL_SOURCE_CHECK=True
+
 
 # FastAPI 포트
 EXPOSE 8000
@@ -35,4 +38,5 @@ EXPOSE 8000
 
 # 서버 실행
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers","1"]
+
 
