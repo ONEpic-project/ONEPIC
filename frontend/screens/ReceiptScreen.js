@@ -184,15 +184,9 @@ const styles = StyleSheet.create({
 
   /* 이 화면 전용 제목 */
   customTitle: {
-<<<<<<< HEAD
-    marginTop: -50,        // ↑↓ 위치 조절
-    marginLeft: 140,       // ←→ 위치 조절
-    fontSize: 24,
-=======
     marginTop: -48,        // ↑↓ 위치 조절
     marginLeft: 150,       // ←→ 위치 조절
     fontSize: fontSizes.lg,
->>>>>>> feat/global-typography
     fontWeight: '600',
     color: '#000000',
   },
@@ -206,20 +200,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   date: {
-<<<<<<< HEAD
-    fontSize: 18,
-=======
     fontSize: fontSizes.md,
->>>>>>> feat/global-typography
     fontWeight: '600',
     color: '#2C2C2C',
   },
   amount: {
-<<<<<<< HEAD
-    fontSize: 18,
-=======
     fontSize: fontSizes.sm,
->>>>>>> feat/global-typography
     color: '#666666',
     marginTop: 4,
   },
@@ -235,11 +221,7 @@ const styles = StyleSheet.create({
   viewButtonText: {
     color: '#666666',
     fontWeight: '600',
-<<<<<<< HEAD
-    fontSize: 18,
-=======
     fontSize: fontSizes.sm,
->>>>>>> feat/global-typography
   },
 
   divider: {
@@ -262,11 +244,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   dropdownText: {
-<<<<<<< HEAD
-    fontSize: 15,
-=======
     fontSize: fontSizes.sm,
->>>>>>> feat/global-typography
     color: '#333333',
   },
   dropdownMenu: {
