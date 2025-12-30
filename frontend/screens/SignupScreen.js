@@ -84,7 +84,7 @@ const SignupScreen = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <View style={styles.container} edges={['top', 'left', 'right']}>
       {/* 헤더영역 */}
           <Header 
             navigation={navigation}
@@ -158,7 +158,7 @@ const SignupScreen = ({ navigation }) => {
           
         </ScrollView>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
