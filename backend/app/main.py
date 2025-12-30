@@ -1,7 +1,19 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 # from app.database.database import engine, Base
-from app.routers import products, ai, auth, health, cart, receipt, kakao_auth
+from app.routers import products, ai, auth, health, cart, receipt, kakao_auth, google_auth
+
+# ...
+
+# 라우터 등록
+app.include_router(health.router)
+app.include_router(ai.router, prefix="/api/ai")     # 필수로 존재해야 함
+app.include_router(products.router, prefix="/api/products")
+app.include_router(auth.router, prefix="/api")
+app.include_router(cart.router, prefix="/api")
+app.include_router(receipt.router, prefix="/api")
+app.include_router(kakao_auth.router, prefix="/api")
+app.include_router(google_auth.router, prefix="/api")
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
