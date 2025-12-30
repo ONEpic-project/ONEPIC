@@ -25,7 +25,7 @@ const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 /* ================= [ADD] L자 스캔 프레임 조절 ================= */
 const GUIDE_WIDTH_RATIO = 0.8;   // 프레임 가로 비율
 const GUIDE_HEIGHT_RATIO = 0.95;  // 프레임 세로 비율
-const GUIDE_OFFSET_Y = 90;       // 위(+)/아래(-) 이동
+const GUIDE_OFFSET_Y = 115;       // 위(+)/아래(-) 이동
 const GUIDE_BORDER = 4;           // L자 두께
 const GUIDE_LENGTH = 28;          // L자 길이
 /* ============================================================ */
