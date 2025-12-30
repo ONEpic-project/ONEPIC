@@ -10,6 +10,10 @@ IMAGE_NAME="onepic-backend"
 CONTAINER_NAME="onepic_backend"
 PORT="8000:8000"
 
+# 🔒 메모리 제한 (2GB 서버 기준 안전값)
+MEMORY_LIMIT="1500m"
+MEMORY_SWAP="2g"
+
 echo "[1] Stop & remove existing container (if exists)"
 docker stop $CONTAINER_NAME 2>/dev/null || true
 docker rm $CONTAINER_NAME 2>/dev/null || true
@@ -17,10 +21,12 @@ docker rm $CONTAINER_NAME 2>/dev/null || true
 echo "[2] Build image (USE CACHE)"
 docker build -t $IMAGE_NAME .
 
-echo "[3] Run container"
+echo "[3] Run container with memory limit"
 docker run -d \
   --name $CONTAINER_NAME \
   -p $PORT \
+  --memory=$MEMORY_LIMIT \
+  --memory-swap=$MEMORY_SWAP \
   --restart unless-stopped \
   $IMAGE_NAME
 
