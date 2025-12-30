@@ -330,30 +330,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
   },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: width * 0.05,
-    paddingVertical: height * 0.02,
-    borderBottomWidth: 1,
-    borderBottomColor: '#F0F0F0',
-  },
-  backButton: {
-    width: width * 0.1,
-    height: width * 0.1,
-    justifyContent: 'center',
-    alignItems: 'flex-start',
-  },
-  backButtonText: {
-    fontSize: width * 0.06,
-    color: '#333',
-  },
-  headerTitle: {
-    fontSize: width * 0.045,
-    fontWeight: '600',
-    color: '#333',
-  },
   deleteAllButton: {
     paddingVertical: height * 0.01,
     paddingHorizontal: width * 0.02,
