@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Modal, ActivityIndicator, Alert, Image, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Modal, ActivityIndicator, Alert, Image, Dimensions, SafeAreaView, Platform, StatusBar } from 'react-native';
 import { WebView } from 'react-native-webview';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -100,7 +100,7 @@ const KakaoLogin = ({ navigation }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)} // Android Back button
       >
-        <SafeAreaView style={{ flex: 1 }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtn}>
                     <Text style={{ fontSize: 16 }}>닫기</Text>
@@ -134,7 +134,7 @@ const KakaoLogin = ({ navigation }) => {
 };
 
 // Need SafeAreaView for Modal content
-import { SafeAreaView } from 'react-native-safe-area-context';
+// SafeAreaView imported from react-native above
 
 const styles = StyleSheet.create({
   kakaoButton: {
