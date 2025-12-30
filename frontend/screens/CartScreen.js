@@ -290,7 +290,7 @@ const CartScreen = ({ navigation }) => {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+    <View style={styles.container} edges={['top', 'left', 'right']}>
       <Header
         navigation={navigation}
         title="장바구니"
@@ -321,7 +321,7 @@ const CartScreen = ({ navigation }) => {
           contentContainerStyle={styles.listContent}
         />
       )}
-    </SafeAreaView>
+    </View>
   );
 };
 
