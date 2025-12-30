@@ -13,6 +13,7 @@ import {
 
 import * as Clipboard from 'expo-clipboard';
 import { API_BASE_URL } from '../config/api';
+import Header from './components/Header';
 
 const { width, height } = Dimensions.get('window');
 
@@ -113,9 +114,12 @@ const FindAccountScreen = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
+        {/* 헤더영역 */}
+          <Header navigation={navigation} title="회원가입" />
 
         {/* 탭 */}
         <View style={styles.tabContainer}>
+          
           <TouchableOpacity
             style={[styles.tab, activeTab === 'id' && styles.activeTab]}
             onPress={() => {
