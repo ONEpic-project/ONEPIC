@@ -4,9 +4,9 @@
   "settings": {
     "width": 2000,
     "height": 2000,
-    "scrollTop": -223.3099,
-    "scrollLeft": -722.2725,
-    "zoomLevel": 0.88,
+    "scrollTop": -481.5533,
+    "scrollLeft": -800,
+    "zoomLevel": 0.73,
     "show": 431,
     "database": 4,
     "databaseName": "",
@@ -684,7 +684,7 @@
         "comment": "해시 비밀번호",
         "dataType": "VARCHAR(255)",
         "default": "",
-        "options": 8,
+        "options": 0,
         "ui": {
           "keys": 0,
           "widthName": 60,
@@ -693,7 +693,7 @@
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1765435362573,
+          "updateAt": 1767084568611,
           "createAt": 1765435270498
         }
       },

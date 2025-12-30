@@ -28,12 +28,12 @@ const ReceiptScreen = ({ navigation }) => {
   // 화면 포커스 될 때마다 리스트 갱신
   React.useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
-      fetchReceipts();
+      fetchReceipts(PERIOD_MAP[period]);
     });
     return unsubscribe;
   }, [navigation]);
 
-  const fetchReceipts = async () => {
+  const fetchReceipts = async (monthsAgo = null) => {
     try {
       setLoading(true);
       const token = await AsyncStorage.getItem('access_token');
@@ -43,7 +43,35 @@ const ReceiptScreen = ({ navigation }) => {
       const response = await axios.get(`${API_BASE_URL}/api/receipts/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setReceipts(response.data);
+
+      const allReceipts = response.data || [];
+
+      // monthsAgo가 null이면 전체, 숫자(0,1,2...)이면 해당 월만 필터
+      if (monthsAgo === null || typeof monthsAgo !== 'number') {
+        setReceipts(allReceipts);
+      } else {
+        // 대상 월의 시작/종료 UTC 범위를 계산
+        const now = new Date();
+        let targetMonth = now.getMonth() - monthsAgo; // 0-11
+        let targetYear = now.getFullYear();
+        while (targetMonth < 0) {
+          targetMonth += 12;
+          targetYear -= 1;
+        }
+
+        const start = Date.UTC(targetYear, targetMonth, 1, 0, 0, 0);
+        const endMonth = targetMonth + 1;
+        const endYear = targetYear + (endMonth > 11 ? 1 : 0);
+        const end = Date.UTC(endYear, endMonth % 12, 1, 0, 0, 0);
+
+        const filtered = allReceipts.filter((item) => {
+          if (!item.created_at) return false;
+          const created = new Date(item.created_at).getTime();
+          return created >= start && created < end;
+        });
+
+        setReceipts(filtered);
+      }
     } catch (error) {
       console.error('영수증 목록 조회 실패:', error);
     } finally {
@@ -52,6 +80,11 @@ const ReceiptScreen = ({ navigation }) => {
   };
 
   const PERIOD_OPTIONS = ['이번 달', '1개월 전', '2개월 전'];
+  const PERIOD_MAP = {
+    '이번 달': 0,
+    '1개월 전': 1,
+    '2개월 전': 2,
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return '-';
@@ -102,6 +135,8 @@ const ReceiptScreen = ({ navigation }) => {
                     onPress={() => {
                       setPeriod(option);
                       setDropdownOpen(false);
+                      // 선택 즉시 해당 월로 필터
+                      fetchReceipts(PERIOD_MAP[option]);
                     }}
                   >
                     <Text style={styles.dropdownItemText}>{option}</Text>
