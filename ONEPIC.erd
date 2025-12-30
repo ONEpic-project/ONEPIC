@@ -4,9 +4,9 @@
   "settings": {
     "width": 2000,
     "height": 2000,
-    "scrollTop": -624.6922,
-    "scrollLeft": -158.3955,
-    "zoomLevel": 0.49,
+    "scrollTop": -223.3099,
+    "scrollLeft": -722.2725,
+    "zoomLevel": 0.88,
     "show": 431,
     "database": 4,
     "databaseName": "",
@@ -72,6 +72,7 @@
         "columnIds": [
           "8-_cYorR65M0EXXQOc45Q",
           "NmHAUuQCyRlQ4RS0k2mam",
+          "Yf4tWEcUdYC4BC4jWTxCt",
           "5XNdY4OXdGSZJBBHQl1aW",
           "huyrZYDuQKonegyc66-7Y"
         ],
@@ -79,6 +80,7 @@
           "8-_cYorR65M0EXXQOc45Q",
           "NmHAUuQCyRlQ4RS0k2mam",
           "xg7lXV1NMVHQgl29wbnsb",
+          "Yf4tWEcUdYC4BC4jWTxCt",
           "5XNdY4OXdGSZJBBHQl1aW",
           "huyrZYDuQKonegyc66-7Y"
         ],
@@ -91,7 +93,7 @@
           "color": ""
         },
         "meta": {
-          "updateAt": 1766991043751,
+          "updateAt": 1767059784376,
           "createAt": 1765428084684
         }
       },
@@ -1974,6 +1976,26 @@
           "updateAt": 1766990842998,
           "createAt": 1766990827931
         }
+      },
+      "Yf4tWEcUdYC4BC4jWTxCt": {
+        "id": "Yf4tWEcUdYC4BC4jWTxCt",
+        "tableId": "hXfxymp20yBbuFAXkFl9_",
+        "name": "status",
+        "comment": "'ACTIVE / CHECKED_OUT / ABANDONED'",
+        "dataType": "VARCHAR(20)",
+        "default": "ACTIVE",
+        "options": 0,
+        "ui": {
+          "keys": 0,
+          "widthName": 60,
+          "widthComment": 220,
+          "widthDataType": 75,
+          "widthDefault": 60
+        },
+        "meta": {
+          "updateAt": 1767059922158,
+          "createAt": 1767059782260
+        }
       }
     },
     "relationshipEntities": {
@@ -2136,8 +2158,8 @@
           "columnIds": [
             "NmHAUuQCyRlQ4RS0k2mam"
           ],
-          "x": 1535.1785,
-          "y": 321.26570000000004,
+          "x": 1703.1785,
+          "y": 333.26570000000004,
           "direction": 2
         },
         "meta": {
@@ -2156,7 +2178,7 @@
             "8-_cYorR65M0EXXQOc45Q"
           ],
           "x": 1099.1785,
-          "y": 321.26570000000004,
+          "y": 333.26570000000004,
           "direction": 1
         },
         "end": {

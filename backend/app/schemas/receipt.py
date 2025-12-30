@@ -5,17 +5,9 @@ from datetime import datetime
 
 # ===== Request =====
 
-class ReceiptItemCreate(BaseModel):
-    product_id: int
-    product_name: str
-    price: int
-    quantity: int
-
-
 class ReceiptCreate(BaseModel):
-    user_id: int
-    payment_method: str
-    items: List[ReceiptItemCreate] = Field(..., min_items=1)
+    payment_method: str = Field(..., max_length=30)
+
 
 
 # ===== Response =====
@@ -32,8 +24,8 @@ class ReceiptItemResponse(BaseModel):
 
 class ReceiptResponse(BaseModel):
     receipt_id: int
-    payment_method: str
     total_amount: int
+    payment_method: str
     created_at: datetime
     items: List[ReceiptItemResponse]
 
