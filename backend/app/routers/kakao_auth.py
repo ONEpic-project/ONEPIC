@@ -61,13 +61,29 @@ def kakao_login(payload: KakaoLoginRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail=f"카카오 사용자 정보 조회 실패: {user_json}")
         
     kakao_id = str(user_json["id"])
+    kakao_id = str(user_json["id"])
+    
+    # 닉네임 우선순위: properties > kakao_account > Default
+    properties = user_json.get("properties", {})
     kakao_account = user_json.get("kakao_account", {})
     profile = kakao_account.get("profile", {})
-    nickname = profile.get("nickname", f"User_{kakao_id}")
+    
+    nickname = properties.get("nickname")
+    if not nickname:
+        nickname = profile.get("nickname")
+    if not nickname:
+        nickname = f"User_{kakao_id}"
     
     # 3. DB에서 유저 찾기 (sns_id로 검색)
     user = db.query(User).filter(User.sns_id == kakao_id, User.sns_type == "kakao").first()
     
+    if user:
+        # 이미 존재하는 유저라면, 카카오 닉네임 변경 시 최신화 (선택사항 - 사용자가 원함)
+        if nickname and nickname != f"User_{kakao_id}" and user.username != nickname:
+            user.username = nickname
+            db.commit()
+            db.refresh(user)
+
     if not user:
         # 3-1. 없으면 회원가입 (자동)
         # login_id는 kakao_{id} 형태로 생성
