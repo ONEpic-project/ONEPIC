@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -9,6 +8,7 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
+import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -116,11 +116,11 @@ export default function PaymentScreen({ route, navigation }) {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>주문 상품</Text>
+          <AppText style={styles.sectionTitle}>주문 상품</AppText>
           <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>총 상품 개수</Text>
-              <Text style={styles.summaryValue}>{totalQuantity}개</Text>
+              <AppText style={styles.summaryLabel}>총 상품 개수</AppText>
+              <AppText style={styles.summaryValue}>{totalQuantity}개</AppText>
             </View>
             <View style={styles.divider} />
 
@@ -132,16 +132,16 @@ export default function PaymentScreen({ route, navigation }) {
                     style={styles.productImage}
                   />
                   <View style={styles.productDetails}>
-                    <Text style={styles.productName} numberOfLines={2}>
+                    <AppText style={styles.productName} numberOfLines={2}>
                       {product.name}
-                    </Text>
-                    <Text style={styles.productQuantity}>
+                    </AppText>
+                    <AppText style={styles.productQuantity}>
                       수량: {product.quantity}개
-                    </Text>
+                    </AppText>
                   </View>
-                  <Text style={styles.productTotal}>
+                  <AppText style={styles.productTotal}>
                     {(product.price * product.quantity).toLocaleString()}원
-                  </Text>
+                  </AppText>
                 </View>
                 {index < normalizedProducts.length - 1 && (
                   <View style={styles.productDivider} />
@@ -152,7 +152,7 @@ export default function PaymentScreen({ route, navigation }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>결제 방법</Text>
+          <AppText style={styles.sectionTitle}>결제 방법</AppText>
           <View style={styles.paymentMethods}>
             {paymentMethods.map(method => (
               <TouchableOpacity
@@ -169,7 +169,7 @@ export default function PaymentScreen({ route, navigation }) {
                   size={24}
                   color={selectedPayment === method.id ? '#ff9500' : '#666'}
                 />
-                <Text
+                <AppText
                   style={[
                     styles.paymentMethodText,
                     selectedPayment === method.id &&
@@ -177,7 +177,7 @@ export default function PaymentScreen({ route, navigation }) {
                   ]}
                 >
                   {method.name}
-                </Text>
+                </AppText>
                 {selectedPayment === method.id && (
                   <Ionicons
                     name="checkmark-circle"
@@ -192,22 +192,22 @@ export default function PaymentScreen({ route, navigation }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>할인 금액</Text>
+          <AppText style={styles.sectionTitle}>할인 금액</AppText>
           <View style={styles.priceCard}>
             <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>쿠폰 사용</Text>
-              <Text style={styles.priceValue}>
+              <AppText style={styles.priceLabel}>쿠폰 사용</AppText>
+              <AppText style={styles.priceValue}>
                 미사용
-              </Text>
+              </AppText>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.priceRow}>
-              <Text style={styles.totalLabel}>총 할인 금액</Text>
-              <Text style={styles.totalPrice}>
+              <AppText style={styles.totalLabel}>총 할인 금액</AppText>
+              <AppText style={styles.totalPrice}>
                 0원
-              </Text>
+              </AppText>
             </View>
           </View>
         </View>
@@ -215,18 +215,18 @@ export default function PaymentScreen({ route, navigation }) {
 
       <View style={styles.bottomContainer}>
         <View style={styles.totalContainer}>
-          <Text style={styles.bottomTotalLabel}>총 결제 금액</Text>
-          <Text style={styles.bottomTotalPrice}>
+          <AppText style={styles.bottomTotalLabel}>총 결제 금액</AppText>
+          <AppText style={styles.bottomTotalPrice}>
             {totalPrice.toLocaleString()}원
-          </Text>
+          </AppText>
         </View>
         <TouchableOpacity
           style={styles.paymentButton}
           onPress={submitPayment}
         >
-          <Text style={styles.paymentButtonText}>
+          <AppText style={styles.paymentButtonText}>
             결제하기
-          </Text>
+          </AppText>
         </TouchableOpacity>
       </View>
     </View>

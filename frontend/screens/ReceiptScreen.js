@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import AppText from '../components/AppText';
 
 import Header from './components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -62,17 +62,17 @@ const ReceiptScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <View>
-        <Text style={styles.date}>{formatDate(item.created_at)}</Text>
-        <Text style={styles.amount}>
+        <AppText style={styles.date}>{formatDate(item.created_at)}</AppText>
+        <AppText style={styles.amount}>
           {item.total_amount?.toLocaleString()}원 구매
-        </Text>
+        </AppText>
       </View>
 
       <TouchableOpacity 
         style={styles.viewButton} 
         onPress={() => navigation.navigate('ReceiptDetail', { receiptId: item.receipt_id })}
       >
-        <Text style={styles.viewButtonText}>영수증 보기</Text>
+        <AppText style={styles.viewButtonText}>영수증 보기</AppText>
       </TouchableOpacity>
     </View>
   );
@@ -90,12 +90,7 @@ const ReceiptScreen = ({ navigation }) => {
               onPress={() => setDropdownOpen(!dropdownOpen)}
               activeOpacity={0.8}
             >
-              <Text style={styles.dropdownText}>{period}</Text>
-            </TouchableOpacity>
-
-            {dropdownOpen && (
-              <View style={styles.dropdownMenu}>
-                {PERIOD_OPTIONS.map((option) => (
+                <AppText style={styles.dropdownText}>{period}</AppText>
                   <TouchableOpacity
                     key={option}
                     style={styles.dropdownItem}
@@ -104,7 +99,7 @@ const ReceiptScreen = ({ navigation }) => {
                       setDropdownOpen(false);
                     }}
                   >
-                    <Text style={styles.dropdownItemText}>{option}</Text>
+                    <AppText style={styles.dropdownItemText}>{option}</AppText>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -114,9 +109,9 @@ const ReceiptScreen = ({ navigation }) => {
       />
 
       {/* ⭐ 전자영수증 제목 (터치 방해 제거) */}
-      <Text style={styles.customTitle} pointerEvents="none">
+      <AppText style={styles.customTitle} pointerEvents="none">
         전자영수증
-      </Text>
+      </AppText>
 
       {/* 리스트 */}
       <FlatList
@@ -130,7 +125,7 @@ const ReceiptScreen = ({ navigation }) => {
         ListEmptyComponent={
           !loading && (
             <View style={{ padding: 20, alignItems: 'center' }}>
-              <Text style={{ color: '#999' }}>영수증 내역이 없습니다.</Text>
+              <AppText style={{ color: '#999' }}>영수증 내역이 없습니다.</AppText>
             </View>
           )
         }

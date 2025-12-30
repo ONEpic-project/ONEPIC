@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -10,6 +9,7 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
+import AppText from "../components/AppText";
 
 import * as Clipboard from "expo-clipboard";
 import { API_BASE_URL } from "../config/api";
@@ -122,14 +122,14 @@ const FindAccountScreen = ({ navigation }) => {
                 setFoundId("");
               }}
             >
-              <Text
+              <AppText
                 style={[
                   styles.tabText,
                   activeTab === "id" && styles.activeTabText,
                 ]}
               >
                 아이디 찾기
-              </Text>
+              </AppText>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -140,14 +140,14 @@ const FindAccountScreen = ({ navigation }) => {
                 setPwMessage("");
               }}
             >
-              <Text
+              <AppText
                 style={[
                   styles.tabText,
                   activeTab === "password" && styles.activeTabText,
                 ]}
               >
                 비밀번호 찾기
-              </Text>
+              </AppText>
             </TouchableOpacity>
           </View>
 
@@ -170,7 +170,7 @@ const FindAccountScreen = ({ navigation }) => {
 
               {foundId && (
                 <View style={styles.resultContainer}>
-                  <Text style={styles.resultText}>아이디 : {foundId}</Text>
+                  <AppText style={styles.resultText}>아이디 : {foundId}</AppText>
                 </View>
               )}
 
@@ -179,14 +179,14 @@ const FindAccountScreen = ({ navigation }) => {
                   style={styles.searchButton}
                   onPress={handleFindId}
                 >
-                  <Text style={styles.searchButtonText}>검색</Text>
+                  <AppText style={styles.searchButtonText}>검색</AppText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.loginButton}
                   onPress={goToLogin}
                 >
-                  <Text style={styles.loginButtonText}>로그인 하기</Text>
+                  <AppText style={styles.loginButtonText}>로그인 하기</AppText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -211,19 +211,19 @@ const FindAccountScreen = ({ navigation }) => {
               {foundPassword && (
                 <View style={styles.resultContainer}>
                   <TouchableOpacity onPress={copyPassword}>
-                    <Text style={styles.resultText}>
+                    <AppText style={styles.resultText}>
                       임시 비밀번호 :{" "}
-                      <Text style={{ textDecorationLine: "underline" }}>
+                      <AppText style={{ textDecorationLine: "underline" }}>
                         {foundPassword}
-                      </Text>
-                    </Text>
+                      </AppText>
+                    </AppText>
                   </TouchableOpacity>
 
-                  <Text style={styles.noticeText}>
+                  <AppText style={styles.noticeText}>
                     터치하면 비밀번호가 복사됩니다.
                     {"\n"}
                     로그인 후 반드시 비밀번호를 변경해주세요.
-                  </Text>
+                  </AppText>
                 </View>
               )}
             </View>
@@ -235,11 +235,11 @@ const FindAccountScreen = ({ navigation }) => {
           style={styles.searchButton}
           onPress={handleFindPassword}
         >
-          <Text style={styles.searchButtonText}>검색</Text>
+          <AppText style={styles.searchButtonText}>검색</AppText>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.loginButton} onPress={goToLogin}>
-          <Text style={styles.loginButtonText}>로그인 하기</Text>
+          <AppText style={styles.loginButtonText}>로그인 하기</AppText>
         </TouchableOpacity>
       </View>
     </>

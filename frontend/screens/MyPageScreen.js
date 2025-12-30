@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert 
+  View, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert 
   } from 'react-native';
+import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './components/Header';
 import { API_BASE_URL } from '../config/api';
@@ -252,12 +253,12 @@ const MyPageScreen = ({navigation}) => {
             ]}
             onPress={handleEdit}
           >
-            <Text style={[
+            <AppText style={[
               styles.editButtonText,
               isEditing && styles.editButtonTextActive
             ]}>
               수정하기
-            </Text>
+            </AppText>
           </TouchableOpacity>
 
           {/* 취소 버튼 - 수정 모드에서만 표시 */}
@@ -266,7 +267,7 @@ const MyPageScreen = ({navigation}) => {
               style={styles.cancelButton}
               onPress={handleCancel}
             >
-              <Text style={styles.cancelButtonText}>취소</Text>
+              <AppText style={styles.cancelButtonText}>취소</AppText>
             </TouchableOpacity>
           )}
         </View>
@@ -276,11 +277,11 @@ const MyPageScreen = ({navigation}) => {
       <View style={styles.bottomMenu}>
 
         <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-          <Text style={styles.logout}>로그아웃</Text>
+          <AppText style={styles.logout}>로그아웃</AppText>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleWithdraw}>
-          <Text style={styles.withdraw}>탈퇴하기</Text>
+          <AppText style={styles.withdraw}>탈퇴하기</AppText>
         </TouchableOpacity>
       </View>
     </View>

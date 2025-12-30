@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
+import AppText from '../components/AppText';
 
 const { width, height } = Dimensions.get('window');
 
@@ -16,8 +17,8 @@ const SignupCompleteScreen = ({ navigation }) => {
         
         {/* 완료 메시지 */}
         <View style={styles.messageContainer}>
-          <Text style={styles.messageText}>결제가</Text>
-          <Text style={styles.messageText}>완료되었습니다!</Text>
+          <AppText style={styles.messageText}>결제가</AppText>
+          <AppText style={styles.messageText}>완료되었습니다!</AppText>
         </View>
       </View>
 
@@ -27,7 +28,7 @@ const SignupCompleteScreen = ({ navigation }) => {
         style={styles.homeButton} 
         onPress={() => navigation.navigate('Home')}
         >
-          <Text style={styles.homeButtonText}>홈 화면 가기</Text>
+          <AppText style={styles.homeButtonText}>홈 화면 가기</AppText>
         </TouchableOpacity>
       </View>
     </View>

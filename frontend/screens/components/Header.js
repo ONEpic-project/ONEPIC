@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import AppText from '../../components/AppText';
+import { fontSizes } from '../../config/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -27,14 +29,14 @@ const Header = ({
           onPress={handleBackPress}
           activeOpacity={0.7}
         >
-          <Text style={styles.backButtonText}>←</Text>
+          <AppText style={styles.backButtonText}>←</AppText>
         </TouchableOpacity>
       ) : (
         <View style={styles.headerSpacer} />
       )}
 
       {/* 제목 */}
-      <Text style={styles.headerTitle}>{title}</Text>
+      <AppText style={styles.headerTitle}>{title}</AppText>
 
       {/* 오른쪽 컴포넌트 (PeriodDropdown 등) */}
       {rightComponent ? (
@@ -65,13 +67,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   backButtonText: {
-    fontSize: width * 0.06,
+    fontSize: fontSizes.lg,
     color: '#676767',
     marginTop: height * 0.02,
     marginLeft: -width * 0.03,
   },
   headerTitle: {
-    fontSize: width * 0.05,
+    fontSize: fontSizes.lg,
     fontWeight: '600',
     color: '#000000',
     flex: 1,

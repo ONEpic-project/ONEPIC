@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Image,
@@ -13,6 +12,7 @@ import {
   Animated,
   PanResponder,
 } from "react-native";
+import AppText from "../components/AppText";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { API_BASE_URL } from "../config/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -335,12 +335,12 @@ export default function ScanScreen({ navigation }) {
   if (!permission.granted)
     return (
       <View style={styles.center}>
-        <Text>카메라 권한이 필요합니다.</Text>
+        <AppText>카메라 권한이 필요합니다.</AppText>
         <TouchableOpacity
           style={styles.permissionButton}
           onPress={requestPermission}
         >
-          <Text style={{ color: "#fff" }}>권한 요청</Text>
+          <AppText style={{ color: "#fff" }}>권한 요청</AppText>
         </TouchableOpacity>
       </View>
     );
@@ -400,23 +400,23 @@ export default function ScanScreen({ navigation }) {
           {...panResponder.panHandlers}
         >
           <View style={styles.handleBar} />
-          <Text style={styles.drawerHeader}>
+          <AppText style={styles.drawerHeader}>
             내 장바구니 ({scannedProducts.length})
-          </Text>
+          </AppText>
           <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
             {scannedProducts.length === 0 ? (
-              <Text style={styles.emptyText}>
+              <AppText style={styles.emptyText}>
                 스캔한 상품이 여기 표시됩니다.
-              </Text>
+              </AppText>
             ) : (
               scannedProducts.map((item) => (
                 <View key={item.product_id} style={styles.cartItem}>
                   <View style={styles.itemHeader}>
-                    <Text style={styles.itemName}>{item.product_name}</Text>
+                    <AppText style={styles.itemName}>{item.product_name}</AppText>
                     <TouchableOpacity
                       onPress={() => removeProduct(item.product_id)}
                     >
-                      <Text style={{ color: "#ccc" }}>✕</Text>
+                      <AppText style={{ color: "#ccc" }}>✕</AppText>
                     </TouchableOpacity>
                   </View>
 
@@ -427,34 +427,34 @@ export default function ScanScreen({ navigation }) {
                       resizeMode="cover"
                     />
                     <View style={{ flex: 1, marginLeft: 10 }}>
-                      <Text style={styles.itemName} numberOfLines={1}>
+                      <AppText style={styles.itemName} numberOfLines={1}>
                         {item.product_name}
-                      </Text>
+                      </AppText>
                     </View>
                   </View>
 
                   <View style={styles.itemFooter}>
-                    <Text style={styles.itemPrice}>
+                    <AppText style={styles.itemPrice}>
                       {(
                         item.price * productQuantities[item.product_id]
                       ).toLocaleString()}
                       원
-                    </Text>
+                    </AppText>
                     <View style={styles.qtyControl}>
                       <TouchableOpacity
                         onPress={() => decreaseQuantity(item.product_id)}
                         style={styles.qtyBtn}
                       >
-                        <Text>-</Text>
+                        <AppText>-</AppText>
                       </TouchableOpacity>
-                      <Text style={styles.qtyText}>
+                      <AppText style={styles.qtyText}>
                         {productQuantities[item.product_id]}
-                      </Text>
+                      </AppText>
                       <TouchableOpacity
                         onPress={() => increaseQuantity(item.product_id)}
                         style={styles.qtyBtn}
                       >
-                        <Text>+</Text>
+                        <AppText>+</AppText>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -468,13 +468,13 @@ export default function ScanScreen({ navigation }) {
         {/* 결제 고정 하단바 */}
         <View style={styles.purchaseBar}>
           <View style={styles.totalInfo}>
-            <Text style={styles.totalLabel}>합계</Text>
-            <Text style={styles.totalPriceText}>
+            <AppText style={styles.totalLabel}>합계</AppText>
+            <AppText style={styles.totalPriceText}>
               {calculateTotal().toLocaleString()}원
-            </Text>
+            </AppText>
           </View>
           <TouchableOpacity style={styles.payBtn} onPress={handlePurchase}>
-            <Text style={styles.payBtnText}>구매하기</Text>
+            <AppText style={styles.payBtnText}>구매하기</AppText>
           </TouchableOpacity>
         </View>
 
@@ -494,15 +494,15 @@ export default function ScanScreen({ navigation }) {
                     style={styles.modalImg}
                     resizeMode="contain"
                   />
-                  <Text style={styles.modalName}>
+                  <AppText style={styles.modalName}>
                     {selectedProduct.product_name}
-                  </Text>
-                  <Text style={styles.modalPrice}>
+                  </AppText>
+                  <AppText style={styles.modalPrice}>
                     {selectedProduct.price?.toLocaleString()}원
-                  </Text>
-                  <Text style={styles.modalTitle}>
+                  </AppText>
+                  <AppText style={styles.modalTitle}>
                     상품을 추가하시겠습니까?
-                  </Text>
+                  </AppText>
                 </>
               )}
               <View style={styles.modalBtnRow}>
@@ -510,15 +510,15 @@ export default function ScanScreen({ navigation }) {
                   style={styles.modalCancel}
                   onPress={() => setIsModalVisible(false)}
                 >
-                  <Text>취소</Text>
+                  <AppText>취소</AppText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalOk}
                   onPress={() => addToCart(selectedProduct)}
                 >
-                  <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                  <AppText style={{ color: "#fff", fontWeight: "bold" }}>
                     담기
-                  </Text>
+                  </AppText>
                 </TouchableOpacity>
               </View>
             </View>

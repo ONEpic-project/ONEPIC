@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
-  Text,
   TouchableOpacity,
   Image,
   StyleSheet,
@@ -10,6 +9,8 @@ import {
   Alert,
   ActivityIndicator,
 } from "react-native";
+import AppText from "../components/AppText";
+import { fontSizes } from '../config/typography';
 import { SafeAreaView } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
@@ -231,14 +232,14 @@ const CartScreen = ({ navigation }) => {
     <View style={styles.cartItemCard}>
       {/* 상단: 상품명 및 삭제 버튼 */}
       <View style={styles.itemHeader}>
-        <Text style={styles.itemName} numberOfLines={1}>
+        <AppText style={styles.itemName} numberOfLines={1}>
           {item.name}
-        </Text>
+        </AppText>
         <TouchableOpacity 
           onPress={() => removeItem(item.id)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
         >
-          <Text style={styles.deleteIcon}>✕</Text>
+          <AppText style={styles.deleteIcon}>✕</AppText>
         </TouchableOpacity>
       </View>
 
@@ -246,35 +247,35 @@ const CartScreen = ({ navigation }) => {
       <View style={styles.itemBody}>
         <Image source={item.image} style={styles.itemImg} resizeMode="cover" />
         <View style={styles.itemInfo}>
-          <Text style={styles.itemNameSecondary} numberOfLines={1}>
+          <AppText style={styles.itemNameSecondary} numberOfLines={1}>
             {item.name}
-          </Text>
+          </AppText>
           {item.description ? (
-            <Text style={styles.itemDescription} numberOfLines={2}>
+            <AppText style={styles.itemDescription} numberOfLines={2}>
               {item.description}
-            </Text>
+            </AppText>
           ) : null}
         </View>
       </View>
 
       {/* 하단: 가격 + 수량 조절 */}
       <View style={styles.itemFooter}>
-        <Text style={styles.itemPrice}>
+        <AppText style={styles.itemPrice}>
           {(item.price * item.quantity).toLocaleString()}원
-        </Text>
+        </AppText>
         <View style={styles.qtyControl}>
           <TouchableOpacity
             onPress={() => decreaseQuantity(item.id)}
             style={styles.qtyBtn}
           >
-            <Text style={styles.qtyBtnText}>-</Text>
+            <AppText style={styles.qtyBtnText}>-</AppText>
           </TouchableOpacity>
-          <Text style={styles.qtyText}>{item.quantity}</Text>
+          <AppText style={styles.qtyText}>{item.quantity}</AppText>
           <TouchableOpacity
             onPress={() => increaseQuantity(item.id)}
             style={styles.qtyBtn}
           >
-            <Text style={styles.qtyBtnText}>+</Text>
+            <AppText style={styles.qtyBtnText}>+</AppText>
           </TouchableOpacity>
         </View>
       </View>
@@ -292,17 +293,17 @@ const CartScreen = ({ navigation }) => {
       {cartItems.length > 0 && (
         <View style={styles.summarySection}>
           <View style={styles.totalContainer}>
-            <Text style={styles.totalLabel}>합계</Text>
-            <Text style={styles.totalPrice}>
+            <AppText style={styles.totalLabel}>합계</AppText>
+            <AppText style={styles.totalPrice}>
               {totalPrice.toLocaleString()}원
-            </Text>
+            </AppText>
           </View>
 
           <TouchableOpacity
             style={styles.purchaseButton}
             onPress={handleCheckout}
           >
-            <Text style={styles.purchaseButtonText}>구매하기</Text>
+            <AppText style={styles.purchaseButtonText}>구매하기</AppText>
           </TouchableOpacity>
         </View>
       )}
@@ -314,7 +315,7 @@ const CartScreen = ({ navigation }) => {
       <Header navigation={navigation} title="장바구니" />
 
       <TouchableOpacity style={styles.deleteAllButton} onPress={removeAll}>
-        <Text style={styles.deleteAllText}>전체 삭제</Text>
+        <AppText style={styles.deleteAllText}>전체 삭제</AppText>
       </TouchableOpacity>
 
       {loading ? (
@@ -323,7 +324,7 @@ const CartScreen = ({ navigation }) => {
         </View>
       ) : cartItems.length === 0 ? (
         <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>장바구니가 비어있습니다</Text>
+          <AppText style={styles.emptyText}>장바구니가 비어있습니다</AppText>
         </View>
       ) : (
         <>
@@ -338,24 +339,24 @@ const CartScreen = ({ navigation }) => {
           <View style={styles.fixedFooter}>
             <View style={styles.priceSummaryCard}>
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>상품 금액</Text>
-                <Text style={styles.priceValue}>
+                <AppText style={styles.priceLabel}>상품 금액</AppText>
+                <AppText style={styles.priceValue}>
                   {totalPrice.toLocaleString()}원
-                </Text>
+                </AppText>
               </View>
               <View style={styles.divider} />
               <View style={styles.priceRow}>
-                <Text style={styles.totalLabel}>총 결제 금액</Text>
-                <Text style={styles.totalPriceText}>
+                <AppText style={styles.totalLabel}>총 결제 금액</AppText>
+                <AppText style={styles.totalPriceText}>
                   {totalPrice.toLocaleString()}원
-                </Text>
+                </AppText>
               </View>
             </View>
             <TouchableOpacity
               style={styles.purchaseButton}
               onPress={handleCheckout}
             >
-              <Text style={styles.purchaseButtonText}>구매하기</Text>
+              <AppText style={styles.purchaseButtonText}>구매하기</AppText>
             </TouchableOpacity>
           </View>
         </>
@@ -376,7 +377,7 @@ const styles = StyleSheet.create({
   deleteAllText: {
     color: "#FF9500",
     fontWeight: "600",
-    fontSize: 14,
+    fontSize: fontSizes.sm,
   },
   listContent: {
     paddingHorizontal: width * 0.05,
@@ -402,13 +403,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   itemName: {
-    fontSize: 15,
+    fontSize: fontSizes.lg,
     fontWeight: "600",
     color: "#333",
     flex: 1,
     marginRight: 10,
   },
-  deleteIcon: { color: "#ccc", fontSize: 18, fontWeight: "600" },
+  deleteIcon: { color: "#ccc", fontSize: fontSizes.md, fontWeight: "600" },
   itemBody: { flexDirection: "row", marginBottom: 10 },
   itemImg: {
     width: 50,
@@ -417,14 +418,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#f5f5f5",
   },
   itemInfo: { flex: 1, marginLeft: 10, justifyContent: "center" },
-  itemNameSecondary: { fontSize: 14, color: "#666", marginBottom: 2 },
-  itemDescription: { fontSize: 12, color: "#999" },
+  itemNameSecondary: { fontSize: fontSizes.sm, color: "#666", marginBottom: 2 },
+  itemDescription: { fontSize: fontSizes.sm, color: "#999" },
   itemFooter: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  itemPrice: { fontSize: 16, fontWeight: "bold", color: "#333" },
+  itemPrice: { fontSize: fontSizes.md, fontWeight: "bold", color: "#333" },
 
   // 수량 조절 (ScanScreen 스타일)
   qtyControl: {
@@ -444,9 +445,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     elevation: 1,
   },
-  qtyBtnText: { fontSize: 16, fontWeight: "600", color: "#333" },
+  qtyBtnText: { fontSize: fontSizes.md, fontWeight: "600", color: "#333" },
   qtyText: {
-    fontSize: 14,
+    fontSize: fontSizes.sm,
     fontWeight: "bold",
     color: "#333",
     marginHorizontal: 12,
@@ -474,11 +475,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginVertical: 4,
   },
-  priceLabel: { color: "#666", fontSize: 14 },
-  priceValue: { fontWeight: "600", color: "#333" },
+  priceLabel: { color: "#666", fontSize: fontSizes.sm },
+  priceValue: { fontWeight: "600", color: "#333", fontSize: fontSizes.md },
   divider: { height: 1, backgroundColor: "#eee", marginVertical: 8 },
-  totalLabel: { fontWeight: "bold", fontSize: 16 },
-  totalPriceText: { fontSize: 20, fontWeight: "bold", color: "#FF9500" },
+  totalLabel: { fontWeight: "bold", fontSize: fontSizes.md },
+  totalPriceText: { fontSize: fontSizes.lg, fontWeight: "bold", color: "#FF9500" },
   purchaseButton: {
     backgroundColor: "#FF9500",
     height: 55,
@@ -486,7 +487,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  purchaseButtonText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  purchaseButtonText: { color: "#fff", fontSize: fontSizes.md, fontWeight: "bold" },
 
   emptyContainer: {
     flex: 1,
@@ -494,7 +495,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    fontSize: width * 0.04,
+    fontSize: fontSizes.md,
     color: "#999",
   },
 });

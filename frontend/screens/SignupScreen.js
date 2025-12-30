@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -12,6 +11,7 @@ import {
   Alert,
   Dimensions
 } from 'react-native';
+import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from './components/Header';
@@ -151,9 +151,9 @@ const SignupScreen = ({ navigation }) => {
 
           {/* 회원가입 버튼 */}
           <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
-            <Text 
+            <AppText 
             style={styles.signupButtonText}
-            >회원가입</Text>
+            >회원가입</AppText>
           </TouchableOpacity>
           
         </ScrollView>

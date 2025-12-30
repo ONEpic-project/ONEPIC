@@ -1,13 +1,13 @@
 import React, { useState, useRef } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   Modal,
   StyleSheet,
   Pressable,
   Dimensions
 } from 'react-native';
+import AppText from '../../components/AppText';
 
 const { width, height } = Dimensions.get('window');
 
@@ -50,9 +50,9 @@ const PeriodDropdown = ({ selectedPeriod, onPeriodChange }) => {
         activeOpacity={0.8}
       >
         
-        <Text style={styles.selectedPeriod}>
+        <AppText style={styles.selectedPeriod}>
           {getSelectedLabel()} {isOpen ? '▲' : '▼'}
-        </Text>
+        </AppText>
       </TouchableOpacity>
 
       <Modal
@@ -87,14 +87,14 @@ const PeriodDropdown = ({ selectedPeriod, onPeriodChange }) => {
                 onPress={() => handleSelect(period.value)}
                 activeOpacity={0.7}
               >
-                <Text 
+                <AppText 
                   style={[
                     styles.menuItemText,
                     period.value === selectedPeriod && styles.selectedMenuItemText
                   ]}
                 >
                   {period.label}
-                </Text>
+                </AppText>
               </TouchableOpacity>
             ))}
           </View>

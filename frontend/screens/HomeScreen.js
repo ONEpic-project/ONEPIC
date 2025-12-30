@@ -3,13 +3,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
   Dimensions,
   Image
 } from 'react-native';
+import AppText from '../components/AppText';
 import { BlurView } from 'expo-blur'; // ✅ 블러 처리용
 import { verticalScale, scale, moderateScale } from 'react-native-size-matters';
 
@@ -55,10 +55,10 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* 상단 오렌지 영역 */}
       <View style={styles.topSection}>
-        <Text style={styles.welcomeText}>
-          반갑습니다!{'\n'}
-          <Text style={styles.boldText}>{username}</Text> 님
-        </Text>
+        <AppText style={styles.welcomeText}>
+          반갑습니다!{'{\n}'}
+          <AppText style={styles.boldText}>{username}</AppText> 님
+        </AppText>
 
         <View style={styles.marketImageContainer}>
           <Image
@@ -88,17 +88,17 @@ const HomeScreen = ({ navigation }) => {
             />
 
             {/* 🔹 기존 텍스트 / 버튼 (블러 영향 X) */}
-            <Text style={styles.scanTitle}>
-              줄 안 서고 결제{'\n'}
-              <Text style={styles.scanSubText}>지금 사용해 보세요</Text>
-            </Text>
+            <AppText style={styles.scanTitle}>
+              줄 안 서고 결제{'{\n}'}
+              <AppText style={styles.scanSubText}>지금 사용해 보세요</AppText>
+            </AppText>
 
             <TouchableOpacity
               style={styles.scanButton}
               onPress={() => navigation.navigate('Scan')}
               activeOpacity={0.8}
             >
-              <Text style={styles.scanButtonText}>스캔하기 →</Text>
+              <AppText style={styles.scanButtonText}>스캔하기 →</AppText>
             </TouchableOpacity>
           </ImageBackground>
         </View>
@@ -123,7 +123,7 @@ const HomeScreen = ({ navigation }) => {
                 color={DARK_TEXT}
                 style={styles.menuIcon}
               />
-              <Text style={styles.menuText}>{item.label}</Text>
+              <AppText style={styles.menuText}>{item.label}</AppText>
             </TouchableOpacity>
           </View>
         ))}
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     borderColor: '#ddd6cdff',
   },
   scanButtonText: {
-    fontSize: moderateScale(15),
+    fontSize: 24,
     fontWeight: '600',
     color: '#333',
   },
@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
     fontSize: MENU_TEXT_SIZE,
     fontWeight: '500',
     color: DARK_TEXT,
+    fontSize: 20,
   },
 });
 

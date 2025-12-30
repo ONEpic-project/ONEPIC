@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   ScrollView,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -13,6 +12,7 @@ import {
   Dimensions,
   ActivityIndicator
 } from 'react-native';
+import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { API_BASE_URL } from '../config/api';
@@ -120,8 +120,8 @@ const LoginScreen = ({ navigation }) => {
         >
           {/* 로고 영역 */}
           <View style={styles.logo}>
-            <Text style={styles.title}>ONE pic</Text>
-            <Text style={styles.subtitle}>마트에서 줄서기는 그만</Text>
+            <AppText style={styles.title}>ONE pic</AppText>
+            <AppText style={styles.subtitle}>마트에서 줄서기는 그만</AppText>
           </View>
 
           {/* 입력 필드 영역 */}
@@ -133,6 +133,7 @@ const LoginScreen = ({ navigation }) => {
               onChangeText={setUserId}
               autoCapitalize="none"
               autoCorrect={false}
+              placeholderTextColor="#686868"
             />
 
             <TextInput
@@ -143,6 +144,7 @@ const LoginScreen = ({ navigation }) => {
               onChangeText={setPassword}
               autoCapitalize="none"
               autoCorrect={false}
+              placeholderTextColor="#686868"
             />
           </View>
 
@@ -151,19 +153,19 @@ const LoginScreen = ({ navigation }) => {
             style={styles.loginButton}
             onPress={handleLogin}
           >
-            <Text style={styles.loginButtonText}>로그인 하기</Text>
+            <AppText style={styles.loginButtonText}>로그인 하기</AppText>
           </TouchableOpacity>
 
           {/* 하단 링크 */}
           <View style={styles.footer}>
             <TouchableOpacity onPress={handleSignup}>
-              <Text style={styles.signupText}>회원가입</Text>
+              <AppText style={styles.signupText}>회원가입</AppText>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={handleForgotCredentials}>
-              <Text style={styles.forgotText}>
+              <AppText style={styles.forgotText}>
                 아이디/비밀번호를 잊으셨나요?
-              </Text>
+              </AppText>
             </TouchableOpacity>
           </View>
 
@@ -191,8 +193,8 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.01,
   },
   subtitle: {
-    fontSize: width * 0.035, // 화면 너비의 3.5%
-    color: '#666',
+    fontSize: width * 0.045, // 화면 너비의 3.5%
+    color: '#686868',
     letterSpacing: 0.5,
   },
   formContainer: {
@@ -204,8 +206,7 @@ const styles = StyleSheet.create({
     height: height * 0.06, // 화면 높이의 6%
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
-    fontSize: width * 0.04,
-    color: '#333',
+    fontSize: 20,
     marginBottom: height * 0.035,
     paddingVertical: 10,
     alignSelf: 'center',
@@ -221,7 +222,7 @@ const styles = StyleSheet.create({
     marginTop: height * 0.025,
   },
   loginButtonText: {
-    fontSize: width * 0.045,
+    fontSize: width * 0.05,
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -236,8 +237,9 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.015,
   },
   forgotText: {
-    fontSize: width * 0.033,
-    color: '#999',
+    fontSize: width * 0.04,
+    //fontSize:20,
+    color: '#686868',
   },
 });
 
