@@ -1,4 +1,4 @@
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.cart import Cart
 from app.models.cart_item import CartItem
@@ -70,6 +70,9 @@ def create_receipt_from_cart(
         db.commit()
         db.refresh(receipt)
 
+        # Force populate items for response model
+        receipt.items = receipt_items
+
         return receipt
 
     except Exception as e:
@@ -80,6 +83,7 @@ def create_receipt_from_cart(
 def get_receipts_by_user(db: Session, user_id: int):
     return (
         db.query(Receipt)
+        .options(joinedload(Receipt.items))
         .filter(Receipt.user_id == user_id)
         .order_by(Receipt.created_at.desc())
         .all()
@@ -89,6 +93,7 @@ def get_receipts_by_user(db: Session, user_id: int):
 def get_receipt_detail(db: Session, receipt_id: int, user_id: int):
     return (
         db.query(Receipt)
+        .options(joinedload(Receipt.items))
         .filter(
             Receipt.receipt_id == receipt_id,
             Receipt.user_id == user_id
