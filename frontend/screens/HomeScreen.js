@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: verticalScale(-10),
     marginRight: scale(-7),
-    borderWidth: 2,              // ⬅ 테두리 두께
+    borderWidth: 1,              // ⬅ 테두리 두께
     borderColor: '#ddd6cdff',
   },
   scanButtonText: {

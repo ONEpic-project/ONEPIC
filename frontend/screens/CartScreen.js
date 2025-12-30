@@ -371,7 +371,7 @@ const styles = StyleSheet.create({
   },
   deleteAllButton: {
     paddingVertical: height * 0.01,
-    paddingHorizontal: width * 0.02,
+    paddingHorizontal: width * 0.06,
   },
   deleteAllText: {
     color: "#FF9500",
