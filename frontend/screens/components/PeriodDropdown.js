@@ -1,13 +1,14 @@
 import React, { useState, useRef } from 'react';
 import {
   View,
-  Text,
   TouchableOpacity,
   Modal,
   StyleSheet,
   Pressable,
   Dimensions
 } from 'react-native';
+import AppText from '../../components/AppText';
+import { fontSizes } from '../../config/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -50,9 +51,9 @@ const PeriodDropdown = ({ selectedPeriod, onPeriodChange }) => {
         activeOpacity={0.8}
       >
         
-        <Text style={styles.selectedPeriod}>
+        <AppText style={styles.selectedPeriod}>
           {getSelectedLabel()} {isOpen ? '▲' : '▼'}
-        </Text>
+        </AppText>
       </TouchableOpacity>
 
       <Modal
@@ -87,14 +88,14 @@ const PeriodDropdown = ({ selectedPeriod, onPeriodChange }) => {
                 onPress={() => handleSelect(period.value)}
                 activeOpacity={0.7}
               >
-                <Text 
+                <AppText 
                   style={[
                     styles.menuItemText,
                     period.value === selectedPeriod && styles.selectedMenuItemText
                   ]}
                 >
                   {period.label}
-                </Text>
+                </AppText>
               </TouchableOpacity>
             ))}
           </View>
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   selectedPeriod: {
-    fontSize: 16,
+    fontSize: fontSizes.sm,
     fontWeight: '700',
     color: '#4B4B4B',
   },
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
   },
   menuItemText: {
-    fontSize: 14,
+    fontSize: fontSizes.sm,
     color: '#333',
     textAlign: 'center',
   },

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   ScrollView,
   Dimensions,
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import AppText from '../components/AppText';
+import { fontSizes } from '../config/typography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Header from './components/Header';
@@ -80,7 +81,7 @@ const ReceiptDetailScreen = ({ route, navigation }) => {
   if (!receipt) {
     return (
       <View style={[styles.container, styles.center]}>
-        <Text>영수증 정보가 없습니다.</Text>
+        <AppText>영수증 정보가 없습니다.</AppText>
       </View>
     );
   }
@@ -93,34 +94,34 @@ const ReceiptDetailScreen = ({ route, navigation }) => {
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* 매장 정보 (고정) */}
         <View style={styles.storeSection}>
-          <Text style={styles.storeName}>원픽마트 동대구점</Text>
-          <Text style={styles.storeAddress}>대구광역시 중구 동내구로 566</Text>
+          <AppText style={styles.storeName}>원픽마트 동대구점</AppText>
+          <AppText style={styles.storeAddress}>대구광역시 중구 동내구로 566</AppText>
           
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>대표자 김준서</Text>
+            <AppText style={styles.infoLabel}>대표자 김준서</AppText>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>사업자번호 123-456-7890</Text>
+            <AppText style={styles.infoLabel}>사업자번호 123-456-7890</AppText>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>고객센터 053-952-0008</Text>
+            <AppText style={styles.infoLabel}>고객센터 053-952-0008</AppText>
           </View>
         </View>
 
         {/* 거래 정보 (동적) */}
         <View style={styles.transactionSection}>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>거래일시 {formatDate(receipt.created_at)}</Text>
+            <AppText style={styles.infoLabel}>거래일시 {formatDate(receipt.created_at)}</AppText>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>거래수단 {getPaymentMethodName(receipt.payment_method)}</Text>
+            <AppText style={styles.infoLabel}>거래수단 {getPaymentMethodName(receipt.payment_method)}</AppText>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>결제금액 {receipt.total_amount?.toLocaleString()}원</Text>
+            <AppText style={styles.infoLabel}>결제금액 {receipt.total_amount?.toLocaleString()}원</AppText>
           </View>
           {/* 카드번호/승인번호는 실제 데이터가 없으므로 임시 숨김 처리하거나 고정값 유지 */}
           <View style={styles.infoRow}>
-             <Text style={styles.infoLabel}>승인번호 {receipt.receipt_id.toString().padStart(8, '0')}</Text>
+             <AppText style={styles.infoLabel}>승인번호 {receipt.receipt_id.toString().padStart(8, '0')}</AppText>
           </View>
         </View>
 
@@ -128,9 +129,9 @@ const ReceiptDetailScreen = ({ route, navigation }) => {
         <View style={styles.divider} />
         
         <View style={styles.itemsHeader}>
-          <Text style={[styles.tableHeader, { flex: 2 }]}>상품</Text>
-          <Text style={[styles.tableHeader, { flex: 0.5, textAlign: 'center' }]}>수량</Text>
-          <Text style={[styles.tableHeader, { flex: 1, textAlign: 'right' }]}>금액</Text>
+          <AppText style={[styles.tableHeader, { flex: 2 }]}>상품</AppText>
+          <AppText style={[styles.tableHeader, { flex: 0.5, textAlign: 'center' }]}>수량</AppText>
+          <AppText style={[styles.tableHeader, { flex: 1, textAlign: 'right' }]}>금액</AppText>
         </View>
         
         <View style={styles.divider} />
@@ -138,25 +139,25 @@ const ReceiptDetailScreen = ({ route, navigation }) => {
         {/* 상품 아이템 반복 렌더링 */}
         {receipt.items && receipt.items.map((item, index) => (
           <View key={index} style={styles.itemRow}>
-            <Text style={[styles.itemName, { flex: 2 }]}>{item.product_name}</Text>
-            <Text style={[styles.itemQuantity, { flex: 0.5, textAlign: 'center' }]}>{item.quantity}</Text>
-            <Text style={[styles.itemPrice, { flex: 1, textAlign: 'right' }]}>
+            <AppText style={[styles.itemName, { flex: 2 }]}>{item.product_name}</AppText>
+            <AppText style={[styles.itemQuantity, { flex: 0.5, textAlign: 'center' }]}>{item.quantity}</AppText>
+            <AppText style={[styles.itemPrice, { flex: 1, textAlign: 'right' }]}>
               {(item.price * item.quantity).toLocaleString()}원
-            </Text>
+            </AppText>
           </View>
         ))}
 
         {/* 안내사항 */}
         <View style={styles.noticeSection}>
-          <Text style={styles.noticeText}>
+          <AppText style={styles.noticeText}>
             · 교환, 환불은 결제일로부터 15일 이내
-          </Text>
-          <Text style={styles.noticeText}>
+          </AppText>
+          <AppText style={styles.noticeText}>
             · 미개봉 제품에 한해 결제했던 수단과 구매영수증 지참 후 매장 방문 시 가능
-          </Text>
-          <Text style={styles.noticeText}>
+          </AppText>
+          <AppText style={styles.noticeText}>
             · 단 한번 수단 변경은 구매매장에서만 가능
-          </Text>
+          </AppText>
         </View>
       </ScrollView>
     </View>
@@ -181,13 +182,13 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   storeName: {
-    fontSize: width > 400 ? 20 : 18,
+    fontSize: fontSizes.lg,
     fontWeight: '700',
     marginBottom: 8,
     letterSpacing: -0.5,
   },
   storeAddress: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
     marginBottom: 16,
   },
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   infoLabel: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
     lineHeight: 20,
   },
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   tableHeader: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     fontWeight: '600',
     color: '#666',
   },
@@ -226,15 +227,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   itemName: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
   },
   itemQuantity: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
   },
   itemPrice: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
     fontWeight: '500',
   },
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   noticeText: {
-    fontSize: width > 400 ? 12 : 11,
+    fontSize: fontSizes.sm,
     color: '#666',
     lineHeight: 20,
     marginBottom: 4,

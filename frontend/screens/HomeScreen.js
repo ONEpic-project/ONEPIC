@@ -3,15 +3,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ImageBackground,
   Dimensions,
   Image
 } from 'react-native';
+import AppText from '../components/AppText';
 import { BlurView } from 'expo-blur'; // ✅ 블러 처리용
 import { verticalScale, scale, moderateScale } from 'react-native-size-matters';
+import { fontSizes } from '../config/typography';
 
 const { width } = Dimensions.get('window');
 
@@ -26,7 +27,7 @@ const DARK_TEXT = '#2C2C2C';
 
 // 스캔 카드 (줄 안 서고 결제)
 const SCAN_CARD_HEIGHT = verticalScale(150);
-const SCAN_TITLE_SIZE = moderateScale(20);
+const SCAN_TITLE_SIZE = fontSizes.lg;
 const SCAN_BUTTON_HEIGHT = verticalScale(40);
 const SCAN_BUTTON_RADIUS = moderateScale(20);
 const SCAN_CARD_COLOR = 'rgba(217, 217, 217, 0.85)';
@@ -37,7 +38,7 @@ const SCAN_BG_BLUR_INTENSITY = 10;
 // 하단 메뉴 버튼
 const MENU_BUTTON_HEIGHT = verticalScale(58);
 const MENU_ICON_SIZE = moderateScale(24);
-const MENU_TEXT_SIZE = moderateScale(16);
+const MENU_TEXT_SIZE = fontSizes.sm;
 const MENU_BUTTON_COLOR = 'rgba(255,255,255,0.92)';
 
 const HomeScreen = ({ navigation }) => {
@@ -73,10 +74,10 @@ const HomeScreen = ({ navigation }) => {
     <View style={styles.container}>
       {/* 상단 오렌지 영역 */}
       <View style={styles.topSection}>
-        <Text style={styles.welcomeText}>
-          반갑습니다!{'\n'}
-          <Text style={styles.boldText}>{username}</Text> 님
-        </Text>
+        <AppText style={styles.welcomeText}>
+          반갑습니다!{'{\n}'}
+          <AppText style={styles.boldText}>{username}</AppText> 님
+        </AppText>
 
         <View style={styles.marketImageContainer}>
           <Image
@@ -106,17 +107,17 @@ const HomeScreen = ({ navigation }) => {
             />
 
             {/* 🔹 기존 텍스트 / 버튼 (블러 영향 X) */}
-            <Text style={styles.scanTitle}>
-              줄 안 서고 결제{'\n'}
-              <Text style={styles.scanSubText}>지금 사용해 보세요</Text>
-            </Text>
+            <AppText style={styles.scanTitle}>
+              줄 안 서고 결제{'{\n}'}
+              <AppText style={styles.scanSubText}>지금 사용해 보세요</AppText>
+            </AppText>
 
             <TouchableOpacity
               style={styles.scanButton}
               onPress={() => navigation.navigate('Scan')}
               activeOpacity={0.8}
             >
-              <Text style={styles.scanButtonText}>스캔하기 →</Text>
+              <AppText style={styles.scanButtonText}>스캔하기 →</AppText>
             </TouchableOpacity>
           </ImageBackground>
         </View>
@@ -141,7 +142,7 @@ const HomeScreen = ({ navigation }) => {
                 color={DARK_TEXT}
                 style={styles.menuIcon}
               />
-              <Text style={styles.menuText}>{item.label}</Text>
+              <AppText style={styles.menuText}>{item.label}</AppText>
             </TouchableOpacity>
           </View>
         ))}
@@ -162,11 +163,11 @@ const styles = StyleSheet.create({
   welcomeText: {
     marginTop: verticalScale(90),
     marginLeft: scale(20),
-    fontSize: moderateScale(14),
+    fontSize: fontSizes.md,
     color: '#e6e6e6ff',
   },
   boldText: {
-    fontSize: moderateScale(22),
+    fontSize: fontSizes.xl,
     fontWeight: '800',
   },
   marketImageContainer: {
@@ -209,7 +210,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
   },
   scanSubText: {
-    fontSize: moderateScale(14),
+    fontSize: fontSizes.sm,
     fontWeight: '300',
     color: '#e6e6e6ff',
   },
@@ -226,10 +227,12 @@ const styles = StyleSheet.create({
     borderColor: '#ddd6cdff',
   },
   scanButtonText: {
-    fontSize: moderateScale(15),
+    fontSize: fontSizes.xl,
     fontWeight: '600',
     color: '#333',
   },
+  
+  /* 메뉴 버튼 */
 
   /* 메뉴 버튼 */
   menuContainer: {
@@ -251,7 +254,7 @@ const styles = StyleSheet.create({
     opacity: 0.7,
   },
   menuText: {
-    fontSize: MENU_TEXT_SIZE,
+    fontSize: fontSizes.lg,
     fontWeight: '500',
     color: DARK_TEXT,
   },

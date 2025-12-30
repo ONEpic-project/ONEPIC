@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   FlatList,
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
+import AppText from '../components/AppText';
+import { fontSizes } from '../config/typography';
 
 import Header from './components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -95,17 +96,17 @@ const ReceiptScreen = ({ navigation }) => {
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <View>
-        <Text style={styles.date}>{formatDate(item.created_at)}</Text>
-        <Text style={styles.amount}>
+        <AppText style={styles.date}>{formatDate(item.created_at)}</AppText>
+        <AppText style={styles.amount}>
           {item.total_amount?.toLocaleString()}원 구매
-        </Text>
+        </AppText>
       </View>
 
       <TouchableOpacity 
         style={styles.viewButton} 
         onPress={() => navigation.navigate('ReceiptDetail', { receiptId: item.receipt_id })}
       >
-        <Text style={styles.viewButtonText}>영수증 보기</Text>
+        <AppText style={styles.viewButtonText}>영수증 보기</AppText>
       </TouchableOpacity>
     </View>
   );
@@ -123,7 +124,7 @@ const ReceiptScreen = ({ navigation }) => {
               onPress={() => setDropdownOpen(!dropdownOpen)}
               activeOpacity={0.8}
             >
-              <Text style={styles.dropdownText}>{period}</Text>
+              <AppText style={styles.dropdownText}>{period}</AppText>
             </TouchableOpacity>
 
             {dropdownOpen && (
@@ -138,8 +139,9 @@ const ReceiptScreen = ({ navigation }) => {
                       // 선택 즉시 해당 월로 필터
                       fetchReceipts(PERIOD_MAP[option]);
                     }}
+                    activeOpacity={0.8}
                   >
-                    <Text style={styles.dropdownItemText}>{option}</Text>
+                    <AppText style={styles.dropdownItemText}>{option}</AppText>
                   </TouchableOpacity>
                 ))}
               </View>
@@ -149,9 +151,9 @@ const ReceiptScreen = ({ navigation }) => {
       />
 
       {/* ⭐ 전자영수증 제목 (터치 방해 제거) */}
-      <Text style={styles.customTitle} pointerEvents="none">
+      <AppText style={styles.customTitle} pointerEvents="none">
         전자영수증
-      </Text>
+      </AppText>
 
       {/* 리스트 */}
       <FlatList
@@ -165,7 +167,7 @@ const ReceiptScreen = ({ navigation }) => {
         ListEmptyComponent={
           !loading && (
             <View style={{ padding: 20, alignItems: 'center' }}>
-              <Text style={{ color: '#999' }}>영수증 내역이 없습니다.</Text>
+              <AppText style={{ color: '#999' }}>영수증 내역이 없습니다.</AppText>
             </View>
           )
         }
@@ -182,9 +184,15 @@ const styles = StyleSheet.create({
 
   /* 이 화면 전용 제목 */
   customTitle: {
+<<<<<<< HEAD
     marginTop: -50,        // ↑↓ 위치 조절
     marginLeft: 140,       // ←→ 위치 조절
     fontSize: 24,
+=======
+    marginTop: -48,        // ↑↓ 위치 조절
+    marginLeft: 150,       // ←→ 위치 조절
+    fontSize: fontSizes.lg,
+>>>>>>> feat/global-typography
     fontWeight: '600',
     color: '#000000',
   },
@@ -198,12 +206,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   date: {
+<<<<<<< HEAD
     fontSize: 18,
+=======
+    fontSize: fontSizes.md,
+>>>>>>> feat/global-typography
     fontWeight: '600',
     color: '#2C2C2C',
   },
   amount: {
+<<<<<<< HEAD
     fontSize: 18,
+=======
+    fontSize: fontSizes.sm,
+>>>>>>> feat/global-typography
     color: '#666666',
     marginTop: 4,
   },
@@ -219,7 +235,11 @@ const styles = StyleSheet.create({
   viewButtonText: {
     color: '#666666',
     fontWeight: '600',
+<<<<<<< HEAD
     fontSize: 18,
+=======
+    fontSize: fontSizes.sm,
+>>>>>>> feat/global-typography
   },
 
   divider: {
@@ -242,7 +262,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   dropdownText: {
+<<<<<<< HEAD
     fontSize: 15,
+=======
+    fontSize: fontSizes.sm,
+>>>>>>> feat/global-typography
     color: '#333333',
   },
   dropdownMenu: {
@@ -265,7 +289,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   dropdownItemText: {
-    fontSize: 13,
+    fontSize: fontSizes.sm,
     color: '#333333',
   },
 });

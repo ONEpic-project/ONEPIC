@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   ScrollView,
@@ -9,6 +8,8 @@ import {
   Alert,
   Dimensions,
 } from 'react-native';
+import AppText from '../components/AppText';
+import { fontSizes } from '../config/typography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -116,11 +117,11 @@ export default function PaymentScreen({ route, navigation }) {
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>주문 상품</Text>
+          <AppText style={styles.sectionTitle}>주문 상품</AppText>
           <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
-              <Text style={styles.summaryLabel}>총 상품 개수</Text>
-              <Text style={styles.summaryValue}>{totalQuantity}개</Text>
+              <AppText style={styles.summaryLabel}>총 상품 개수</AppText>
+              <AppText style={styles.summaryValue}>{totalQuantity}개</AppText>
             </View>
             <View style={styles.divider} />
 
@@ -132,16 +133,16 @@ export default function PaymentScreen({ route, navigation }) {
                     style={styles.productImage}
                   />
                   <View style={styles.productDetails}>
-                    <Text style={styles.productName} numberOfLines={2}>
+                    <AppText style={styles.productName} numberOfLines={2}>
                       {product.name}
-                    </Text>
-                    <Text style={styles.productQuantity}>
+                    </AppText>
+                    <AppText style={styles.productQuantity}>
                       수량: {product.quantity}개
-                    </Text>
+                    </AppText>
                   </View>
-                  <Text style={styles.productTotal}>
+                  <AppText style={styles.productTotal}>
                     {(product.price * product.quantity).toLocaleString()}원
-                  </Text>
+                  </AppText>
                 </View>
                 {index < normalizedProducts.length - 1 && (
                   <View style={styles.productDivider} />
@@ -152,7 +153,7 @@ export default function PaymentScreen({ route, navigation }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>결제 방법</Text>
+          <AppText style={styles.sectionTitle}>결제 방법</AppText>
           <View style={styles.paymentMethods}>
             {paymentMethods.map(method => (
               <TouchableOpacity
@@ -169,7 +170,7 @@ export default function PaymentScreen({ route, navigation }) {
                   size={24}
                   color={selectedPayment === method.id ? '#ff9500' : '#666'}
                 />
-                <Text
+                <AppText
                   style={[
                     styles.paymentMethodText,
                     selectedPayment === method.id &&
@@ -177,7 +178,7 @@ export default function PaymentScreen({ route, navigation }) {
                   ]}
                 >
                   {method.name}
-                </Text>
+                </AppText>
                 {selectedPayment === method.id && (
                   <Ionicons
                     name="checkmark-circle"
@@ -192,22 +193,22 @@ export default function PaymentScreen({ route, navigation }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>할인 금액</Text>
+          <AppText style={styles.sectionTitle}>할인 금액</AppText>
           <View style={styles.priceCard}>
             <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>쿠폰 사용</Text>
-              <Text style={styles.priceValue}>
+              <AppText style={styles.priceLabel}>쿠폰 사용</AppText>
+              <AppText style={styles.priceValue}>
                 미사용
-              </Text>
+              </AppText>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.priceRow}>
-              <Text style={styles.totalLabel}>총 할인 금액</Text>
-              <Text style={styles.totalPrice}>
+              <AppText style={styles.totalLabel}>총 할인 금액</AppText>
+              <AppText style={styles.totalPrice}>
                 0원
-              </Text>
+              </AppText>
             </View>
           </View>
         </View>
@@ -215,18 +216,18 @@ export default function PaymentScreen({ route, navigation }) {
 
       <View style={styles.bottomContainer}>
         <View style={styles.totalContainer}>
-          <Text style={styles.bottomTotalLabel}>총 결제 금액</Text>
-          <Text style={styles.bottomTotalPrice}>
+          <AppText style={styles.bottomTotalLabel}>총 결제 금액</AppText>
+          <AppText style={styles.bottomTotalPrice}>
             {totalPrice.toLocaleString()}원
-          </Text>
+          </AppText>
         </View>
         <TouchableOpacity
           style={styles.paymentButton}
           onPress={submitPayment}
         >
-          <Text style={styles.paymentButtonText}>
+          <AppText style={styles.paymentButtonText}>
             결제하기
-          </Text>
+          </AppText>
         </TouchableOpacity>
       </View>
     </View>
@@ -237,33 +238,33 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   content: { flex: 1 },
   section: { marginTop: 20, paddingHorizontal: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  sectionTitle: { fontSize: fontSizes.md, fontWeight: 'bold', marginBottom: 12 },
   summaryCard: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  summaryLabel: { color: '#666' },
-  summaryValue: { fontWeight: '600' },
+  summaryLabel: { color: '#666', fontSize: fontSizes.sm },
+  summaryValue: { fontWeight: '600', fontSize: fontSizes.md },
   divider: { height: 1, backgroundColor: '#eee', marginVertical: 12 },
   productRow: { flexDirection: 'row', alignItems: 'center' },
   productImage: { width: 50, height: 50, borderRadius: 8, marginRight: 12 },
   productDetails: { flex: 1 },
-  productName: { fontSize: 14 },
-  productQuantity: { fontSize: 13, color: '#999' },
-  productTotal: { fontWeight: '600' },
+  productName: { fontSize: fontSizes.sm },
+  productQuantity: { fontSize: fontSizes.sm, color: '#999' },
+  productTotal: { fontWeight: '600', fontSize: fontSizes.md },
   productDivider: { height: 1, backgroundColor: '#f5f5f5', marginVertical: 8 },
   paymentMethods: { backgroundColor: '#fff', borderRadius: 12 },
   paymentMethod: { flexDirection: 'row', padding: 18 },
   paymentMethodSelected: { backgroundColor: '#FFF5EB' },
-  paymentMethodText: { marginLeft: 12, flex: 1 },
+  paymentMethodText: { marginLeft: 12, flex: 1, fontSize: fontSizes.md },
   paymentMethodTextSelected: { color: '#ff9500', fontWeight: '600' },
   checkIcon: { marginLeft: 'auto' },
   priceCard: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
   priceRow: { flexDirection: 'row', justifyContent: 'space-between' },
   totalLabel: { fontWeight: 'bold' },
-  totalPrice: { fontWeight: 'bold', color: '#ff9500' },
+  totalPrice: { fontWeight: 'bold', color: '#ff9500', fontSize: fontSizes.md },
   bottomContainer: { backgroundColor: '#fff', padding: 20, zIndex: 10 },
   totalContainer: { flexDirection: 'row', justifyContent: 'space-between' },
   bottomTotalLabel: { fontWeight: '600' },
-  bottomTotalPrice: { fontSize: 22, fontWeight: 'bold', color: '#ff9500' },
+  bottomTotalPrice: { fontSize: fontSizes.xl, fontWeight: 'bold', color: '#ff9500' },
   paymentButton: {
     backgroundColor: '#ff9500',
     paddingVertical: 16,
@@ -271,5 +272,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
   },
-  paymentButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
+  paymentButtonText: { color: '#fff', fontWeight: 'bold', fontSize: fontSizes.md },
 });

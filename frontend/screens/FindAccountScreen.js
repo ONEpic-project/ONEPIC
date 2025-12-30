@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import {
   View,
-  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
@@ -10,6 +9,8 @@ import {
   ScrollView,
   Dimensions,
 } from "react-native";
+import AppText from "../components/AppText";
+import { fontSizes } from '../config/typography';
 
 import * as Clipboard from "expo-clipboard";
 import { API_BASE_URL } from "../config/api";
@@ -122,14 +123,14 @@ const FindAccountScreen = ({ navigation }) => {
                 setFoundId("");
               }}
             >
-              <Text
+              <AppText
                 style={[
                   styles.tabText,
                   activeTab === "id" && styles.activeTabText,
                 ]}
               >
                 아이디 찾기
-              </Text>
+              </AppText>
             </TouchableOpacity>
 
             <TouchableOpacity
@@ -140,14 +141,14 @@ const FindAccountScreen = ({ navigation }) => {
                 setPwMessage("");
               }}
             >
-              <Text
+              <AppText
                 style={[
                   styles.tabText,
                   activeTab === "password" && styles.activeTabText,
                 ]}
               >
                 비밀번호 찾기
-              </Text>
+              </AppText>
             </TouchableOpacity>
           </View>
 
@@ -170,7 +171,7 @@ const FindAccountScreen = ({ navigation }) => {
 
               {foundId && (
                 <View style={styles.resultContainer}>
-                  <Text style={styles.resultText}>아이디 : {foundId}</Text>
+                  <AppText style={styles.resultText}>아이디 : {foundId}</AppText>
                 </View>
               )}
 
@@ -179,14 +180,14 @@ const FindAccountScreen = ({ navigation }) => {
                   style={styles.searchButton}
                   onPress={handleFindId}
                 >
-                  <Text style={styles.searchButtonText}>검색</Text>
+                  <AppText style={styles.searchButtonText}>검색</AppText>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                   style={styles.loginButton}
                   onPress={goToLogin}
                 >
-                  <Text style={styles.loginButtonText}>로그인 하기</Text>
+                  <AppText style={styles.loginButtonText}>로그인 하기</AppText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -211,37 +212,42 @@ const FindAccountScreen = ({ navigation }) => {
               {foundPassword && (
                 <View style={styles.resultContainer}>
                   <TouchableOpacity onPress={copyPassword}>
-                    <Text style={styles.resultText}>
+                    <AppText style={styles.resultText}>
                       임시 비밀번호 :{" "}
-                      <Text style={{ textDecorationLine: "underline" }}>
+                      <AppText style={{ textDecorationLine: "underline" }}>
                         {foundPassword}
-                      </Text>
-                    </Text>
+                      </AppText>
+                    </AppText>
                   </TouchableOpacity>
 
-                  <Text style={styles.noticeText}>
+                  <AppText style={styles.noticeText}>
                     터치하면 비밀번호가 복사됩니다.
                     {"\n"}
                     로그인 후 반드시 비밀번호를 변경해주세요.
-                  </Text>
+                  </AppText>
                 </View>
               )}
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.searchButton}
+                  onPress={handleFindPassword}
+                >
+                  <AppText style={styles.searchButtonText}>검색</AppText>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.loginButton}
+                  onPress={goToLogin}
+                >
+                  <AppText style={styles.loginButtonText}>로그인 하기</AppText>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         </View>
       </ScrollView>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.searchButton}
-          onPress={handleFindPassword}
-        >
-          <Text style={styles.searchButtonText}>검색</Text>
-        </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={goToLogin}>
-          <Text style={styles.loginButtonText}>로그인 하기</Text>
-        </TouchableOpacity>
-      </View>
     </>
   );
 };
@@ -276,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF9500",
   },
   tabText: {
-    fontSize: width * 0.04,
+    fontSize: fontSizes.md,
     fontWeight: "600",
     color: "#FF9500",
   },
@@ -291,7 +297,7 @@ const styles = StyleSheet.create({
     height: height * 0.06,
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
-    fontSize: width * 0.04,
+    fontSize: fontSizes.md,
     color: "#333",
     marginBottom: height * 0.035,
     paddingVertical: 10,
@@ -302,20 +308,20 @@ const styles = StyleSheet.create({
     minHeight: height * 0.03,
   },
   resultText: {
-    fontSize: width * 0.045,
+    fontSize: fontSizes.lg,
     color: "#FF9500",
     fontWeight: "500",
     textAlign: "center",
   },
   noticeText: {
     marginTop: 10,
-    fontSize: width * 0.035,
+    fontSize: fontSizes.sm,
     color: "#999",
     textAlign: "center",
   },
   buttonContainer: {
     width: "100%",
-    marginTop: height * 0.2,
+    //marginTop: height * 0.2,
   },
   searchButton: {
     width: "100%",
@@ -327,7 +333,7 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.02,
   },
   searchButtonText: {
-    fontSize: width * 0.045,
+    fontSize: fontSizes.md,
     fontWeight: "600",
     color: "#FFFFFF",
   },
@@ -342,13 +348,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loginButtonText: {
-    fontSize: width * 0.045,
+    fontSize: fontSizes.md,
     fontWeight: "600",
     color: "#FF9500",
   },
   noticeText: {
     marginTop: 10,
-    fontSize: width * 0.035,
+    fontSize: fontSizes.sm,
     color: "#999",
     textAlign: "center",
   },

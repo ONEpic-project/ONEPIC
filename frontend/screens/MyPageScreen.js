@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert 
+  View, TextInput, TouchableOpacity, StyleSheet, Dimensions, Alert 
   } from 'react-native';
+import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './components/Header';
+import { fontSizes } from '../config/typography';
 import { API_BASE_URL } from '../config/api';
 
 import { WebView } from 'react-native-webview';
@@ -286,12 +288,12 @@ const MyPageScreen = ({navigation}) => {
             ]}
             onPress={handleEdit}
           >
-            <Text style={[
+            <AppText style={[
               styles.editButtonText,
               isEditing && styles.editButtonTextActive
             ]}>
               수정하기
-            </Text>
+            </AppText>
           </TouchableOpacity>
 
           {/* 취소 버튼 - 수정 모드에서만 표시 */}
@@ -300,7 +302,7 @@ const MyPageScreen = ({navigation}) => {
               style={styles.cancelButton}
               onPress={handleCancel}
             >
-              <Text style={styles.cancelButtonText}>취소</Text>
+              <AppText style={styles.cancelButtonText}>취소</AppText>
             </TouchableOpacity>
           )}
         </View>
@@ -309,12 +311,17 @@ const MyPageScreen = ({navigation}) => {
       {/* 하단 메뉴 */}
       <View style={styles.bottomMenu}>
 
+<<<<<<< HEAD
         <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.logout}>로그아웃</Text>
+=======
+        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+          <AppText style={styles.logout}>로그아웃</AppText>
+>>>>>>> feat/global-typography
         </TouchableOpacity>
 
         <TouchableOpacity onPress={handleWithdraw}>
-          <Text style={styles.withdraw}>탈퇴하기</Text>
+          <AppText style={styles.withdraw}>탈퇴하기</AppText>
         </TouchableOpacity>
       </View>
       
@@ -370,11 +377,11 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: width * 0.05,
-    fontSize: width * 0.06,
+    fontSize: fontSizes.lg,
     color: '#676767',
   },
   title: {
-    fontSize: width * 0.06,
+    fontSize: fontSizes.lg,
     fontWeight: '600',
     color: '#000000',
   },
@@ -383,7 +390,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.15,
   },
   input: {
-    fontSize: width * 0.04,
+    fontSize: fontSizes.md,
     color: '#4B4B4B',
     paddingVertical: height * 0.012,
     paddingLeft: width * 0.025,
@@ -412,7 +419,7 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
   editButtonText: {
-    fontSize: width * 0.035,
+    fontSize: fontSizes.sm,
     color: '#FF9317',
   },
   editButtonTextActive: {
@@ -427,7 +434,7 @@ const styles = StyleSheet.create({
     borderRadius: 39,
   },
   cancelButtonText: {
-    fontSize: width * 0.035,
+    fontSize: fontSizes.sm,
     color: '#FF9317',
   },
   bottomMenu: {
@@ -436,14 +443,14 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   logout: {
-    fontSize: width * 0.04,
+    fontSize: fontSizes.sm,
     fontWeight: '600',
     color: '#2C2C2C',
     textAlign: 'center',
     marginBottom: height * 0.025,
   },
   withdraw: {
-    fontSize: width * 0.04,
+    fontSize: fontSizes.sm,
     color: '#C3C3C3',
     textAlign: 'center',
   },

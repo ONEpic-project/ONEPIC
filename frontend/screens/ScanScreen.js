@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
-  Text,
   StyleSheet,
   TouchableOpacity,
   Image,
@@ -13,11 +12,13 @@ import {
   Animated,
   PanResponder,
 } from "react-native";
+import AppText from "../components/AppText";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { API_BASE_URL } from "../config/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Header from "./components/Header";
+import { fontSizes } from '../config/typography';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -335,12 +336,12 @@ export default function ScanScreen({ navigation }) {
   if (!permission.granted)
     return (
       <View style={styles.center}>
-        <Text>카메라 권한이 필요합니다.</Text>
+        <AppText>카메라 권한이 필요합니다.</AppText>
         <TouchableOpacity
           style={styles.permissionButton}
           onPress={requestPermission}
         >
-          <Text style={{ color: "#fff" }}>권한 요청</Text>
+          <AppText style={{ color: "#fff" }}>권한 요청</AppText>
         </TouchableOpacity>
       </View>
     );
@@ -400,23 +401,23 @@ export default function ScanScreen({ navigation }) {
           {...panResponder.panHandlers}
         >
           <View style={styles.handleBar} />
-          <Text style={styles.drawerHeader}>
+          <AppText style={styles.drawerHeader}>
             내 장바구니 ({scannedProducts.length})
-          </Text>
+          </AppText>
           <ScrollView style={{ flex: 1 }} showsVerticalScrollIndicator={false}>
             {scannedProducts.length === 0 ? (
-              <Text style={styles.emptyText}>
+              <AppText style={styles.emptyText}>
                 스캔한 상품이 여기 표시됩니다.
-              </Text>
+              </AppText>
             ) : (
               scannedProducts.map((item) => (
                 <View key={item.product_id} style={styles.cartItem}>
                   <View style={styles.itemHeader}>
-                    <Text style={styles.itemName}>{item.product_name}</Text>
+                    <AppText style={styles.itemName}>{item.product_name}</AppText>
                     <TouchableOpacity
                       onPress={() => removeProduct(item.product_id)}
                     >
-                      <Text style={{ color: "#ccc" }}>✕</Text>
+                      <AppText style={{ color: "#ccc" }}>✕</AppText>
                     </TouchableOpacity>
                   </View>
 
@@ -427,34 +428,34 @@ export default function ScanScreen({ navigation }) {
                       resizeMode="cover"
                     />
                     <View style={{ flex: 1, marginLeft: 10 }}>
-                      <Text style={styles.itemName} numberOfLines={1}>
+                      <AppText style={styles.itemName} numberOfLines={1}>
                         {item.product_name}
-                      </Text>
+                      </AppText>
                     </View>
                   </View>
 
                   <View style={styles.itemFooter}>
-                    <Text style={styles.itemPrice}>
+                    <AppText style={styles.itemPrice}>
                       {(
                         item.price * productQuantities[item.product_id]
                       ).toLocaleString()}
                       원
-                    </Text>
+                    </AppText>
                     <View style={styles.qtyControl}>
                       <TouchableOpacity
                         onPress={() => decreaseQuantity(item.product_id)}
                         style={styles.qtyBtn}
                       >
-                        <Text>-</Text>
+                        <AppText>-</AppText>
                       </TouchableOpacity>
-                      <Text style={styles.qtyText}>
+                      <AppText style={styles.qtyText}>
                         {productQuantities[item.product_id]}
-                      </Text>
+                      </AppText>
                       <TouchableOpacity
                         onPress={() => increaseQuantity(item.product_id)}
                         style={styles.qtyBtn}
                       >
-                        <Text>+</Text>
+                        <AppText>+</AppText>
                       </TouchableOpacity>
                     </View>
                   </View>
@@ -468,13 +469,13 @@ export default function ScanScreen({ navigation }) {
         {/* 결제 고정 하단바 */}
         <View style={styles.purchaseBar}>
           <View style={styles.totalInfo}>
-            <Text style={styles.totalLabel}>합계</Text>
-            <Text style={styles.totalPriceText}>
+            <AppText style={styles.totalLabel}>합계</AppText>
+            <AppText style={styles.totalPriceText}>
               {calculateTotal().toLocaleString()}원
-            </Text>
+            </AppText>
           </View>
           <TouchableOpacity style={styles.payBtn} onPress={handlePurchase}>
-            <Text style={styles.payBtnText}>구매하기</Text>
+            <AppText style={styles.payBtnText}>구매하기</AppText>
           </TouchableOpacity>
         </View>
 
@@ -494,15 +495,15 @@ export default function ScanScreen({ navigation }) {
                     style={styles.modalImg}
                     resizeMode="contain"
                   />
-                  <Text style={styles.modalName}>
+                  <AppText style={styles.modalName}>
                     {selectedProduct.product_name}
-                  </Text>
-                  <Text style={styles.modalPrice}>
+                  </AppText>
+                  <AppText style={styles.modalPrice}>
                     {selectedProduct.price?.toLocaleString()}원
-                  </Text>
-                  <Text style={styles.modalTitle}>
+                  </AppText>
+                  <AppText style={styles.modalTitle}>
                     상품을 추가하시겠습니까?
-                  </Text>
+                  </AppText>
                 </>
               )}
               <View style={styles.modalBtnRow}>
@@ -510,15 +511,15 @@ export default function ScanScreen({ navigation }) {
                   style={styles.modalCancel}
                   onPress={() => setIsModalVisible(false)}
                 >
-                  <Text>취소</Text>
+                  <AppText>취소</AppText>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.modalOk}
                   onPress={() => addToCart(selectedProduct)}
                 >
-                  <Text style={{ color: "#fff", fontWeight: "bold" }}>
+                  <AppText style={{ color: "#fff", fontWeight: "bold" }}>
                     담기
-                  </Text>
+                  </AppText>
                 </TouchableOpacity>
               </View>
             </View>
@@ -635,7 +636,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   drawerHeader: {
-    fontSize: 18,
+    fontSize: fontSizes.md,
     fontWeight: "bold",
     marginVertical: 10,
   },
@@ -670,7 +671,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   itemName: {
-    fontSize: 15,
+    fontSize: fontSizes.sm,
     fontWeight: "600",
     color: "#333",
     marginBottom: 4,
@@ -680,7 +681,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   itemPrice: {
-    fontSize: 15,
+    fontSize: fontSizes.sm,
     fontWeight: "bold",
     color: "#FF9500",
   },
@@ -713,7 +714,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   qtyText: {
-    fontSize: 14,
+    fontSize: fontSizes.sm,
     fontWeight: "bold",
     color: "#333",
     marginHorizontal: 12,
@@ -737,8 +738,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 15,
   },
-  totalLabel: { color: "#888", fontSize: 14 },
-  totalPriceText: { fontSize: 22, fontWeight: "bold" },
+  totalLabel: { color: "#888", fontSize: fontSizes.sm },
+  totalPriceText: { fontSize: fontSizes.xl, fontWeight: "bold" },
   payBtn: {
     backgroundColor: "#FF9500",
     height: 50,
@@ -747,7 +748,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 30,
   },
-  payBtnText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  payBtnText: { color: "#fff", fontSize: fontSizes.md, fontWeight: "bold" },
 
   // 모달
   modalBg: {
@@ -763,11 +764,11 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
   },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 15 },
+  modalTitle: { fontSize: fontSizes.md, fontWeight: "bold", marginBottom: 15 },
   modalImg: { width: "100%", height: 150, marginBottom: 15 },
-  modalName: { fontSize: 16, marginBottom: 5 },
+  modalName: { fontSize: fontSizes.sm, marginBottom: 5 },
   modalPrice: {
-    fontSize: 20,
+    fontSize: fontSizes.lg,
     fontWeight: "bold",
     color: "#FF9500",
     marginBottom: 20,
