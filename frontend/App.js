@@ -17,7 +17,6 @@ import Cart from './screens/CartScreen';
 import MyPage from './screens/MyPageScreen';
 import Receipt from './screens/ReceiptScreen';
 import ReceiptDetail from './screens/ReceiptDetailScreen';
-
 import Period from './screens/components/PeriodDropdown';
 
 const Stack = createStackNavigator();
