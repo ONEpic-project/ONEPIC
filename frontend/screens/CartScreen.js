@@ -234,7 +234,10 @@ const CartScreen = ({ navigation }) => {
         <Text style={styles.itemName} numberOfLines={1}>
           {item.name}
         </Text>
-        <TouchableOpacity onPress={() => removeItem(item.id)}>
+        <TouchableOpacity 
+          onPress={() => removeItem(item.id)}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+        >
           <Text style={styles.deleteIcon}>✕</Text>
         </TouchableOpacity>
       </View>
