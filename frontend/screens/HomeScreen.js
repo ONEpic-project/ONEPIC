@@ -44,12 +44,30 @@ const HomeScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadUser = async () => {
-      const storedUsername = await AsyncStorage.getItem('username');
-      if (storedUsername) setUsername(storedUsername);
+      try {
+        const storedUsername = await AsyncStorage.getItem('username');
+        if (isMounted && storedUsername) setUsername(storedUsername);
+      } catch (e) {
+        console.error('loadUser error', e);
+      }
     };
+
+    // 초기 로드
     loadUser();
-  }, []);
+
+    // 화면 포커스 시 최신 사용자명 재로드
+    const unsubscribe = navigation.addListener('focus', () => {
+      loadUser();
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [navigation]);
 
   return (
     <View style={styles.container}>
