@@ -14,6 +14,7 @@ import {
   Alert,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import Feather from 'react-native-vector-icons/Feather';
 import Header from './components/Header';
 import { API_BASE_URL } from '../config/api';
 import { fontSizes } from '../config/typography';
@@ -33,6 +34,8 @@ const MyPageScreen = ({ navigation }) => {
 
   const [infoMessage, setInfoMessage] = useState('');
   const [infoMessageType, setInfoMessageType] = useState('info'); 
+
+  const [showPassword, setShowPassword] = useState(false); 
 
   const [snsType, setSnsType] = useState('local');
 
@@ -333,20 +336,41 @@ const MyPageScreen = ({ navigation }) => {
                 message={passwordError || infoMessage}
                 messageType={passwordError ? 'error' : infoMessageType}
               >
-                <TextInput
-                  ref={inputRefs.password}
-                  style={[styles.input, snsType !== 'local' && styles.disabledInput]}
-                  value={password || (snsType !== 'local' ? '*******' : '')}
-                  editable={isEditing && snsType === 'local'}
-                  secureTextEntry={true}
-                  onFocus={() => {
-                    if (snsType === 'local') {
-                      handlePasswordFocus();
-                      scrollToInput(inputRefs.password);
-                    }
-                  }}
-                  onChangeText={setPassword}
-                />
+                <View style={[styles.passwordWrapper, { borderBottomWidth: 0 }]}>
+                    <TextInput
+                    ref={inputRefs.password}
+                    style={[
+                        styles.input, 
+                        { flex: 1 }, 
+                        snsType !== 'local' && styles.disabledInput
+                    ]}
+                    value={password || (snsType !== 'local' ? '*******' : '')}
+                    editable={isEditing && snsType === 'local'}
+                    secureTextEntry={isEditing ? !showPassword : true}
+                    placeholder={isEditing ? "6자 이상 입력해 주세요" : ""}
+                    placeholderTextColor="#C8C8C8"
+                    onFocus={() => {
+                        if (snsType === 'local') {
+                        handlePasswordFocus();
+                        scrollToInput(inputRefs.password);
+                        }
+                    }}
+                    onChangeText={setPassword}
+                    />
+                    {isEditing && (
+                     <TouchableOpacity
+                        onPress={() => setShowPassword((prev) => !prev)}
+                        style={styles.eyeButton}
+                        activeOpacity={0.7}
+                    >
+                        <Feather
+                        name={showPassword ? 'eye-off' : 'eye'}
+                        size={25}
+                        color="#9A9A9A"
+                        />
+                    </TouchableOpacity>
+                    )}
+                </View>
               </Field>
             </View>
 
@@ -422,6 +446,19 @@ const styles = StyleSheet.create({
   input: { fontSize: fontSizes.lg, color: '#4B4B4B' },
   disabledInput: { backgroundColor: '#F5F5F5', color: '#A4A4A4', paddingHorizontal: 5 },
   readonly: { color: '#A4A4A4' },
+  disabledInput: { backgroundColor: '#F5F5F5', color: '#A4A4A4', paddingHorizontal: 5 },
+  readonly: { color: '#A4A4A4' },
+  passwordWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+  },
+  eyeButton: {
+    paddingLeft: 10,
+    paddingVertical: 8,
+    position: 'absolute',
+    right: 0,
+  },
   divider: { height: 1, backgroundColor: '#848484', marginTop: 6 },
 
   error: { marginTop: 15, color: '#FF3B30', fontSize: fontSizes.sm },

@@ -15,6 +15,7 @@ import {
 import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { fontSizes } from '../config/typography';
+import Feather from 'react-native-vector-icons/Feather';
 
 import { API_BASE_URL } from '../config/api';
 import KakaoLogin from '../components/KakaoLogin';
@@ -26,6 +27,7 @@ const LoginScreen = ({ navigation }) => {
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
 
 
@@ -142,16 +144,29 @@ const LoginScreen = ({ navigation }) => {
               placeholderTextColor="#686868"
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="비밀번호"
-              secureTextEntry
-              value={password}
-              onChangeText={setPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              placeholderTextColor="#686868"
-            />
+            <View style={styles.passwordWrapper}>
+              <TextInput
+                style={[styles.input, { flex: 1, marginBottom: 0, borderBottomWidth: 0 }]}
+                placeholder="비밀번호"
+                secureTextEntry={!showPassword}
+                value={password}
+                onChangeText={setPassword}
+                autoCapitalize="none"
+                autoCorrect={false}
+                placeholderTextColor="#686868"
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword((prev) => !prev)}
+                style={styles.eyeButton}
+                activeOpacity={0.7}
+              >
+                <Feather
+                  name={showPassword ? 'eye-off' : 'eye'}
+                  size={20}
+                  color="#686868"
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           {/* 로그인 버튼 */}
@@ -222,6 +237,21 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.035,
     paddingVertical: 10,
     alignSelf: 'center',
+  },
+  passwordWrapper: {
+    width: '80%',
+    height: height * 0.06,
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    marginBottom: height * 0.035,
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+  },
+  eyeButton: {
+    position: 'absolute',
+    right: 0,
+    padding: 10,
   },
   loginButton: {
     width: '85%',
