@@ -80,6 +80,21 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
     }
 
 
+# 내 정보 조회 ================================================
+@router.get("/me", tags=["Auth"])
+def read_users_me(current_user: User = Depends(get_current_user)):
+    """
+    현재 로그인한 사용자 정보를 반환합니다.
+    """
+    return {
+        "user_id": current_user.user_id,
+        "login_id": current_user.login_id,
+        "username": current_user.username,
+        "phone": current_user.phone,
+        "sns_type": current_user.sns_type  # 프론트엔드 구분용 중요 필드
+    }
+
+
 # 회원 탈퇴 ================================================
 @router.delete("/me", tags=["Auth"])
 def delete_me(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
