@@ -48,7 +48,9 @@ const GoogleLogin = ({ navigation }) => {
 
   const handleBackendLogin = async (code) => {
     try {
-      const cleanCode = code.split('&')[0];
+      // URL 인코딩된 코드를 디코딩 (예: %2F -> /)
+      const decodedCode = decodeURIComponent(code);
+      const cleanCode = decodedCode.split('&')[0];
 
       // Call Backend (Not implemented yet, but prepared)
       const response = await axios.post(`${API_BASE_URL}/api/auth/google`, {
