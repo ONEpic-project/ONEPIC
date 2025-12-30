@@ -1,27 +1,46 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
-# from app.database.database import engine, Base
-from app.routers import products, ai, auth, health, cart, receipt, kakao_auth, google_auth
-
-# ...
-
-# 라우터 등록
-app.include_router(health.router)
-app.include_router(ai.router, prefix="/api/ai")     # 필수로 존재해야 함
-app.include_router(products.router, prefix="/api/products")
-app.include_router(auth.router, prefix="/api")
-app.include_router(cart.router, prefix="/api")
-app.include_router(receipt.router, prefix="/api")
-app.include_router(kakao_auth.router, prefix="/api")
-app.include_router(google_auth.router, prefix="/api")
-
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
+from app.routers import (
+    products,
+    ai,
+    auth,
+    health,
+    cart,
+    receipt,
+    kakao_auth,
+    google_auth,
+)
 
 
 app = FastAPI(
     swagger_ui_parameters={"persistAuthorization": True}
 )
+
+
+# 라우터 등록
+app.include_router(health.router)
+app.include_router(ai.router, prefix="/api/ai")
+app.include_router(products.router, prefix="/api/products")
+app.include_router(auth.router, prefix="/api")
+app.include_router(cart.router, prefix="/api")
+app.include_router(receipt.router, prefix="/api")
+app.include_router(kakao_auth.router, prefix="/api")
+
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 개발 단계에서는 *
+    allow_credentials=True,
+    allow_methods=["*"],  # OPTIONS, POST, GET 전부 허용
+    allow_headers=["*"],
+)
+
+# Static files
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 
 def custom_openapi():
     if app.openapi_schema:
@@ -38,38 +57,16 @@ def custom_openapi():
             "bearerFormat": "JWT",
         }
     }
+
     # DELETE /api/auth/me에 보안 적용
     if "/api/auth/me" in openapi_schema.get("paths", {}):
         if "delete" in openapi_schema["paths"]["/api/auth/me"]:
             openapi_schema["paths"]["/api/auth/me"]["delete"]["security"] = [{"Bearer": []}]
 
-    
     app.openapi_schema = openapi_schema
     return app.openapi_schema
 
 app.openapi = custom_openapi
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # 개발 단계에서는 *
-    allow_credentials=True,
-    allow_methods=["*"],  # OPTIONS, POST, GET 전부 허용
-    allow_headers=["*"],
-)
-
-# 라우터 등록
-app.include_router(health.router)
-app.include_router(ai.router, prefix="/api/ai")     # 필수로 존재해야 함
-app.include_router(products.router, prefix="/api/products")
-app.include_router(auth.router, prefix="/api")
-app.include_router(cart.router, prefix="/api")
-app.include_router(receipt.router, prefix="/api")
-app.include_router(kakao_auth.router, prefix="/api")
-
-
-
-# Static files
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 @app.get("/")
