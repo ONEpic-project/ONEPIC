@@ -492,7 +492,7 @@ export default function ScanScreen({ navigation }) {
               scannedProducts.map((item) => (
                 <View key={item.product_id} style={styles.cartItem}>
                   <View style={styles.itemHeader}>
-                    <AppText style={styles.itemName}>{item.product_name}</AppText>
+                    <View />
                     <TouchableOpacity
                       onPress={() => removeProduct(item.product_id)}
                     >
@@ -507,7 +507,7 @@ export default function ScanScreen({ navigation }) {
                       resizeMode="cover"
                     />
                     <View style={{ flex: 1, marginLeft: 10 }}>
-                      <AppText style={styles.itemName} numberOfLines={1}>
+                      <AppText style={styles.itemNameInline} numberOfLines={1}>
                         {item.product_name}
                       </AppText>
                     </View>
@@ -740,7 +740,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 10,
+    //marginBottom: 5,
   },
   itemImg: {
     width: 50,
@@ -754,6 +754,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#333",
     marginBottom: 4,
+  },
+  itemNameInline: {
+    fontSize: fontSizes.sm,
+    fontWeight: "600",
+    color: "#333",
+    // move slightly down relative to the image
+    marginTop: 15,
   },
   itemBody: {
     flexDirection: "row",
@@ -804,7 +811,7 @@ const styles = StyleSheet.create({
   // 하단 결제바
   purchaseBar: {
     position: "absolute",
-    bottom: 0,
+    bottom: 10,
     width: "100%",
     height: PURCHASE_AREA_HEIGHT,
     backgroundColor: "#fff",
