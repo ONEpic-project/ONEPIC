@@ -9,6 +9,9 @@ import {
 } from 'react-native';
 
 import Header from './components/Header';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 const { width } = Dimensions.get('window');
 
@@ -16,28 +19,59 @@ const { width } = Dimensions.get('window');
  * 임시 영수증 리스트 (UI 확인용)
  * ❌ 네트워크 / DB / user 무시
  */
-const DUMMY_RECEIPTS = [
-  { id: 1, date: '2025-12-22', amount: '10,900원 구매' },
-  { id: 2, date: '2025-12-22', amount: '10,900원 구매' },
-  { id: 3, date: '2025-12-22', amount: '10,900원 구매' },
-  { id: 4, date: '2025-12-22', amount: '10,900원 구매' },
-  { id: 5, date: '2025-12-22', amount: '10,900원 구매' },
-];
-
 const ReceiptScreen = ({ navigation }) => {
   const [period, setPeriod] = useState('이번 달');
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [receipts, setReceipts] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  // 화면 포커스 될 때마다 리스트 갱신
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchReceipts();
+    });
+    return unsubscribe;
+  }, [navigation]);
+
+  const fetchReceipts = async () => {
+    try {
+      setLoading(true);
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) return;
+
+      // GET /api/receipts/me 호출
+      const response = await axios.get(`${API_BASE_URL}/api/receipts/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setReceipts(response.data);
+    } catch (error) {
+      console.error('영수증 목록 조회 실패:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const PERIOD_OPTIONS = ['이번 달', '1개월 전', '2개월 전'];
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    // YYYY-MM-DD 만 표시
+    return dateString.split('T')[0];
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.item}>
       <View>
-        <Text style={styles.date}>{item.date}</Text>
-        <Text style={styles.amount}>{item.amount}</Text>
+        <Text style={styles.date}>{formatDate(item.created_at)}</Text>
+        <Text style={styles.amount}>
+          {item.total_amount?.toLocaleString()}원 구매
+        </Text>
       </View>
 
-      <TouchableOpacity style={styles.viewButton} onPress={() => navigation.navigate('ReceiptDetail')}>
+      <TouchableOpacity 
+        style={styles.viewButton} 
+        onPress={() => navigation.navigate('ReceiptDetail', { receiptId: item.receipt_id })}
+      >
         <Text style={styles.viewButtonText}>영수증 보기</Text>
       </TouchableOpacity>
     </View>
@@ -87,10 +121,19 @@ const ReceiptScreen = ({ navigation }) => {
       {/* 리스트 */}
       <FlatList
         contentContainerStyle={{ paddingTop: 26 }}
-        data={DUMMY_RECEIPTS}
-        keyExtractor={(item) => String(item.id)}
+        data={receipts}
+        keyExtractor={(item) => String(item.receipt_id)}
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={styles.divider} />}
+        refreshing={loading}
+        onRefresh={fetchReceipts}
+        ListEmptyComponent={
+          !loading && (
+            <View style={{ padding: 20, alignItems: 'center' }}>
+              <Text style={{ color: '#999' }}>영수증 내역이 없습니다.</Text>
+            </View>
+          )
+        }
       />
     </View>
   );

@@ -1,31 +1,97 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
+  Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import Header from './components/Header';
+import { API_BASE_URL } from '../config/api';
 
 const { width } = Dimensions.get('window');
 
-const ReceiptDetailScreen = ({ navigation }) => {
+const ReceiptDetailScreen = ({ route, navigation }) => {
+  const { receiptId } = route.params || {};
+  const [receipt, setReceipt] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!receiptId) {
+      Alert.alert('오류', '영수증 정보가 없습니다.');
+      navigation.goBack();
+      return;
+    }
+    fetchReceiptDetail();
+  }, [receiptId]);
+
+  const fetchReceiptDetail = async () => {
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        Alert.alert('오류', '로그인이 필요합니다.');
+        return;
+      }
+
+      const response = await axios.get(`${API_BASE_URL}/api/receipts/${receiptId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      setReceipt(response.data);
+    } catch (error) {
+      console.error('영수증 상세 조회 실패:', error);
+      Alert.alert('오류', '영수증 정보를 불러오지 못했습니다.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    const hh = String(date.getHours()).padStart(2, '0');
+    const min = String(date.getMinutes()).padStart(2, '0');
+    const ss = String(date.getSeconds()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${hh}:${min}:${ss}`;
+  };
+
+  const getPaymentMethodName = (method) => {
+    switch (method) {
+      case 'kakao': return '카카오페이';
+      case 'card': return '카드 결제';
+      default: return method || '-';
+    }
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <ActivityIndicator size="large" color="#FF9500" />
+      </View>
+    );
+  }
+
+  if (!receipt) {
+    return (
+      <View style={[styles.container, styles.center]}>
+        <Text>영수증 정보가 없습니다.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-
-      {/* ⭐ 이 화면에서만 헤더를 아래로 내리기 위한 spacer */}
       <View style={{ height: 13 }} />
-
-      {/* 헤더 (그대로 사용) */}
-      <Header 
-        navigation={navigation}
-        title="전자영수증"
-      />
+      <Header navigation={navigation} title="전자영수증" />
 
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-        {/* 매장 정보 */}
+        {/* 매장 정보 (고정) */}
         <View style={styles.storeSection}>
           <Text style={styles.storeName}>원픽마트 동대구점</Text>
           <Text style={styles.storeAddress}>대구광역시 중구 동내구로 566</Text>
@@ -41,23 +107,24 @@ const ReceiptDetailScreen = ({ navigation }) => {
           </View>
         </View>
 
-        {/* 거래 정보 */}
+        {/* 거래 정보 (동적) */}
         <View style={styles.transactionSection}>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>거래일시 2025-12-22</Text>
+            <Text style={styles.infoLabel}>거래일시 {formatDate(receipt.created_at)}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>거래수단 네이버페이</Text>
+            <Text style={styles.infoLabel}>거래수단 {getPaymentMethodName(receipt.payment_method)}</Text>
           </View>
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>카드번호 1234********5678</Text>
+            <Text style={styles.infoLabel}>결제금액 {receipt.total_amount?.toLocaleString()}원</Text>
           </View>
+          {/* 카드번호/승인번호는 실제 데이터가 없으므로 임시 숨김 처리하거나 고정값 유지 */}
           <View style={styles.infoRow}>
-            <Text style={styles.infoLabel}>승인번호 123456</Text>
+             <Text style={styles.infoLabel}>승인번호 {receipt.receipt_id.toString().padStart(8, '0')}</Text>
           </View>
         </View>
 
-        {/* 상품 목록 */}
+        {/* 상품 목록 (동적) */}
         <View style={styles.divider} />
         
         <View style={styles.itemsHeader}>
@@ -68,18 +135,16 @@ const ReceiptDetailScreen = ({ navigation }) => {
         
         <View style={styles.divider} />
 
-        {/* 상품 아이템 */}
-        <View style={styles.itemRow}>
-          <Text style={[styles.itemName, { flex: 2 }]}>오리온 초코송이 40g</Text>
-          <Text style={[styles.itemQuantity, { flex: 0.5, textAlign: 'center' }]}>1</Text>
-          <Text style={[styles.itemPrice, { flex: 1, textAlign: 'right' }]}>1,380원</Text>
-        </View>
-
-        <View style={styles.itemRow}>
-          <Text style={[styles.itemName, { flex: 2 }]}>오리온 예감 오리지널 38g</Text>
-          <Text style={[styles.itemQuantity, { flex: 0.5, textAlign: 'center' }]}>1</Text>
-          <Text style={[styles.itemPrice, { flex: 1, textAlign: 'right' }]}>2,080원</Text>
-        </View>
+        {/* 상품 아이템 반복 렌더링 */}
+        {receipt.items && receipt.items.map((item, index) => (
+          <View key={index} style={styles.itemRow}>
+            <Text style={[styles.itemName, { flex: 2 }]}>{item.product_name}</Text>
+            <Text style={[styles.itemQuantity, { flex: 0.5, textAlign: 'center' }]}>{item.quantity}</Text>
+            <Text style={[styles.itemPrice, { flex: 1, textAlign: 'right' }]}>
+              {(item.price * item.quantity).toLocaleString()}원
+            </Text>
+          </View>
+        ))}
 
         {/* 안내사항 */}
         <View style={styles.noticeSection}>
@@ -102,6 +167,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+  },
+  center: {
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   scrollView: {
     flex: 1,

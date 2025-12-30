@@ -75,3 +75,23 @@ def create_receipt_from_cart(
     except Exception as e:
         db.rollback()
         raise e
+
+
+def get_receipts_by_user(db: Session, user_id: int):
+    return (
+        db.query(Receipt)
+        .filter(Receipt.user_id == user_id)
+        .order_by(Receipt.created_at.desc())
+        .all()
+    )
+
+
+def get_receipt_detail(db: Session, receipt_id: int, user_id: int):
+    return (
+        db.query(Receipt)
+        .filter(
+            Receipt.receipt_id == receipt_id,
+            Receipt.user_id == user_id
+        )
+        .first()
+    )
