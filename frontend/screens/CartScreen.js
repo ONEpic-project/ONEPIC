@@ -230,11 +230,9 @@ const CartScreen = ({ navigation }) => {
 
   const renderCartItem = ({ item }) => (
     <View style={styles.cartItemCard}>
-      {/* 상단: 상품명 및 삭제 버튼 */}
+      {/* 상단: 삭제 버튼 (상품명은 이미지 옆 한 곳에서만 표시) */}
       <View style={styles.itemHeader}>
-        <AppText style={styles.itemName} numberOfLines={1}>
-          {item.name}
-        </AppText>
+        <View style={{ flex: 1 }} />
         <TouchableOpacity 
           onPress={() => removeItem(item.id)}
           hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
@@ -386,9 +384,9 @@ const styles = StyleSheet.create({
 
   cartItemCard: {
     backgroundColor: "#fff",
-    padding: 15,
-    borderRadius: 15,
-    marginBottom: 12,
+    padding: 10,
+    borderRadius: 12,
+    marginBottom: 8,
     elevation: 2,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
@@ -400,25 +398,25 @@ const styles = StyleSheet.create({
   itemHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 10,
+    marginBottom: 6,
   },
   itemName: {
-    fontSize: fontSizes.lg,
+    fontSize: fontSizes.md,
     fontWeight: "600",
     color: "#333",
     flex: 1,
-    marginRight: 10,
+    marginRight: 8,
   },
   deleteIcon: { color: "#ccc", fontSize: fontSizes.md, fontWeight: "600" },
   itemBody: { flexDirection: "row", marginBottom: 10 },
   itemImg: {
-    width: 50,
-    height: 50,
-    borderRadius: 10,
+    width: 44,
+    height: 44,
+    borderRadius: 8,
     backgroundColor: "#f5f5f5",
   },
-  itemInfo: { flex: 1, marginLeft: 10, justifyContent: "center" },
-  itemNameSecondary: { fontSize: fontSizes.sm, color: "#666", marginBottom: 2 },
+  itemInfo: { flex: 1, marginLeft: 12, justifyContent: "center" },
+  itemNameSecondary: { fontSize: fontSizes.sm, color: "#000000ff", marginBottom: 0, fontWeight: "600" },
   itemDescription: { fontSize: fontSizes.sm, color: "#999" },
   itemFooter: {
     flexDirection: "row",
