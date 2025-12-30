@@ -182,9 +182,9 @@ const styles = StyleSheet.create({
 
   /* 이 화면 전용 제목 */
   customTitle: {
-    marginTop: -48,        // ↑↓ 위치 조절
-    marginLeft: 150,       // ←→ 위치 조절
-    fontSize: 20,
+    marginTop: -50,        // ↑↓ 위치 조절
+    marginLeft: 140,       // ←→ 위치 조절
+    fontSize: 24,
     fontWeight: '600',
     color: '#000000',
   },
@@ -198,12 +198,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   date: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '600',
     color: '#2C2C2C',
   },
   amount: {
-    fontSize: 14,
+    fontSize: 18,
     color: '#666666',
     marginTop: 4,
   },
@@ -219,7 +219,7 @@ const styles = StyleSheet.create({
   viewButtonText: {
     color: '#666666',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: 18,
   },
 
   divider: {
@@ -242,7 +242,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   dropdownText: {
-    fontSize: 13,
+    fontSize: 15,
     color: '#333333',
   },
   dropdownMenu: {
