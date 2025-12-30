@@ -9,7 +9,7 @@ import { API_BASE_URL } from '../config/api';
 const REST_API_KEY = "14d4155ec774b7dfda7d393aa289f385"; 
 const REDIRECT_URI = "http://localhost:8081/oauth/callback/kakao";
 
-const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}`;
+const KAKAO_AUTH_URL = `https://kauth.kakao.com/oauth/authorize?response_type=code&client_id=${REST_API_KEY}&redirect_uri=${REDIRECT_URI}&prompt=login`;
 
 const { width, height } = Dimensions.get('window');
 
@@ -35,11 +35,16 @@ const KakaoLogin = ({ navigation }) => {
       // Send code to Backend
       handleBackendLogin(code);
     }
-    
-    // Handle error or cancel
-    if (url.includes('error=')) {
+  };
+
+  const handleError = (syntheticEvent) => {
+    const { nativeEvent } = syntheticEvent;
+    // -1004 Error (Connection Failure to localhost) means redirect attempted
+    if (nativeEvent.url && nativeEvent.url.includes('code=')) {
+        const code = nativeEvent.url.split('code=')[1];
+        console.log('Kakao Auth Code (from Error):', code);
         setModalVisible(false);
-        Alert.alert("로그인 취소/실패", "사용자가 취소했거나 오류가 발생했습니다.");
+        handleBackendLogin(code);
     }
   };
 
@@ -106,6 +111,17 @@ const KakaoLogin = ({ navigation }) => {
                 source={{ uri: KAKAO_AUTH_URL }}
                 style={{ flex: 1 }}
                 onNavigationStateChange={handleWebViewNavigationStateChange}
+                onShouldStartLoadWithRequest={(request) => {
+                    // iOS often handles redirection here
+                    if (request.url.includes('code=')) {
+                        const code = request.url.split('code=')[1];
+                        setModalVisible(false);
+                        handleBackendLogin(code);
+                        return false; // Stop loading localhost
+                    }
+                    return true;
+                }}
+                onError={handleError}
                 javaScriptEnabled={true}
                 domStorageEnabled={true}
                 startInLoadingState={true}

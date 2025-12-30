@@ -6,10 +6,13 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './components/Header';
 import { API_BASE_URL } from '../config/api';
 
+import { WebView } from 'react-native-webview';
+
 const { width, height } = Dimensions.get('window');
 
 const MyPageScreen = ({navigation}) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [loginId, setLoginId] = useState('');
@@ -198,6 +201,37 @@ const MyPageScreen = ({navigation}) => {
     }
   };
 
+  const handleLogout = () => {
+      // 카카오 로그아웃 URL 호출을 위해 WebView 활성화
+      // (만약 카카오 유저가 아니어도 호출해도 상관없음, 에러나면 그냥 로컬 로그아웃 진행)
+      setShowLogoutModal(true);
+      
+      // 혹시 WebView가 5초 동안 응답 없으면 강제 로그아웃
+      setTimeout(() => {
+          if (showLogoutModal) { // 아직 안 끝났으면
+              performLocalLogout();
+          }
+      }, 3000);
+  };
+
+  const performLocalLogout = async () => {
+    try {
+      setShowLogoutModal(false); // 확실히 닫기
+      // 로컬 토큰 삭제
+      await AsyncStorage.multiRemove(['user_id', 'username', 'login_id', 'access_token', 'phone']);
+      Alert.alert('알림', '로그아웃 되었습니다.');
+      
+      // 로그인 화면으로 이동 (스택 초기화)
+      navigation.reset({
+        index: 0,
+        routes: [{ name: 'Login' }],
+      });
+    } catch (e) {
+      console.log('로그아웃 에러', e);
+      Alert.alert('오류', '로그아웃 처리 중 에러가 발생했습니다.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       {/* 헤더 */}
@@ -272,10 +306,10 @@ const MyPageScreen = ({navigation}) => {
         </View>
       </View>
 
-      {/* 하단 메뉴 이거는 시간이 되면...*/}
+      {/* 하단 메뉴 */}
       <View style={styles.bottomMenu}>
 
-        <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <TouchableOpacity onPress={handleLogout}>
           <Text style={styles.logout}>로그아웃</Text>
         </TouchableOpacity>
 
@@ -283,6 +317,40 @@ const MyPageScreen = ({navigation}) => {
           <Text style={styles.withdraw}>탈퇴하기</Text>
         </TouchableOpacity>
       </View>
+      
+      {/* 카카오 로그아웃용 히든 WebView (사이즈 0이면 로드 안될 수 있음) */}
+      {showLogoutModal && (
+        <View style={{ position: 'absolute', width: 1, height: 1, opacity: 0.1, bottom: 0 }}>
+          <WebView
+            source={{ uri: `https://kauth.kakao.com/oauth/logout?client_id=14d4155ec774b7dfda7d393aa289f385&logout_redirect_uri=http://localhost:8081/oauth/callback/kakao` }}
+            onLoadStart={(e) => console.log('Logout WebView Load Start:', e.nativeEvent.url)}
+            onShouldStartLoadWithRequest={(request) => {
+              console.log('Logout WebView Request:', request.url);
+              if (request.url.includes('oauth/callback/kakao')) {
+                  setShowLogoutModal(false);
+                  performLocalLogout();
+                  return false;
+              }
+              return true;
+            }}
+            onError={(syntheticEvent) => {
+              const { nativeEvent } = syntheticEvent;
+              console.log('Logout WebView Error:', nativeEvent);
+              // localhost 접속 에러인 경우에만 성공으로 처리
+              if (nativeEvent.url && nativeEvent.url.includes('oauth/callback/kakao')) {
+                 setShowLogoutModal(false);
+                 performLocalLogout();
+              } else {
+                 // 그 외 에러는 진짜 에러일 수 있음
+                 if (nativeEvent.url === "") {
+                     // URL이 비어서 온다면... 일단 무시하거나 로컬 로그아웃만 진행?
+                     // 하지만 쿠키삭제가 안됐을 수 있음.
+                 }
+              }
+            }}
+          />
+        </View>
+      )}
     </View>
   );
 };
