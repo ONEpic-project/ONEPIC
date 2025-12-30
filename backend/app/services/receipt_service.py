@@ -17,8 +17,11 @@ def create_receipt_from_cart(
     """
 
     try:
-        # 1. 유저의 cart 조회
-        cart = db.query(Cart).filter(Cart.user_id == user_id).first()
+        # 1. 유저의 cart 조회 (ACTIVE 상태인 것만)
+        cart = db.query(Cart).filter(
+            Cart.user_id == user_id,
+            Cart.status == "ACTIVE"
+        ).first()
         if not cart:
             raise ValueError("장바구니가 존재하지 않습니다.")
 
@@ -60,8 +63,9 @@ def create_receipt_from_cart(
         db.add_all(receipt_items)
 
         # 5. cart_items 삭제 (cart 비우기)
-        for item in cart_items:
-            db.delete(item)
+        # 5. cart_items 삭제 (삭제하지 않음 - status 변경으로 처리)
+        # for item in cart_items:
+        #     db.delete(item)
 
         db.commit()
         db.refresh(receipt)

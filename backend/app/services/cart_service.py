@@ -17,7 +17,7 @@ def calculate_cart_total(cart: Cart) -> int:
 def purge_inactive_carts(db: Session) -> None:
     cutoff = datetime.utcnow() - timedelta(days=7)
     db.query(Cart).filter(
-        Cart.status == "ABANDONED",
+        Cart.status == "CHECKED_OUT",
         Cart.updated_at < cutoff,
     ).delete(synchronize_session=False)
     db.commit()
