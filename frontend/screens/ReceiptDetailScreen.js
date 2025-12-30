@@ -8,6 +8,7 @@ import {
   Alert,
 } from 'react-native';
 import AppText from '../components/AppText';
+import { fontSizes } from '../config/typography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import Header from './components/Header';
@@ -181,13 +182,13 @@ const styles = StyleSheet.create({
     paddingBottom: 16,
   },
   storeName: {
-    fontSize: width > 400 ? 20 : 18,
+    fontSize: fontSizes.lg,
     fontWeight: '700',
     marginBottom: 8,
     letterSpacing: -0.5,
   },
   storeAddress: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
     marginBottom: 16,
   },
@@ -195,7 +196,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   infoLabel: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
     lineHeight: 20,
   },
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   tableHeader: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     fontWeight: '600',
     color: '#666',
   },
@@ -226,15 +227,15 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   itemName: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
   },
   itemQuantity: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
   },
   itemPrice: {
-    fontSize: width > 400 ? 14 : 13,
+    fontSize: fontSizes.sm,
     color: '#333',
     fontWeight: '500',
   },
@@ -244,7 +245,7 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   noticeText: {
-    fontSize: width > 400 ? 12 : 11,
+    fontSize: fontSizes.sm,
     color: '#666',
     lineHeight: 20,
     marginBottom: 4,

@@ -8,6 +8,7 @@ import {
   Dimensions
 } from 'react-native';
 import AppText from '../../components/AppText';
+import { fontSizes } from '../../config/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -116,7 +117,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   selectedPeriod: {
-    fontSize: 16,
+    fontSize: fontSizes.sm,
     fontWeight: '700',
     color: '#4B4B4B',
   },
@@ -149,7 +150,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#f0f0f0',
   },
   menuItemText: {
-    fontSize: 14,
+    fontSize: fontSizes.sm,
     color: '#333',
     textAlign: 'center',
   },

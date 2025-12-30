@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, TouchableOpacity, Image, StyleSheet, Dimensions } from 'react-native';
 import AppText from '../components/AppText';
+import { fontSizes } from '../config/typography';
 
 const { width, height } = Dimensions.get('window');
 
@@ -56,7 +57,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   messageText: {
-    fontSize: 22,
+    fontSize: fontSizes.xl,
     fontWeight: '700',
     color: '#333333',
     lineHeight: 32,
@@ -74,7 +75,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   homeButtonText: {
-    fontSize: 18,
+    fontSize: fontSizes.md,
     fontWeight: '600',
     color: '#FFFFFF',
   },

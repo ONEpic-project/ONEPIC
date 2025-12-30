@@ -7,6 +7,7 @@ import {
   Dimensions,
 } from 'react-native';
 import AppText from '../components/AppText';
+import { fontSizes } from '../config/typography';
 
 import Header from './components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -90,7 +91,12 @@ const ReceiptScreen = ({ navigation }) => {
               onPress={() => setDropdownOpen(!dropdownOpen)}
               activeOpacity={0.8}
             >
-                <AppText style={styles.dropdownText}>{period}</AppText>
+              <AppText style={styles.dropdownText}>{period}</AppText>
+            </TouchableOpacity>
+
+            {dropdownOpen && (
+              <View style={styles.dropdownMenu}>
+                {PERIOD_OPTIONS.map((option) => (
                   <TouchableOpacity
                     key={option}
                     style={styles.dropdownItem}
@@ -98,6 +104,7 @@ const ReceiptScreen = ({ navigation }) => {
                       setPeriod(option);
                       setDropdownOpen(false);
                     }}
+                    activeOpacity={0.8}
                   >
                     <AppText style={styles.dropdownItemText}>{option}</AppText>
                   </TouchableOpacity>
@@ -144,7 +151,7 @@ const styles = StyleSheet.create({
   customTitle: {
     marginTop: -48,        // ↑↓ 위치 조절
     marginLeft: 150,       // ←→ 위치 조절
-    fontSize: 20,
+    fontSize: fontSizes.lg,
     fontWeight: '600',
     color: '#000000',
   },
@@ -158,12 +165,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   date: {
-    fontSize: 15,
+    fontSize: fontSizes.md,
     fontWeight: '600',
     color: '#2C2C2C',
   },
   amount: {
-    fontSize: 14,
+    fontSize: fontSizes.sm,
     color: '#666666',
     marginTop: 4,
   },
@@ -179,7 +186,7 @@ const styles = StyleSheet.create({
   viewButtonText: {
     color: '#666666',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: fontSizes.sm,
   },
 
   divider: {
@@ -202,7 +209,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   dropdownText: {
-    fontSize: 13,
+    fontSize: fontSizes.sm,
     color: '#333333',
   },
   dropdownMenu: {
@@ -225,7 +232,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   dropdownItemText: {
-    fontSize: 13,
+    fontSize: fontSizes.sm,
     color: '#333333',
   },
 });

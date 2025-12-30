@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { fontSizes } from '../config/typography';
 
 import { API_BASE_URL } from '../config/api';
 
@@ -187,13 +188,13 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.1, // 화면 높이의 10%
   },
   title: {
-    fontSize: width * 0.12, // 화면 너비의 12%
+    fontSize: fontSizes.xl,
     fontWeight: 'bold',
     color: '#FF9500',
     marginBottom: height * 0.01,
   },
   subtitle: {
-    fontSize: width * 0.045, // 화면 너비의 3.5%
+    fontSize: fontSizes.md,
     color: '#686868',
     letterSpacing: 0.5,
   },
@@ -206,7 +207,7 @@ const styles = StyleSheet.create({
     height: height * 0.06, // 화면 높이의 6%
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
-    fontSize: 20,
+    fontSize: fontSizes.lg,
     marginBottom: height * 0.035,
     paddingVertical: 10,
     alignSelf: 'center',
@@ -222,7 +223,7 @@ const styles = StyleSheet.create({
     marginTop: height * 0.025,
   },
   loginButtonText: {
-    fontSize: width * 0.05,
+    fontSize: fontSizes.md,
     fontWeight: '600',
     color: '#FFFFFF',
   },
@@ -231,13 +232,13 @@ const styles = StyleSheet.create({
     marginTop: height * 0.05,
   },
   signupText: {
-    fontSize: width * 0.045,
+    fontSize: fontSizes.md,
     fontWeight: '600',
     color: '#333',
     marginBottom: height * 0.015,
   },
   forgotText: {
-    fontSize: width * 0.04,
+    fontSize: fontSizes.sm,
     //fontSize:20,
     color: '#686868',
   },

@@ -10,6 +10,7 @@ import {
   Dimensions,
 } from "react-native";
 import AppText from "../components/AppText";
+import { fontSizes } from '../config/typography';
 
 import * as Clipboard from "expo-clipboard";
 import { API_BASE_URL } from "../config/api";
@@ -226,22 +227,27 @@ const FindAccountScreen = ({ navigation }) => {
                   </AppText>
                 </View>
               )}
+
+              <View style={styles.buttonContainer}>
+                <TouchableOpacity
+                  style={styles.searchButton}
+                  onPress={handleFindPassword}
+                >
+                  <AppText style={styles.searchButtonText}>검색</AppText>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.loginButton}
+                  onPress={goToLogin}
+                >
+                  <AppText style={styles.loginButtonText}>로그인 하기</AppText>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         </View>
       </ScrollView>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.searchButton}
-          onPress={handleFindPassword}
-        >
-          <AppText style={styles.searchButtonText}>검색</AppText>
-        </TouchableOpacity>
 
-        <TouchableOpacity style={styles.loginButton} onPress={goToLogin}>
-          <AppText style={styles.loginButtonText}>로그인 하기</AppText>
-        </TouchableOpacity>
-      </View>
     </>
   );
 };
@@ -276,7 +282,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FF9500",
   },
   tabText: {
-    fontSize: width * 0.04,
+    fontSize: fontSizes.md,
     fontWeight: "600",
     color: "#FF9500",
   },
@@ -291,7 +297,7 @@ const styles = StyleSheet.create({
     height: height * 0.06,
     borderBottomWidth: 1,
     borderBottomColor: "#E0E0E0",
-    fontSize: width * 0.04,
+    fontSize: fontSizes.md,
     color: "#333",
     marginBottom: height * 0.035,
     paddingVertical: 10,
@@ -302,20 +308,20 @@ const styles = StyleSheet.create({
     minHeight: height * 0.03,
   },
   resultText: {
-    fontSize: width * 0.045,
+    fontSize: fontSizes.lg,
     color: "#FF9500",
     fontWeight: "500",
     textAlign: "center",
   },
   noticeText: {
     marginTop: 10,
-    fontSize: width * 0.035,
+    fontSize: fontSizes.sm,
     color: "#999",
     textAlign: "center",
   },
   buttonContainer: {
     width: "100%",
-    marginTop: height * 0.2,
+    //marginTop: height * 0.2,
   },
   searchButton: {
     width: "100%",
@@ -327,7 +333,7 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.02,
   },
   searchButtonText: {
-    fontSize: width * 0.045,
+    fontSize: fontSizes.md,
     fontWeight: "600",
     color: "#FFFFFF",
   },
@@ -342,13 +348,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   loginButtonText: {
-    fontSize: width * 0.045,
+    fontSize: fontSizes.md,
     fontWeight: "600",
     color: "#FF9500",
   },
   noticeText: {
     marginTop: 10,
-    fontSize: width * 0.035,
+    fontSize: fontSizes.sm,
     color: "#999",
     textAlign: "center",
   },

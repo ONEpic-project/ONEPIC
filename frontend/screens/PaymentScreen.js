@@ -9,6 +9,7 @@ import {
   Dimensions,
 } from 'react-native';
 import AppText from '../components/AppText';
+import { fontSizes } from '../config/typography';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
@@ -237,33 +238,33 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   content: { flex: 1 },
   section: { marginTop: 20, paddingHorizontal: 20 },
-  sectionTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 12 },
+  sectionTitle: { fontSize: fontSizes.md, fontWeight: 'bold', marginBottom: 12 },
   summaryCard: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
   summaryRow: { flexDirection: 'row', justifyContent: 'space-between' },
-  summaryLabel: { color: '#666' },
-  summaryValue: { fontWeight: '600' },
+  summaryLabel: { color: '#666', fontSize: fontSizes.sm },
+  summaryValue: { fontWeight: '600', fontSize: fontSizes.md },
   divider: { height: 1, backgroundColor: '#eee', marginVertical: 12 },
   productRow: { flexDirection: 'row', alignItems: 'center' },
   productImage: { width: 50, height: 50, borderRadius: 8, marginRight: 12 },
   productDetails: { flex: 1 },
-  productName: { fontSize: 14 },
-  productQuantity: { fontSize: 13, color: '#999' },
-  productTotal: { fontWeight: '600' },
+  productName: { fontSize: fontSizes.sm },
+  productQuantity: { fontSize: fontSizes.sm, color: '#999' },
+  productTotal: { fontWeight: '600', fontSize: fontSizes.md },
   productDivider: { height: 1, backgroundColor: '#f5f5f5', marginVertical: 8 },
   paymentMethods: { backgroundColor: '#fff', borderRadius: 12 },
   paymentMethod: { flexDirection: 'row', padding: 18 },
   paymentMethodSelected: { backgroundColor: '#FFF5EB' },
-  paymentMethodText: { marginLeft: 12, flex: 1 },
+  paymentMethodText: { marginLeft: 12, flex: 1, fontSize: fontSizes.md },
   paymentMethodTextSelected: { color: '#ff9500', fontWeight: '600' },
   checkIcon: { marginLeft: 'auto' },
   priceCard: { backgroundColor: '#fff', borderRadius: 12, padding: 20 },
   priceRow: { flexDirection: 'row', justifyContent: 'space-between' },
   totalLabel: { fontWeight: 'bold' },
-  totalPrice: { fontWeight: 'bold', color: '#ff9500' },
+  totalPrice: { fontWeight: 'bold', color: '#ff9500', fontSize: fontSizes.md },
   bottomContainer: { backgroundColor: '#fff', padding: 20, zIndex: 10 },
   totalContainer: { flexDirection: 'row', justifyContent: 'space-between' },
   bottomTotalLabel: { fontWeight: '600' },
-  bottomTotalPrice: { fontSize: 22, fontWeight: 'bold', color: '#ff9500' },
+  bottomTotalPrice: { fontSize: fontSizes.xl, fontWeight: 'bold', color: '#ff9500' },
   paymentButton: {
     backgroundColor: '#ff9500',
     paddingVertical: 16,
@@ -271,5 +272,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: 12,
   },
-  paymentButtonText: { color: '#fff', fontWeight: 'bold', fontSize: 18 },
+  paymentButtonText: { color: '#fff', fontWeight: 'bold', fontSize: fontSizes.md },
 });

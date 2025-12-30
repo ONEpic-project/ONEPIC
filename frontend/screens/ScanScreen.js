@@ -18,6 +18,7 @@ import { API_BASE_URL } from "../config/api";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import Header from "./components/Header";
+import { fontSizes } from '../config/typography';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
@@ -635,7 +636,7 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   drawerHeader: {
-    fontSize: 18,
+    fontSize: fontSizes.md,
     fontWeight: "bold",
     marginVertical: 10,
   },
@@ -670,7 +671,7 @@ const styles = StyleSheet.create({
     resizeMode: "contain",
   },
   itemName: {
-    fontSize: 15,
+    fontSize: fontSizes.sm,
     fontWeight: "600",
     color: "#333",
     marginBottom: 4,
@@ -680,7 +681,7 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   },
   itemPrice: {
-    fontSize: 15,
+    fontSize: fontSizes.sm,
     fontWeight: "bold",
     color: "#FF9500",
   },
@@ -713,7 +714,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   qtyText: {
-    fontSize: 14,
+    fontSize: fontSizes.sm,
     fontWeight: "bold",
     color: "#333",
     marginHorizontal: 12,
@@ -737,8 +738,8 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginBottom: 15,
   },
-  totalLabel: { color: "#888", fontSize: 14 },
-  totalPriceText: { fontSize: 22, fontWeight: "bold" },
+  totalLabel: { color: "#888", fontSize: fontSizes.sm },
+  totalPriceText: { fontSize: fontSizes.xl, fontWeight: "bold" },
   payBtn: {
     backgroundColor: "#FF9500",
     height: 50,
@@ -747,7 +748,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: 30,
   },
-  payBtnText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  payBtnText: { color: "#fff", fontSize: fontSizes.md, fontWeight: "bold" },
 
   // 모달
   modalBg: {
@@ -763,11 +764,11 @@ const styles = StyleSheet.create({
     padding: 20,
     alignItems: "center",
   },
-  modalTitle: { fontSize: 18, fontWeight: "bold", marginBottom: 15 },
+  modalTitle: { fontSize: fontSizes.md, fontWeight: "bold", marginBottom: 15 },
   modalImg: { width: "100%", height: 150, marginBottom: 15 },
-  modalName: { fontSize: 16, marginBottom: 5 },
+  modalName: { fontSize: fontSizes.sm, marginBottom: 5 },
   modalPrice: {
-    fontSize: 20,
+    fontSize: fontSizes.lg,
     fontWeight: "bold",
     color: "#FF9500",
     marginBottom: 20,

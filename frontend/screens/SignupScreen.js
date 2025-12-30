@@ -15,6 +15,7 @@ import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import Header from './components/Header';
+import { fontSizes } from '../config/typography';
 import { API_BASE_URL } from '../config/api';
 
 const { width, height } = Dimensions.get('window');
@@ -179,7 +180,7 @@ const styles = StyleSheet.create({
     height: height * 0.06, // 화면 높이의 6%
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
-    fontSize: width * 0.04,
+    fontSize: fontSizes.sm,
     color: '#333',
     marginBottom: height * 0.035,
     paddingVertical: 10,
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
   },
   signupButtonText: {
     color: '#FFFFFF',
-    fontSize: width * 0.045,
+    fontSize: fontSizes.md,
     fontWeight: '600',
   },
 });
