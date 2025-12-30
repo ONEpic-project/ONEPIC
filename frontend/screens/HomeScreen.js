@@ -29,7 +29,7 @@ const SCAN_CARD_HEIGHT = verticalScale(150);
 const SCAN_TITLE_SIZE = moderateScale(20);
 const SCAN_BUTTON_HEIGHT = verticalScale(40);
 const SCAN_BUTTON_RADIUS = moderateScale(20);
-const SCAN_CARD_COLOR = 'rgba(183, 44, 44, 0.85)';
+const SCAN_CARD_COLOR = 'rgba(217, 217, 217, 0.85)';
 
 // ✅ 배경 블러 강도 (10~20 추천 / 값만 바꿔서 조절 가능)
 const SCAN_BG_BLUR_INTENSITY = 10;
@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(90),
     marginLeft: scale(20),
     fontSize: moderateScale(14),
-    color: '#FFF0DF',
+    color: '#e6e6e6ff',
   },
   boldText: {
     fontSize: moderateScale(22),
@@ -193,7 +193,7 @@ const styles = StyleSheet.create({
   scanSubText: {
     fontSize: moderateScale(14),
     fontWeight: '300',
-    color: '#FFE9D6',
+    color: '#e6e6e6ff',
   },
   scanButton: {
     alignSelf: 'flex-end',
