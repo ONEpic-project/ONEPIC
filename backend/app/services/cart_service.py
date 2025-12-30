@@ -17,7 +17,7 @@ def calculate_cart_total(cart: Cart) -> int:
 def purge_inactive_carts(db: Session) -> None:
     cutoff = datetime.utcnow() - timedelta(days=7)
     db.query(Cart).filter(
-        Cart.status == False,
+        Cart.status == "ABANDONED",
         Cart.updated_at < cutoff,
     ).delete(synchronize_session=False)
     db.commit()
@@ -29,7 +29,7 @@ def get_cart_by_user_id(db: Session, user_id: int) -> Cart | None:
         db.query(Cart)
         .filter(
             Cart.user_id == user_id,
-            Cart.status == True,
+            Cart.status == "ACTIVE",
         )
         .first()
     )
@@ -39,7 +39,7 @@ def get_or_create_cart(db: Session, user_id: int) -> Cart:
     cart = get_cart_by_user_id(db, user_id)
 
     if not cart:
-        cart = Cart(user_id=user_id, status=True)
+        cart = Cart(user_id=user_id, status="ACTIVE")
         db.add(cart)
         db.commit()
         db.refresh(cart)
@@ -90,7 +90,8 @@ def get_cart_item_by_id_and_user(
         .filter(
             CartItem.cart_item_id == cart_item_id,
             Cart.user_id == user_id,
-            Cart.status == True,
+            Cart.user_id == user_id,
+            Cart.status == "ACTIVE",
         )
         .first()
     )
@@ -138,7 +139,7 @@ def deactivate_cart_for_user(db: Session, user_id: int) -> Cart | None:
     if not cart:
         return None
 
-    cart.status = False
+    cart.status = "CHECKED_OUT"
     db.commit()
     db.refresh(cart)
     return cart
@@ -153,7 +154,8 @@ def create_cart_from_scan(
         db.query(Cart)
         .filter(
             Cart.user_id == user_id,
-            Cart.status == True,
+            Cart.user_id == user_id,
+            Cart.status == "ACTIVE",
         )
         .first()
     )
@@ -161,7 +163,7 @@ def create_cart_from_scan(
         db.delete(existing)
         db.commit()
 
-    cart = Cart(user_id=user_id, status=True)
+    cart = Cart(user_id=user_id, status="ACTIVE")
     db.add(cart)
     db.commit()
     db.refresh(cart)

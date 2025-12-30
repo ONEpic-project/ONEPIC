@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, DateTime, Boolean, text
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Boolean, String, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database.database import Base
@@ -16,9 +16,9 @@ class Cart(Base):
     )
 
     status = Column(
-        Boolean,
+        String(20),
         nullable=False,
-        server_default=text("1")
+        server_default=text("'ACTIVE'")
     )
 
     created_at = Column(
