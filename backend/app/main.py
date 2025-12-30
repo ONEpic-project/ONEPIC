@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
-from app.database import engine, Base
+# from app.database.database import engine, Base
 from app.routers import products, ai, auth, health, cart, receipt
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -55,12 +55,9 @@ app.include_router(receipt.router, prefix="/api")
 
 
 
-# 데이터베이스 테이블 생성
-app.mount(
-    "/static",
-    StaticFiles(directory="app/static"),
-    name="static"
-)
+# Static files
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
 
 @app.get("/")
 def root():

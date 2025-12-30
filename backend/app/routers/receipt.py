@@ -1,12 +1,12 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from app.core.dependencies import get_db
-from app.models.receipt import Receipt
-from app.schemas.receipt import ReceiptCreate
-from app.schemas.receipt import ReceiptResponse
-from app.models.receipt_items import ReceiptItem
-from app.services.cart_service import deactivate_cart_for_user
+from app.core.dependencies import get_db, get_current_user
+from app.schemas.receipt import ReceiptCreate, ReceiptResponse
+from app.services.receipt_service import create_receipt_from_cart
+from app.models.user import User
+
+
 
 router = APIRouter(
     prefix="/receipts",
@@ -14,86 +14,37 @@ router = APIRouter(
 )
 
 
-@router.post("/", status_code=status.HTTP_201_CREATED)
+@router.post(
+    "",
+    response_model=ReceiptResponse,
+    status_code=status.HTTP_201_CREATED
+)
 def create_receipt(
-    receipt_data: ReceiptCreate,
-    db: Session = Depends(get_db)
+    payload: ReceiptCreate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
+    """
+    장바구니 기반 영수증 생성 (결제)
+    """
+
     try:
-        # 1. 총 금액 계산
-        total_amount = sum(
-            item.price * item.quantity
-            for item in receipt_data.items
+        receipt = create_receipt_from_cart(
+            db=db,
+            user_id=current_user.user_id,
+            payment_method=payload.payment_method
         )
+        return receipt
 
-        # 2. Receipt 생성
-        receipt = Receipt(
-            user_id=receipt_data.user_id,
-            total_amount=total_amount,
-            payment_method=receipt_data.payment_method
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
         )
-        db.add(receipt)
-        db.flush()  # receipt_id 확보
-
-        # 3. ReceiptItem 생성
-        for item in receipt_data.items:
-            receipt_item = ReceiptItem(
-                receipt_id=receipt.receipt_id,
-                product_id=item.product_id,
-                product_name=item.product_name,
-                price=item.price,
-                quantity=item.quantity
-            )
-            db.add(receipt_item)
-
-        # 4. 커밋
-        db.commit()
-        db.refresh(receipt)
-        deactivate_cart_for_user(db, receipt_data.user_id)
-
-        return {
-            "receipt_id": receipt.receipt_id,
-            "total_amount": total_amount,
-            "message": "결제 완료"
-        }
 
     except Exception as e:
-        db.rollback()
+        print(e)
         raise HTTPException(
-            status_code=500,
-            detail=f"결제 처리 중 오류 발생: {str(e)}"
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="영수증 생성 중 오류가 발생했습니다."
         )
-
-# 영수증 조회
-@router.get("/{receipt_id}", response_model=ReceiptResponse)
-def get_receipt(
-    receipt_id: int,
-    db: Session = Depends(get_db)
-):
-    receipt = (
-        db.query(Receipt)
-        .filter(Receipt.receipt_id == receipt_id)
-        .first()
-    )
-
-    if not receipt:
-        raise HTTPException(
-            status_code=404,
-            detail="영수증을 찾을 수 없습니다."
-        )
-
-    return {
-        "receipt_id": receipt.receipt_id,
-        "payment_method": receipt.payment_method,
-        "total_amount": receipt.total_amount,
-        "created_at": receipt.created_at,
-        "items": [
-            {
-                "product_id": item.product_id,
-                "product_name": item.product_name,
-                "price": item.price,
-                "quantity": item.quantity
-            }
-            for item in receipt.items
-        ]
-    }
