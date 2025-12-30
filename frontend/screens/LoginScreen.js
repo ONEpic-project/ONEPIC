@@ -18,6 +18,7 @@ import { fontSizes } from '../config/typography';
 
 import { API_BASE_URL } from '../config/api';
 import KakaoLogin from '../components/KakaoLogin';
+import GoogleLogin from '../components/GoogleLogin';
 
 const { width, height } = Dimensions.get('window');
 
@@ -173,8 +174,11 @@ const LoginScreen = ({ navigation }) => {
             <AppText style={styles.loginButtonText}>로그인 하기</AppText>
           </TouchableOpacity>
 
-          {/* 카카오 로그인 버튼 (임시 추가) */}
+          {/* 카카오 로그인 버튼 */}
           <KakaoLogin navigation={navigation} />
+          
+          {/* 구글 로그인 버튼 */}
+          <GoogleLogin navigation={navigation} />
 
           {/* 하단 링크 */}
           <View style={styles.footer}>
