@@ -55,6 +55,7 @@ def kakao_login(payload: KakaoLoginRequest, db: Session = Depends(get_db)):
     
     user_resp = requests.get(user_info_url, headers=headers)
     user_json = user_resp.json()
+    print("DEBUG KAKAO JSON:", user_json)  # 디버깅용 로그 추가
     
     if "id" not in user_json:
         print("Kakao User Info Error:", user_json)
