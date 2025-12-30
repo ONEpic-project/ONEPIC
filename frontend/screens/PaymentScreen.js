@@ -9,6 +9,8 @@ import {
   Alert,
   Dimensions
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import { Ionicons } from '@expo/vector-icons';
 import Header from './components/Header';
 import { API_BASE_URL } from '../config/api';
@@ -86,6 +88,61 @@ export default function PaymentScreen({ route, navigation }) {
                 onPress: () => navigation.navigate('Paid'),
               },
             ]);
+          },
+        },
+      ]
+    );
+  };
+
+  const submitPayment = () => {
+    if (!selectedPayment) {
+      Alert.alert('?Œë¦¼', 'ê²°ì œ ë°©ë²•??? íƒ?´ì£¼?¸ìš”');
+      return;
+    }
+
+    Alert.alert(
+      'ê²°ì œ ?•ì¸',
+      `${totalPrice.toLocaleString()}?ì„ ê²°ì œ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
+      [
+        { text: 'ì·¨ì†Œ', style: 'cancel' },
+        {
+          text: '?•ì¸',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('access_token');
+              const userId = await AsyncStorage.getItem('user_id');
+              if (!token || !userId) {
+                Alert.alert('?¤ë¥˜', 'ë¡œê·¸?¸ì´ ?„ìš”?©ë‹ˆ??');
+                return;
+              }
+
+              const receiptItems = normalizedProducts.map(item => ({
+                product_id: item.id,
+                product_name: item.name,
+                price: item.price,
+                quantity: item.quantity,
+              }));
+
+              await axios.post(
+                `${API_BASE_URL}/api/receipts`,
+                {
+                  user_id: Number(userId),
+                  payment_method: selectedPayment,
+                  items: receiptItems,
+                },
+                { headers: { Authorization: `Bearer ${token}` } }
+              );
+
+              Alert.alert('ê²°ì œ ?„ë£Œ', 'ê²°ì œê°€ ?„ë£Œ?˜ì—ˆ?µë‹ˆ??, [
+                {
+                  text: '?•ì¸',
+                  onPress: () => navigation.navigate('Paid'),
+                },
+              ]);
+            } catch (error) {
+              console.error('ê²°ì œ ?¤íŒ¨:', error);
+              Alert.alert('?¤ë¥˜', 'ê²°ì œ ì²˜ë¦¬???¤íŒ¨?ˆìŠµ?ˆë‹¤.');
+            }
           },
         },
       ]
@@ -210,7 +267,7 @@ export default function PaymentScreen({ route, navigation }) {
         </View>
         <TouchableOpacity
           style={styles.paymentButton}
-          onPress={handlePayment}
+          onPress={submitPayment}
         >
           <Text style={styles.paymentButtonText}>
             결제하기

@@ -14,6 +14,7 @@ class ReceiptItemCreate(BaseModel):
 
 class ReceiptCreate(BaseModel):
     user_id: int
+    payment_method: str
     items: List[ReceiptItemCreate] = Field(..., min_items=1)
 
 

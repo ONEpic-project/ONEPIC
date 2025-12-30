@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { 
   View, 
   Text, 
@@ -21,6 +21,7 @@ const { width, height } = Dimensions.get('window');
 const CartScreen = ({ navigation }) => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 
   // 장바구니 조회
   const fetchCart = async () => {
@@ -46,6 +47,7 @@ const CartScreen = ({ navigation }) => {
       }));
 
       setCartItems(items);
+      setPendingDeleteIds([]);
     } catch (error) {
       console.error('장바구니 조회 실패:', error);
       Alert.alert('오류', '장바구니를 불러올 수 없습니다.');
@@ -61,6 +63,64 @@ const CartScreen = ({ navigation }) => {
     return unsubscribe;
   }, [navigation]);
 
+  const syncCartChanges = useCallback(async () => {
+    if (loading) {
+      return;
+    }
+    if (cartItems.length === 0 && pendingDeleteIds.length === 0) {
+      return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        return;
+      }
+
+      let remainingDeleteIds = [...pendingDeleteIds];
+
+      for (const id of pendingDeleteIds) {
+        try {
+          await axios.delete(
+            `${API_BASE_URL}/api/cart/items/${id}`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+          remainingDeleteIds = remainingDeleteIds.filter(itemId => itemId !== id);
+        } catch (error) {
+          const status = error?.response?.status;
+          if (status === 404) {
+            remainingDeleteIds = remainingDeleteIds.filter(itemId => itemId !== id);
+          } else {
+            console.error('Cart delete sync failed:', error);
+          }
+        }
+      }
+
+      for (const item of cartItems) {
+        try {
+          await axios.patch(
+            `${API_BASE_URL}/api/cart/items/${item.id}`,
+            { quantity: item.quantity },
+            { headers: { Authorization: `Bearer ${token}` } }
+          );
+        } catch (error) {
+          console.error('Cart quantity sync failed:', error);
+        }
+      }
+
+      setPendingDeleteIds(remainingDeleteIds);
+    } catch (error) {
+      console.error('Cart sync failed:', error);
+    }
+  }, [cartItems, pendingDeleteIds, loading]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('blur', () => {
+      syncCartChanges();
+    });
+    return unsubscribe;
+  }, [navigation, syncCartChanges]);
+
   const handleCheckout = async () => {
     if (cartItems.length === 0) {
       Alert.alert('알림', '장바구니가 비어있습니다.');
@@ -75,13 +135,7 @@ const CartScreen = ({ navigation }) => {
       }
 
       // 변경된 수량을 DB에 일괄 업데이트
-      for (const item of cartItems) {
-        await axios.patch(
-          `${API_BASE_URL}/api/cart/items/${item.id}`,
-          { quantity: item.quantity },
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-      }
+      await syncCartChanges();
 
       const paymentProducts = cartItems.map(item => ({
         product_id: item.product_id,
@@ -114,16 +168,16 @@ const CartScreen = ({ navigation }) => {
 
   // 수량 증가 (로컬에서만)
   const increaseQuantity = (id) => {
-    setCartItems(cartItems.map(item => 
+    setCartItems(prev => prev.map(item =>
       item.id === id ? { ...item, quantity: item.quantity + 1 } : item
     ));
   };
 
   // 수량 감소 (로컬에서만)
   const decreaseQuantity = (id) => {
-    setCartItems(cartItems.map(item => 
-      item.id === id && item.quantity > 1 
-        ? { ...item, quantity: item.quantity - 1 } 
+    setCartItems(prev => prev.map(item =>
+      item.id === id && item.quantity > 1
+        ? { ...item, quantity: item.quantity - 1 }
         : item
     ));
   };
@@ -137,6 +191,7 @@ const CartScreen = ({ navigation }) => {
         { text: '취소', style: 'cancel' },
         { 
           text: '삭제', 
+<<<<<<< Updated upstream
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('access_token');
@@ -147,6 +202,15 @@ const CartScreen = ({ navigation }) => {
 
               setCartItems(cartItems.filter(item => item.id !== id));
             } catch (error) {
+=======
+          onPress: async () => {
+            try {
+              setPendingDeleteIds(prev => (
+                prev.includes(id) ? prev : [...prev, id]
+              ));
+              setCartItems(prev => prev.filter(item => item.id !== id));
+            } catch (error) {
+>>>>>>> Stashed changes
               console.error('삭제 실패:', error);
               Alert.alert('오류', '삭제에 실패했습니다.');
             }
@@ -168,16 +232,17 @@ const CartScreen = ({ navigation }) => {
           text: '전체 삭제', 
           onPress: async () => {
             try {
+<<<<<<< Updated upstream
               const token = await AsyncStorage.getItem('access_token');
+=======
+              const idsToDelete = cartItems.map(item => item.id);
+              setPendingDeleteIds(prev => {
+                const combined = new Set([...prev, ...idsToDelete]);
+                return Array.from(combined);
+              });
+>>>>>>> Stashed changes
               
               // 각 아이템 삭제
-              for (const item of cartItems) {
-                await axios.delete(
-                  `${API_BASE_URL}/api/cart/items/${item.id}`,
-                  { headers: { Authorization: `Bearer ${token}` } }
-                );
-              }
-
               setCartItems([]);
             } catch (error) {
               console.error('전체 삭제 실패:', error);
@@ -262,7 +327,7 @@ const CartScreen = ({ navigation }) => {
           
           <TouchableOpacity 
           style={styles.purchaseButton}
-          onPress={() => navigation.navigate('Payment')}
+          onPress={handleCheckout}
           >
             <Text style={styles.purchaseButtonText}>구매하기</Text>
           </TouchableOpacity>

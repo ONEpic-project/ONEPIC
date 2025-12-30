@@ -6,6 +6,7 @@ from app.models.receipt import Receipt
 from app.schemas.receipt import ReceiptCreate
 from app.schemas.receipt import ReceiptResponse
 from app.models.receipt_items import ReceiptItem
+from app.services.cart_service import deactivate_cart_for_user
 
 router = APIRouter(
     prefix="/receipts",
@@ -48,6 +49,7 @@ def create_receipt(
         # 4. 커밋
         db.commit()
         db.refresh(receipt)
+        deactivate_cart_for_user(db, receipt_data.user_id)
 
         return {
             "receipt_id": receipt.receipt_id,

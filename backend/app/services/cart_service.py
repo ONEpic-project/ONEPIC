@@ -1,10 +1,12 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy.orm import Session
+
 from app.models.cart import Cart
 from app.models.cart_item import CartItem
 from app.models.product import Product
 
 
-# 장바구니 총액 계산
 def calculate_cart_total(cart: Cart) -> int:
     total = 0
     for item in cart.items:
@@ -12,21 +14,32 @@ def calculate_cart_total(cart: Cart) -> int:
     return total
 
 
-# 사용자 ID로 장바구니 조회
+def purge_inactive_carts(db: Session) -> None:
+    cutoff = datetime.utcnow() - timedelta(days=7)
+    db.query(Cart).filter(
+        Cart.status == False,
+        Cart.updated_at < cutoff,
+    ).delete(synchronize_session=False)
+    db.commit()
+
+
 def get_cart_by_user_id(db: Session, user_id: int) -> Cart | None:
+    purge_inactive_carts(db)
     return (
         db.query(Cart)
-        .filter(Cart.user_id == user_id)
+        .filter(
+            Cart.user_id == user_id,
+            Cart.status == True,
+        )
         .first()
     )
 
 
-# 장바구니 없으면 생성
 def get_or_create_cart(db: Session, user_id: int) -> Cart:
     cart = get_cart_by_user_id(db, user_id)
 
     if not cart:
-        cart = Cart(user_id=user_id)
+        cart = Cart(user_id=user_id, status=True)
         db.add(cart)
         db.commit()
         db.refresh(cart)
@@ -34,7 +47,6 @@ def get_or_create_cart(db: Session, user_id: int) -> Cart:
     return cart
 
 
-# 장바구니 상품 추가
 def add_cart_item(
     db: Session,
     user_id: int,
@@ -67,7 +79,6 @@ def add_cart_item(
     return item
 
 
-# (핵심) cart_item + user 소유권 검증 조회
 def get_cart_item_by_id_and_user(
     db: Session,
     cart_item_id: int,
@@ -79,12 +90,12 @@ def get_cart_item_by_id_and_user(
         .filter(
             CartItem.cart_item_id == cart_item_id,
             Cart.user_id == user_id,
+            Cart.status == True,
         )
         .first()
     )
 
 
-# 수량 변경 (0 이하면 삭제) + 소유권 검증
 def update_cart_item_quantity(
     db: Session,
     cart_item_id: int,
@@ -107,7 +118,6 @@ def update_cart_item_quantity(
     return item
 
 
-# 장바구니 상품 삭제 + 소유권 검증
 def delete_cart_item(
     db: Session,
     cart_item_id: int,
@@ -122,23 +132,36 @@ def delete_cart_item(
     db.commit()
     return True
 
-# 스캔한 상품들로 장바구니 생성
+
+def deactivate_cart_for_user(db: Session, user_id: int) -> Cart | None:
+    cart = get_cart_by_user_id(db, user_id)
+    if not cart:
+        return None
+
+    cart.status = False
+    db.commit()
+    db.refresh(cart)
+    return cart
+
+
 def create_cart_from_scan(
     db: Session,
     user_id: int,
     items: list,
 ) -> Cart:
-    # 기존 장바구니 있으면 삭제 (정책 선택)
     existing = (
         db.query(Cart)
-        .filter(Cart.user_id == user_id)
+        .filter(
+            Cart.user_id == user_id,
+            Cart.status == True,
+        )
         .first()
     )
     if existing:
         db.delete(existing)
         db.commit()
 
-    cart = Cart(user_id=user_id)
+    cart = Cart(user_id=user_id, status=True)
     db.add(cart)
     db.commit()
     db.refresh(cart)
@@ -149,7 +172,7 @@ def create_cart_from_scan(
         ).first()
 
         if not product:
-            raise ValueError("존재하지 않는 상품입니다.")
+            raise ValueError("Product not found.")
 
         cart_item = CartItem(
             cart_id=cart.cart_id,

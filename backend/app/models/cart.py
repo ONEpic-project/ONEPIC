@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, ForeignKey, DateTime
+from sqlalchemy import Column, Integer, ForeignKey, DateTime, Boolean, text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.database.database import Base
@@ -13,6 +13,12 @@ class Cart(Base):
         Integer,
         ForeignKey("user.user_id"),
         nullable=False
+    )
+
+    status = Column(
+        Boolean,
+        nullable=False,
+        server_default=text("1")
     )
 
     created_at = Column(
