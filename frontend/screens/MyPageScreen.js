@@ -157,6 +157,44 @@ const MyPageScreen = ({ navigation }) => {
     });
   };
 
+  const handleWithdraw = async () => {
+    const confirm = await new Promise((resolve) => {
+      Alert.alert(
+        '회원 탈퇴',
+        '정말 탈퇴하시겠습니까?\n계정 정보가 모두 삭제됩니다.',
+        [
+          { text: '취소', style: 'cancel', onPress: () => resolve(false) },
+          { text: '확인', style: 'destructive', onPress: () => resolve(true) },
+        ]
+      );
+    });
+
+    if (!confirm) return;
+
+    const token = await AsyncStorage.getItem('access_token');
+
+    await fetch(`${API_BASE_URL}/api/auth/me`, {
+      method: 'DELETE',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    await AsyncStorage.multiRemove([
+      'user_id',
+      'username',
+      'login_id',
+      'access_token',
+      'phone',
+    ]);
+
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  };
+
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -165,7 +203,7 @@ const MyPageScreen = ({ navigation }) => {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
           ref={scrollRef}
-          scrollEnabled={isKeyboardVisible}
+          scrollEnabled={true}
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
@@ -185,10 +223,12 @@ const MyPageScreen = ({ navigation }) => {
               <Field label="연락처">
                 <TextInput
                   style={styles.input}
-                  value={phone}
+                   value={phone ?? ''}
                   editable={isEditing}
                   keyboardType="phone-pad"
-                  onChangeText={setPhone}
+                  onChangeText={(text) => {
+                    setPhone(text.replace(/[^0-9]/g, ''));
+                  }}
                 />
               </Field>
 
@@ -231,11 +271,14 @@ const MyPageScreen = ({ navigation }) => {
 
               {!isEditing && (
                 <TouchableOpacity style={styles.outline} onPress={handleLogout}>
-                  <Text style={styles.outlineText}>로그아웃</Text>
+                  <Text style={styles.outlineText}>로그아웃 하기</Text>
                 </TouchableOpacity>
               )}
 
-              <Text style={styles.withdraw}>회원 탈퇴하기</Text>
+              <TouchableOpacity onPress={handleWithdraw}>
+                <Text style={styles.withdraw}>회원 탈퇴</Text>
+              </TouchableOpacity>
+
             </View>
           </View>
         </ScrollView>
