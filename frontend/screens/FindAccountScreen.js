@@ -112,10 +112,11 @@ const FindAccountScreen = ({ navigation }) => {
   };
 
   return (
+    <>
+    <Header navigation={navigation} title="회원가입" />
+    
     <ScrollView style={styles.container}>
       <View style={styles.content}>
-        {/* 헤더영역 */}
-          <Header navigation={navigation} title="회원가입" />
 
         {/* 탭 */}
         <View style={styles.tabContainer}>
@@ -230,6 +231,7 @@ const FindAccountScreen = ({ navigation }) => {
         )}
       </View>
     </ScrollView>
+    </>
   );
 };
 
