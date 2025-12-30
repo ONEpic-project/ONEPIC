@@ -312,14 +312,32 @@ const CartScreen = ({ navigation }) => {
           <Text style={styles.emptyText}>장바구니가 비어있습니다</Text>
         </View>
       ) : (
-        <FlatList
-          data={cartItems.slice(Math.ceil(cartItems.length / 2))}
-          renderItem={renderCartItem}
-          keyExtractor={(item) => String(item.id)}
-          ListHeaderComponent={renderHeader}
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={styles.listContent}
-        />
+        <>
+          <FlatList
+            data={cartItems}
+            renderItem={renderCartItem}
+            keyExtractor={item => item.id.toString()}
+            contentContainerStyle={styles.listContent}
+          />
+
+          {/* 하단 고정 결제 바 (ScanScreen & PaymentScreen 스타일 참고) */}
+          <View style={styles.fixedFooter}>
+            <View style={styles.priceSummaryCard}>
+              <View style={styles.priceRow}>
+                <Text style={styles.priceLabel}>상품 금액</Text>
+                <Text style={styles.priceValue}>{totalPrice.toLocaleString()}원</Text>
+              </View>
+              <View style={styles.divider} />
+              <View style={styles.priceRow}>
+                <Text style={styles.totalLabel}>총 결제 금액</Text>
+                <Text style={styles.totalPriceText}>{totalPrice.toLocaleString()}원</Text>
+              </View>
+            </View>
+            <TouchableOpacity style={styles.purchaseButton} onPress={handleCheckout}>
+              <Text style={styles.purchaseButtonText}>구매하기</Text>
+            </TouchableOpacity>
+          </View>
+        </>
       )}
     </View>
   );
