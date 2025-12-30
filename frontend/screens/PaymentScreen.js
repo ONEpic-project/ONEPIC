@@ -7,7 +7,7 @@ import {
   ScrollView,
   Image,
   Alert,
-  Dimensions
+  Dimensions,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -18,18 +18,11 @@ import { API_BASE_URL } from '../config/api';
 const { width, height } = Dimensions.get('window');
 
 export default function PaymentScreen({ route, navigation }) {
-  /* ============================
-     1. ScanScreen에서 전달받은 데이터
-  ============================ */
   const products = route?.params?.products ?? [];
   const quantities = route?.params?.quantities ?? {};
-  //const totalPrice = route?.params?.totalPrice ?? 0; -> 251230 수정한 내용
 
   const [selectedPayment, setSelectedPayment] = useState(null);
 
-  /* ============================
-     2. 상품 데이터 정규화
-  ============================ */
   const normalizedProducts = products.map(p => ({
     id: p.product_id,
     name: p.product_name,
@@ -40,35 +33,22 @@ export default function PaymentScreen({ route, navigation }) {
     image: `${API_BASE_URL}${p.image_url}`,
   }));
 
-    /* ============================
-     251230 수정한 내용 
-  ============================ */
-
-  const calculatedTotalPrice = normalizedProducts.reduce(
+  const totalPrice = normalizedProducts.reduce(
     (sum, p) => sum + (p.price * p.quantity),
     0
   );
-
-  // 최종 화면에 표시할 가격 (계산된 값 우선 사용)
-  const totalPrice = calculatedTotalPrice;
 
   const totalQuantity = normalizedProducts.reduce(
     (sum, p) => sum + p.quantity,
     0
   );
 
-  /* ============================
-     3. 결제 수단
-  ============================ */
   const paymentMethods = [
     { id: 'card', name: '카드 결제', icon: 'card-outline' },
     { id: 'kakao', name: '카카오페이', icon: 'chatbubble-outline' },
   ];
 
-  /* ============================
-     4. 결제 처리
-  ============================ */
-  const handlePayment = () => {
+  const submitPayment = () => {
     if (!selectedPayment) {
       Alert.alert('알림', '결제 방법을 선택해주세요');
       return;
@@ -81,38 +61,12 @@ export default function PaymentScreen({ route, navigation }) {
         { text: '취소', style: 'cancel' },
         {
           text: '확인',
-          onPress: () => {
-            Alert.alert('결제 완료', '결제가 완료되었습니다', [
-              {
-                text: '확인',
-                onPress: () => navigation.navigate('Paid'),
-              },
-            ]);
-          },
-        },
-      ]
-    );
-  };
-
-  const submitPayment = () => {
-    if (!selectedPayment) {
-      Alert.alert('?Œë¦¼', 'ê²°ì œ ë°©ë²•??? íƒ?´ì£¼?¸ìš”');
-      return;
-    }
-
-    Alert.alert(
-      'ê²°ì œ ?•ì¸',
-      `${totalPrice.toLocaleString()}?ì„ ê²°ì œ?˜ì‹œê² ìŠµ?ˆê¹Œ?`,
-      [
-        { text: 'ì·¨ì†Œ', style: 'cancel' },
-        {
-          text: '?•ì¸',
           onPress: async () => {
             try {
               const token = await AsyncStorage.getItem('access_token');
               const userId = await AsyncStorage.getItem('user_id');
               if (!token || !userId) {
-                Alert.alert('?¤ë¥˜', 'ë¡œê·¸?¸ì´ ?„ìš”?©ë‹ˆ??');
+                Alert.alert('오류', '로그인이 필요합니다.');
                 return;
               }
 
@@ -133,15 +87,15 @@ export default function PaymentScreen({ route, navigation }) {
                 { headers: { Authorization: `Bearer ${token}` } }
               );
 
-              Alert.alert('ê²°ì œ ?„ë£Œ', 'ê²°ì œê°€ ?„ë£Œ?˜ì—ˆ?µë‹ˆ??, [
+              Alert.alert('결제 완료', '결제가 완료되었습니다.', [
                 {
-                  text: '?•ì¸',
+                  text: '확인',
                   onPress: () => navigation.navigate('Paid'),
                 },
               ]);
             } catch (error) {
-              console.error('ê²°ì œ ?¤íŒ¨:', error);
-              Alert.alert('?¤ë¥˜', 'ê²°ì œ ì²˜ë¦¬???¤íŒ¨?ˆìŠµ?ˆë‹¤.');
+              console.error('결제 실패:', error);
+              Alert.alert('오류', '결제 처리에 실패했습니다.');
             }
           },
         },
@@ -151,11 +105,9 @@ export default function PaymentScreen({ route, navigation }) {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <Header navigation={navigation} title="결제하기" />
 
       <ScrollView style={styles.content} showsVerticalScrollIndicator={false}>
-        {/* 주문 상품 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>주문 상품</Text>
           <View style={styles.summaryCard}>
@@ -192,7 +144,6 @@ export default function PaymentScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* 결제 방법 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>결제 방법</Text>
           <View style={styles.paymentMethods}>
@@ -233,7 +184,6 @@ export default function PaymentScreen({ route, navigation }) {
           </View>
         </View>
 
-        {/* 결제 금액 */}
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>결제 금액</Text>
           <View style={styles.priceCard}>
@@ -254,10 +204,8 @@ export default function PaymentScreen({ route, navigation }) {
             </View>
           </View>
         </View>
-
       </ScrollView>
 
-      {/* 하단 결제 버튼 */}
       <View style={styles.bottomContainer}>
         <View style={styles.totalContainer}>
           <Text style={styles.bottomTotalLabel}>총 결제 금액</Text>
@@ -278,9 +226,6 @@ export default function PaymentScreen({ route, navigation }) {
   );
 }
 
-/* ============================
-   스타일 (원본 그대로)
-============================ */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f5f5f5' },
   content: { flex: 1 },
