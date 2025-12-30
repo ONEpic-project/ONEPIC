@@ -193,6 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: height * 0.03,
     width: '83%',
     alignSelf: 'center',
+    marginTop: height * 0.02,
   },
   signupButtonText: {
     color: '#FFFFFF',
