@@ -69,7 +69,12 @@ const KakaoLogin = ({ navigation }) => {
 
     } catch (e) {
       console.error('Kakao Login Error:', e);
-      Alert.alert('로그인 실패', '서버 통신 중 오류가 발생했습니다.');
+      if (e.response && e.response.data && e.response.data.detail) {
+        console.error('Server detailed error:', e.response.data.detail);
+        Alert.alert('로그인 실패', e.response.data.detail);
+      } else {
+        Alert.alert('로그인 실패', '서버 통신 중 오류가 발생했습니다.');
+      }
     }
   };
 

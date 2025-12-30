@@ -40,7 +40,9 @@ def kakao_login(payload: KakaoLoginRequest, db: Session = Depends(get_db)):
     if "access_token" not in token_json:
         # 에러 처리
         print("Kakao Token Error:", token_json)
-        raise HTTPException(status_code=400, detail="카카오 로그인 실패 (토큰 발급 오류)")
+        error_msg = token_json.get("error_description", "Unknown Error")
+        error_code = token_json.get("error_code", "")
+        raise HTTPException(status_code=400, detail=f"카카오 토큰 발급 실패: {error_code} {error_msg}")
     
     kakao_access_token = token_json["access_token"]
     
@@ -55,7 +57,8 @@ def kakao_login(payload: KakaoLoginRequest, db: Session = Depends(get_db)):
     user_json = user_resp.json()
     
     if "id" not in user_json:
-        raise HTTPException(status_code=400, detail="카카오 사용자 정보 조회 실패")
+        print("Kakao User Info Error:", user_json)
+        raise HTTPException(status_code=400, detail=f"카카오 사용자 정보 조회 실패: {user_json}")
         
     kakao_id = str(user_json["id"])
     kakao_account = user_json.get("kakao_account", {})
@@ -86,16 +89,6 @@ def kakao_login(payload: KakaoLoginRequest, db: Session = Depends(get_db)):
         db.refresh(user)
     
     # 4. 우리 서비스 JWT 토큰 발급
-    access_token = create_access_token(
-        data={"sub": str(user.user_id)}
-    )
-    
-    return {
-        "message": "카카오 로그인 성공",
-        "access_token": access_token,
-        "user_id": user.user_id,
-        "username": user.username
-    }
     access_token = create_access_token(
         data={"sub": str(user.user_id)}
     )
