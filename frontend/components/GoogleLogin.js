@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, TouchableOpacity, Text, StyleSheet, Modal, ActivityIndicator, Alert, Dimensions } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Modal, ActivityIndicator, Alert, Dimensions, SafeAreaView, Platform, StatusBar } from 'react-native';
 import { WebView } from 'react-native-webview';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -70,10 +70,17 @@ const GoogleLogin = ({ navigation }) => {
 
     } catch (e) {
       console.error('Google Login Error:', e);
+
+      // 상세 에러 로그 출력 (사용자 요청)
+      if (e.response) {
+        console.log('Server Response Status:', e.response.status);
+        console.log('Server Response Data:', JSON.stringify(e.response.data, null, 2));
+      }
+
       if (e.response && e.response.data && e.response.data.detail) {
         Alert.alert('로그인 실패', e.response.data.detail);
       } else {
-        Alert.alert('로그인 실패', '서버 통신 중 오류가 발생했습니다. (백엔드 구현 필요)');
+        Alert.alert('로그인 실패', '서버 통신 중 오류가 발생했습니다.');
       }
     }
   };
@@ -94,8 +101,7 @@ const GoogleLogin = ({ navigation }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-         {/* Use SafeAreaView from react-native-safe-area-context if available, else View with padding */}
-         <View style={{ flex: 1, backgroundColor: '#fff', paddingTop: 40 }}> 
+         <SafeAreaView style={{ flex: 1, backgroundColor: '#fff', paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 }}>  
             <View style={styles.header}>
                 <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeBtn}>
                     <Text style={{ fontSize: 16 }}>닫기</Text>
@@ -122,7 +128,7 @@ const GoogleLogin = ({ navigation }) => {
                 userAgent="Mozilla/5.0 (Linux; Android 10; Android SDK built for x86) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.120 Mobile Safari/537.36" // Google sometimes blocks embedded webviews, specific UA helps
                 renderLoading={() => <ActivityIndicator size="large" color="#4285F4" />}
             />
-        </View>
+        </SafeAreaView>
       </Modal>
     </>
   );

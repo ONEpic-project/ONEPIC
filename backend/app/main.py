@@ -28,6 +28,7 @@ app.include_router(auth.router, prefix="/api")
 app.include_router(cart.router, prefix="/api")
 app.include_router(receipt.router, prefix="/api")
 app.include_router(kakao_auth.router, prefix="/api")
+app.include_router(google_auth.router, prefix="/api")
 
 
 app.add_middleware(
