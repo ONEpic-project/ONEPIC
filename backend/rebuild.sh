@@ -3,7 +3,7 @@
 set -e
 
 echo "===================================="
-echo " ONEPIC Backend Rebuild"
+echo " ONEPIC Backend DEV Build & Run"
 echo "===================================="
 
 IMAGE_NAME="onepic-backend"
@@ -14,21 +14,17 @@ echo "[1] Stop & remove existing container (if exists)"
 docker stop $CONTAINER_NAME 2>/dev/null || true
 docker rm $CONTAINER_NAME 2>/dev/null || true
 
-echo "[2] Optional cleanup (dangling only)"
-docker image prune -f
-docker builder prune -f
+echo "[2] Build image (USE CACHE)"
+docker build -t $IMAGE_NAME .
 
-echo "[3] Build image (no cache)"
-docker build --no-cache -t $IMAGE_NAME .
-
-echo "[4] Run container"
+echo "[3] Run container"
 docker run -d \
   --name $CONTAINER_NAME \
   -p $PORT \
   --restart unless-stopped \
   $IMAGE_NAME
 
-echo "[5] Done"
+echo "[4] Done"
 docker ps | grep $CONTAINER_NAME || true
 
 
@@ -40,20 +36,10 @@ docker ps | grep $CONTAINER_NAME || true
 
 
 
-
-
-
-
-
-
-
-
-
-
 # set -e
 
 # echo "===================================="
-# echo " ONEPIC Backend DEV Build & Run"
+# echo " ONEPIC Backend Rebuild"
 # echo "===================================="
 
 # IMAGE_NAME="onepic-backend"
@@ -64,15 +50,20 @@ docker ps | grep $CONTAINER_NAME || true
 # docker stop $CONTAINER_NAME 2>/dev/null || true
 # docker rm $CONTAINER_NAME 2>/dev/null || true
 
-# echo "[2] Build image (USE CACHE)"
-# docker build -t $IMAGE_NAME .
+# echo "[2] Optional cleanup (dangling only)"
+# docker image prune -f
+# docker builder prune -f
 
-# echo "[3] Run container"
+# echo "[3] Build image (no cache)"
+# docker build --no-cache -t $IMAGE_NAME .
+
+# echo "[4] Run container"
 # docker run -d \
 #   --name $CONTAINER_NAME \
 #   -p $PORT \
 #   --restart unless-stopped \
 #   $IMAGE_NAME
 
-# echo "[4] Done"
+# echo "[5] Done"
 # docker ps | grep $CONTAINER_NAME || true
+
