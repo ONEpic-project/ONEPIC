@@ -191,18 +191,18 @@ const CartScreen = ({ navigation }) => {
         { text: '취소', style: 'cancel' },
         { 
           text: '삭제', 
-<<<<<<< Updated upstream
+
           onPress: async () => {
             try {
-              const token = await AsyncStorage.getItem('access_token');
-              await axios.delete(
+              const token = await AsyncStorage.getItem('acce
+              await axios.delete(ss_token');
                 `${API_BASE_URL}/api/cart/items/${id}`,
                 { headers: { Authorization: `Bearer ${token}` } }
               );
 
               setCartItems(cartItems.filter(item => item.id !== id));
             } catch (error) {
-=======
+
           onPress: async () => {
             try {
               setPendingDeleteIds(prev => (
@@ -210,7 +210,7 @@ const CartScreen = ({ navigation }) => {
               ));
               setCartItems(prev => prev.filter(item => item.id !== id));
             } catch (error) {
->>>>>>> Stashed changes
+
               console.error('삭제 실패:', error);
               Alert.alert('오류', '삭제에 실패했습니다.');
             }
@@ -232,15 +232,15 @@ const CartScreen = ({ navigation }) => {
           text: '전체 삭제', 
           onPress: async () => {
             try {
-<<<<<<< Updated upstream
+
               const token = await AsyncStorage.getItem('access_token');
-=======
+
               const idsToDelete = cartItems.map(item => item.id);
               setPendingDeleteIds(prev => {
                 const combined = new Set([...prev, ...idsToDelete]);
                 return Array.from(combined);
               });
->>>>>>> Stashed changes
+
               
               // 각 아이템 삭제
               setCartItems([]);
