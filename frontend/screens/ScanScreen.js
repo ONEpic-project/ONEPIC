@@ -85,8 +85,11 @@ export default function ScanScreen({ navigation }) {
   // --- 로컬 저장 함수 =============================================================
   useEffect(() => {
     const initData = async () => {
-      await loadProducts();
-      await loadCartFromStorage();
+      const productList = await loadProducts();
+      const hasServerCart = await loadCartFromServer(productList);
+      if (!hasServerCart) {
+        await loadCartFromStorage();
+      }
     };
     initData();
   }, []);
@@ -101,8 +104,10 @@ export default function ScanScreen({ navigation }) {
     try {
       const response = await axios.get(`${API_BASE_URL}/api/products/`);
       setProducts(response.data);
+      return response.data;
     } catch (e) {
       console.error("로드 실패", e);
+      return [];
     }
   };
 
@@ -122,6 +127,52 @@ export default function ScanScreen({ navigation }) {
       }
     } catch (e) {
       console.error("불러오기 실패", e);
+    }
+  };
+
+  const loadCartFromServer = async (productList = []) => {
+    try {
+      const token = await AsyncStorage.getItem("access_token");
+      if (!token) {
+        return false;
+      }
+
+      const response = await axios.get(`${API_BASE_URL}/api/cart/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const items = response.data?.items ?? [];
+      if (items.length == 0) {
+        return false;
+      }
+
+      const productMap = new Map(
+        productList.map(product => [product.product_id, product])
+      );
+
+      const serverProducts = items.map(item => {
+        const product = productMap.get(item.product_id);
+        return {
+          product_id: item.product_id,
+          product_name: item.name ?? product?.name ?? '',
+          image_url: product?.image_url ?? `/static/products/${item.product_id}.jpg`,
+          price: item.price ?? product?.price ?? 0,
+          brand_name: null,
+          size: null,
+        };
+      });
+
+      const serverQuantities = items.reduce((acc, item) => {
+        acc[item.product_id] = item.quantity;
+        return acc;
+      }, {});
+
+      setScannedProducts(serverProducts);
+      setProductQuantities(serverQuantities);
+      return true;
+    } catch (e) {
+      console.error("cart fetch failed", e);
+      return false;
     }
   };
 
