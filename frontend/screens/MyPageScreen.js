@@ -156,7 +156,7 @@ const MyPageScreen = ({ navigation }) => {
     setInfoMessage('수정이 완료되었습니다.');
     setInfoMessageType('success');
 
-    await fetch(`${API_BASE_URL}/api/auth/me`, {
+    const res = await fetch(`${API_BASE_URL}/api/auth/me`, {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -167,11 +167,23 @@ const MyPageScreen = ({ navigation }) => {
         phone,
         password: password !== '*******' ? password : null,
       }),
-
     });
+
+    if (!res.ok) {
+      Alert.alert('오류', '회원정보 수정에 실패했습니다.');
+      return;
+    }
+
+    await AsyncStorage.setItem('username', name);
+    await AsyncStorage.setItem('phone', phone);
+
 
     setOrigin({ name, phone, password: '*******' });
     setPassword('*******');
+
+    setInfoMessage('수정이 완료되었습니다.');
+    setInfoMessageType('success');
+
     setIsEditing(false);
     Keyboard.dismiss();
   };
