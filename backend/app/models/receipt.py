@@ -5,6 +5,12 @@ from sqlalchemy.sql import func
 from app.database.database import Base
 
 
+from datetime import datetime, timedelta
+
+def kst_now():
+    return datetime.utcnow() + timedelta(hours=9)
+
+
 class Receipt(Base):
     __tablename__ = "receipts"
 
@@ -26,7 +32,7 @@ class Receipt(Base):
     created_at = Column(
         DateTime,
         nullable=False,
-        server_default=func.now()
+        default=kst_now
     )
 
     # 관계

@@ -6,6 +6,12 @@ from sqlalchemy.orm import relationship
 from app.database.database import Base
 
 
+from datetime import datetime, timedelta
+
+def kst_now():
+    return datetime.utcnow() + timedelta(hours=9)
+
+
 class User(Base):
     __tablename__ = "user"
 
@@ -18,7 +24,7 @@ class User(Base):
     created_at = Column(
         DateTime,
         nullable=False,
-        server_default=func.now()
+        default=kst_now
     )
 
     # 1:1 Cart

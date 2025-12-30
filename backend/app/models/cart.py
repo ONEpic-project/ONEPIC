@@ -4,6 +4,12 @@ from sqlalchemy.sql import func
 from app.database.database import Base
 
 
+from datetime import datetime, timedelta
+
+def kst_now():
+    return datetime.utcnow() + timedelta(hours=9)
+
+
 class Cart(Base):
     __tablename__ = "cart"
 
@@ -24,14 +30,14 @@ class Cart(Base):
     created_at = Column(
         DateTime,
         nullable=False,
-        server_default=func.now()
+        default=kst_now
     )
 
     updated_at = Column(
         DateTime,
         nullable=False,
-        server_default=func.now(),
-        server_onupdate=func.now()
+        default=kst_now,
+        onupdate=kst_now
     )
 
     # 관계
