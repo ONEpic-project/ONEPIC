@@ -192,21 +192,21 @@ export default function PaymentScreen({ route, navigation }) {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>결제 금액</Text>
+          <Text style={styles.sectionTitle}>할인 금액</Text>
           <View style={styles.priceCard}>
             <View style={styles.priceRow}>
-              <Text style={styles.priceLabel}>상품 금액</Text>
+              <Text style={styles.priceLabel}>쿠폰 사용</Text>
               <Text style={styles.priceValue}>
-                {totalPrice.toLocaleString()}원
+                미사용
               </Text>
             </View>
 
             <View style={styles.divider} />
 
             <View style={styles.priceRow}>
-              <Text style={styles.totalLabel}>총 결제 금액</Text>
+              <Text style={styles.totalLabel}>총 할인 금액</Text>
               <Text style={styles.totalPrice}>
-                {totalPrice.toLocaleString()}원
+                0원
               </Text>
             </View>
           </View>
