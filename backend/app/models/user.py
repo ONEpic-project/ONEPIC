@@ -20,10 +20,6 @@ class User(Base):
     password = Column(String(255), nullable=True)
     username = Column(String(50), nullable=False)
     phone = Column(String(20), nullable=True, unique=True)
-    
-    # SNS Login Fields
-    sns_type = Column(String(20), default="local")  # 'kakao', 'local'
-    sns_id = Column(String(100), nullable=True)
 
     created_at = Column(
         DateTime,

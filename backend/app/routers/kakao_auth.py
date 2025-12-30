@@ -5,6 +5,7 @@ from pydantic import BaseModel
 
 from app.core.dependencies import get_db
 from app.models.user import User
+from app.models.sns_user import SNSUser
 from app.core.security import create_access_token
 
 router = APIRouter(prefix="/auth/kakao", tags=["Auth"])
@@ -62,26 +63,34 @@ def kakao_login(payload: KakaoLoginRequest, db: Session = Depends(get_db)):
     profile = kakao_account.get("profile", {})
     nickname = profile.get("nickname", f"User_{kakao_id}")
     
-    # 3. DB에서 유저 찾기 (sns_id로 검색)
-    user = db.query(User).filter(User.sns_id == kakao_id, User.sns_type == "kakao").first()
+    # 3. DB에서 유저 찾기 (SNSUser 테이블 조회)
+    sns_user = db.query(SNSUser).filter(SNSUser.sns_id == kakao_id, SNSUser.sns_type == "kakao").first()
     
-    if not user:
-        # 3-1. 없으면 회원가입 (자동)
-        # login_id는 kakao_{id} 형태로 생성
+    if sns_user:
+        # 이미 연동된 계정이면 해당 유저 정보 가져오기
+        user = sns_user.user
+    else:
+        # 3-1. 없으면 신규 회원가입 (User + SNSUser 생성)
+        # login_id는 kakao_{id} 형태로 생성 (중복 방지)
         new_login_id = f"kakao_{kakao_id}"
         
-        # 이름 중복 방지 로직 (필요 시)
-        # 지금은 그냥 nickname 사용
-        
+        # User 생성
         user = User(
             login_id=new_login_id,
             username=nickname,
-            sns_type="kakao",
-            sns_id=kakao_id,
             password=None, # 비밀번호 없음
             phone=None     # 카카오에서 안 넘어오면 None
         )
         db.add(user)
+        db.flush() # user_id 생성을 위해 flush
+        
+        # SNSUser 생성
+        new_sns_user = SNSUser(
+            user_id=user.user_id,
+            sns_type="kakao",
+            sns_id=kakao_id
+        )
+        db.add(new_sns_user)
         db.commit()
         db.refresh(user)
     
