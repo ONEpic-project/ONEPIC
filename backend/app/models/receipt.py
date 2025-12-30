@@ -30,6 +30,8 @@ class Receipt(Base):
     )
 
     # 관계
+
+    user = relationship("User", back_populates="receipts")
     items = relationship(
         "ReceiptItem",
         back_populates="receipt",
