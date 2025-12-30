@@ -1,206 +1,316 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
+  SafeAreaView,
+  KeyboardAvoidingView,
+  ScrollView,
+  Keyboard,
+  Platform,
   View,
+  Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
+  Dimensions,
   Alert,
-  Dimensions
 } from 'react-native';
-import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import Feather from 'react-native-vector-icons/Feather';
 import Header from './components/Header';
-import { fontSizes } from '../config/typography';
 import { API_BASE_URL } from '../config/api';
+import { fontSizes } from '../config/typography';
 
-const { width, height } = Dimensions.get('window');
-
+const { height } = Dimensions.get('window');
 
 const SignupScreen = ({ navigation }) => {
+  const scrollRef = useRef(null);
+
   const [name, setName] = useState('');
-  const [userId, setUserId] = useState('');
+  const [loginId, setLoginId] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [contact, setContact] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+
+  const [passwordError, setPasswordError] = useState('');
+  const [passwordConfirmError, setPasswordConfirmError] = useState('');
+
+  const inputRefs = {
+    name: useRef(null),
+    loginId: useRef(null),
+    phone: useRef(null),
+    password: useRef(null),
+    passwordConfirm: useRef(null),
+  };
+
+  const scrollToInput = (inputRef) => {
+    if (!inputRef.current || !scrollRef.current) return;
+
+    inputRef.current.measureLayout(
+      scrollRef.current,
+      (x, y) => {
+        scrollRef.current.scrollTo({
+          y: Math.max(0, y - height * 0.25),
+          animated: true,
+        });
+      },
+      () => {}
+    );
+  };
 
   const handleSignup = async () => {
-    // 유효성 검사
     if (!name.trim()) {
       Alert.alert('알림', '성명을 입력해주세요.');
       return;
     }
-    if (!userId.trim()) {
+
+    if (!loginId.trim()) {
       Alert.alert('알림', '아이디를 입력해주세요.');
       return;
     }
-    if (password.length < 6) {
-      Alert.alert('알림', '비밀번호는 6자 이상이어야 합니다.');
-      return;
-    }
-    if (!contact.trim()) {
-    Alert.alert('알림', '연락처를 입력해주세요.');
-    return;
-    }
-    if (contact.length !== 11) {
+
+    if (!phone.trim() || phone.length !== 11) {
       Alert.alert('알림', '연락처는 11자리로 입력해주세요.');
       return;
     }
 
-    // 회원가입 완료 화면으로 이동
-    try {
-    const response = await fetch(`${API_BASE_URL}/api/auth/signup`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        // 🔴 여기!!! 이게 제일 중요
-        login_id: userId,   // DB 컬럼명
-        password: password,
-        username: name,     // 화면의 '성명'
-        phone: contact,     // 화면의 '연락처'
-      }),
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      Alert.alert('회원가입 실패', data.detail || '오류 발생');
+    if (password.length < 6) {
+      setPasswordError('비밀번호는 6자 이상이어야 합니다.');
+      setPasswordConfirmError('');
       return;
     }
 
-    // 회원가입 성공 - 사용자 정보 저장
-    await AsyncStorage.setItem('login_id', userId);
-    await AsyncStorage.setItem('username', name);
-    await AsyncStorage.setItem('phone', contact);
+    if (password !== passwordConfirm) {
+      setPasswordConfirmError('비밀번호가 일치하지 않습니다.');
+      setPasswordError('');
+      return;
+    }
 
-    navigation.navigate('SignupComplete');
-  } catch (error) {
-    Alert.alert('오류', '서버와 연결할 수 없습니다.');
-  }
+    setPasswordError('');
+    setPasswordConfirmError('');
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          login_id: loginId,
+          password,
+          username: name,
+          phone,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        Alert.alert('회원가입 실패', data.detail || '오류 발생');
+        return;
+      }
+
+      await AsyncStorage.setItem('login_id', loginId);
+      await AsyncStorage.setItem('username', name);
+      await AsyncStorage.setItem('phone', phone);
+
+      navigation.navigate('SignupComplete');
+    } catch (e) {
+      Alert.alert('오류', '서버와 연결할 수 없습니다.');
+    }
   };
 
   return (
-    <View style={styles.container} edges={['top', 'left', 'right']}>
-      {/* 헤더영역 */}
-          <Header 
-            navigation={navigation}
-            title="회원가입"
-          />
-
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        //style={styles.flex}
+        style={{ flex: 1 }}
       >
+        <View style={{ marginTop: -45 }}>
+          <Header navigation={navigation} title="회원가입" />
+        </View>
 
-        <ScrollView 
-          //contentContainerStyle={styles.scrollContent}
-          //keyboardShouldPersistTaps="handled"
-          //showsVerticalScrollIndicator={false}
+        <ScrollView
+          ref={scrollRef}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingBottom: 40 }}
         >
-          
+          <View style={styles.container}>
+            <View style={styles.form}>
+              <Field label="성명">
+                <TextInput
+                  ref={inputRefs.name}
+                  style={styles.input}
+                  value={name}
+                  placeholder="성명을 입력해 주세요"
+                  placeholderTextColor="#C8C8C8"
+                  onChangeText={setName}
+                  onFocus={() => scrollToInput(inputRefs.name)}
+                />
+              </Field>
 
-          {/* 입력 필드들 */}
-          <View style={styles.formContainer}>
-            {/* 성명 */}
-              <TextInput
-                style={styles.input}
-                value={name}
-                onChangeText={setName}
-                placeholder="성명"
-                placeholderTextColor="#999"
-                autoCapitalize="words"
-              />
+              <Field label="아이디">
+                <TextInput
+                  ref={inputRefs.loginId}
+                  style={styles.input}
+                  value={loginId}
+                  placeholder="아이디를 입력해 주세요"
+                  placeholderTextColor="#C8C8C8"
+                  autoCapitalize="none"
+                  onChangeText={setLoginId}
+                  onFocus={() => scrollToInput(inputRefs.loginId)}
+                />
+              </Field>
 
-            {/* 아이디 */}
-              <TextInput
-                style={styles.input}
-                value={userId}
-                onChangeText={setUserId}
-                placeholder="아이디"
-                placeholderTextColor="#999"
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              <Field label="연락처">
+                <TextInput
+                  ref={inputRefs.phone}
+                  style={styles.input}
+                  value={phone}
+                  placeholder="01012345678"
+                  placeholderTextColor="#C8C8C8"
+                  keyboardType="phone-pad"
+                  onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
+                  onFocus={() => scrollToInput(inputRefs.phone)}
+                />
+              </Field>
 
-            {/* 비밀번호 */}
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="비밀번호"
-                placeholderTextColor="#999"
-                secureTextEntry
-                autoCapitalize="none"
-                autoCorrect={false}
-              />
+              <Field
+                label="비밀번호"
+                message={passwordError}
+                messageType="error"
+              >
+                <View style={styles.passwordWrapper}>
+                  <TextInput
+                    key={showPassword ? 'password-show' : 'password-hide'}
+                    ref={inputRefs.password}
+                    style={[styles.input, { flex: 1 }]}
+                    value={password}
+                    placeholder="6자 이상 입력해 주세요"
+                    placeholderTextColor="#C8C8C8"
+                    secureTextEntry={!showPassword}
+                    onChangeText={(text) => {
+                      setPassword(text);
+                      setPasswordConfirmError('');
+                    }}
+                    onFocus={() => scrollToInput(inputRefs.password)}
+                  />
 
-            {/* 연락처 */}
-              <TextInput
-                style={styles.input}
-                value={contact}
-                onChangeText={setContact}
-                placeholder="연락처"
-                placeholderTextColor="#999"
-                keyboardType="phone-pad"
-              />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword((prev) => !prev)}
+                    style={styles.eyeButton}
+                    activeOpacity={0.7}
+                  >
+                    <Feather
+                      name={showPassword ? 'eye-off' : 'eye'}
+                      size={25}  // 아이콘 크기 조정
+                      color="#9A9A9A"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </Field>
+
+              <Field
+                label="비밀번호 확인"
+                message={passwordConfirmError}
+                messageType="error"
+              >
+                <View style={styles.passwordWrapper}>
+                  <TextInput
+                    key={showPasswordConfirm ? 'confirm-show' : 'confirm-hide'}
+                    ref={inputRefs.passwordConfirm}
+                    style={[styles.input, { flex: 1 }]}
+                    value={passwordConfirm}
+                    placeholder="비밀번호를 다시 입력해 주세요"
+                    placeholderTextColor="#C8C8C8"
+                    secureTextEntry={!showPasswordConfirm}
+                    onChangeText={setPasswordConfirm}
+                    onFocus={() => scrollToInput(inputRefs.passwordConfirm)}
+                  />
+
+                  <TouchableOpacity
+                    onPress={() => setShowPasswordConfirm((prev) => !prev)}
+                    style={styles.eyeButton}
+                    activeOpacity={0.7}
+                  >
+                    <Feather
+                      name={showPasswordConfirm ? 'eye-off' : 'eye'}
+                      size={25}  // 아이콘 크기 조정
+                      color="#9A9A9A"
+                    />
+                  </TouchableOpacity>
+                </View>
+              </Field>
+            </View>
+
+            <View style={styles.buttons}>
+              <TouchableOpacity style={styles.primary} onPress={handleSignup}>
+                <Text style={styles.primaryText}>회원가입</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-
-          {/* 회원가입 버튼 */}
-          <TouchableOpacity style={styles.signupButton} onPress={handleSignup}>
-            <AppText 
-            style={styles.signupButtonText}
-            >회원가입</AppText>
-          </TouchableOpacity>
-          
         </ScrollView>
       </KeyboardAvoidingView>
-    </View>
+    </SafeAreaView>
   );
 };
 
+/* 공통 필드 */
+const Field = ({ label, children, message, messageType }) => (
+  <View style={styles.field}>
+    <Text style={styles.label}>{label}</Text>
+    {children}
+    <View style={styles.divider} />
+    <Text
+      style={[
+        styles.messageSlot,
+        messageType === 'error' && styles.errorText,
+      ]}
+    >
+      {message ? message : ' '}
+    </Text>
+  </View>
+);
+
+/* styles */
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
+  container: { backgroundColor: '#fff' },
+
+  form: { marginTop: 45, width: 296, alignSelf: 'center' },
+  field: { marginBottom: 15 },
+
+  label: { fontSize: fontSizes.md, color: '#848484', marginBottom: 12 },
+  input: { fontSize: fontSizes.lg, color: '#4B4B4B' },
+  divider: { height: 1, backgroundColor: '#848484', marginTop: 6 },
+
+  passwordWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
-  formContainer: {
-    marginBottom: height * 0.04,
-    marginTop: height * 0.08,
-    paddingHorizontal: width * 0.08,
-    paddingTop: height * 0.02,
-    paddingBottom: height * 0.05,
+
+  eyeButton: {
+    paddingLeft: 10,
+    paddingVertical: 8,
   },
-  input: {
-    width: '95%',
-    height: height * 0.06, // 화면 높이의 6%
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+
+  messageSlot: {
+    marginTop: 4,
+    minHeight: 18,
     fontSize: fontSizes.sm,
-    color: '#333',
-    marginBottom: height * 0.035,
-    paddingVertical: 10,
-    alignSelf: 'center',
+    color: '#848484',
   },
-  signupButton: {
-    backgroundColor: '#FF9500',
-    height: height * 0.06,
+  errorText: { color: '#FF3B30' },
+
+  buttons: { alignItems: 'center', marginTop: height * 0.06 },
+  primary: {
+    width: 344,
+    height: 50,
+    backgroundColor: '#FF9317',
+    borderRadius: 300,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: height * 0.03,
-    width: '83%',
-    alignSelf: 'center',
-    marginTop: height * 0.02,
   },
-  signupButtonText: {
-    color: '#FFFFFF',
-    fontSize: fontSizes.md,
-    fontWeight: '600',
-  },
+  primaryText: { color: '#fff', fontSize: fontSizes.lg },
 });
 
 export default SignupScreen;
