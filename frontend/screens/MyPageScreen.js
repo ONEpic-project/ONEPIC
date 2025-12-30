@@ -344,7 +344,11 @@ const MyPageScreen = ({ navigation }) => {
                         { flex: 1 }, 
                         snsType !== 'local' && styles.disabledInput
                     ]}
-                    value={password || (snsType !== 'local' ? '*******' : '')}
+                    value={
+                      snsType !== 'local' 
+                        ? (password || '*******') 
+                        : (isEditing && password === '*******' && showPassword ? '' : password)
+                    }
                     editable={isEditing && snsType === 'local'}
                     secureTextEntry={isEditing ? !showPassword : true}
                     placeholder={isEditing ? "6자 이상 입력해 주세요" : ""}
