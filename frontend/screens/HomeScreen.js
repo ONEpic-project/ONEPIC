@@ -75,7 +75,7 @@ const HomeScreen = ({ navigation }) => {
       {/* 상단 오렌지 영역 */}
       <View style={styles.topSection}>
         <AppText style={styles.welcomeText}>
-          반갑습니다!{'{\n}'}
+          반갑습니다!{'\n'}
           <AppText style={styles.boldText}>{username}</AppText> 님
         </AppText>
 
@@ -108,7 +108,7 @@ const HomeScreen = ({ navigation }) => {
 
             {/* 🔹 기존 텍스트 / 버튼 (블러 영향 X) */}
             <AppText style={styles.scanTitle}>
-              줄 안 서고 결제{'{\n}'}
+              줄 안 서고 결제{'\n'}
               <AppText style={styles.scanSubText}>지금 사용해 보세요</AppText>
             </AppText>
 

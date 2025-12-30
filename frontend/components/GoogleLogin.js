@@ -139,9 +139,9 @@ const GoogleLogin = ({ navigation }) => {
 const styles = StyleSheet.create({
   googleButton: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 12,
+    borderRadius: height * 0.03,
     width: '85%',
-    height: 50,
+    height: height * 0.06,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'center',

@@ -34,6 +34,10 @@ const MyPageScreen = ({ navigation }) => {
   const [infoMessage, setInfoMessage] = useState('');
   const [infoMessageType, setInfoMessageType] = useState('info'); 
 
+  const [snsType, setSnsType] = useState('local');
+
+
+
   const [origin, setOrigin] = useState({
     name: '',
     phone: '',
@@ -87,20 +91,48 @@ const MyPageScreen = ({ navigation }) => {
   /* 사용자 정보 로드 */
   useEffect(() => {
     const load = async () => {
-      const login_id = await AsyncStorage.getItem('login_id');
-      const username = await AsyncStorage.getItem('username');
-      const phone = await AsyncStorage.getItem('phone');
+      try {
+        const token = await AsyncStorage.getItem('access_token');
+        // 우선 API에서 최신 정보를 가져옵니다.
+        if (token) {
+          const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
+             headers: { Authorization: `Bearer ${token}` },
+          });
+          if (response.ok) {
+            const data = await response.json();
+            setLoginId(data.login_id || '');
+            setName(data.username || '');
+            setPhone(data.phone || '');
+            setSnsType(data.sns_type || 'local');
+            setPassword('*******');
 
-      setLoginId(login_id || '');
-      setName(username || '');
-      setPhone(phone || '');
-      setPassword('*******');
+            setOrigin({
+              name: data.username || '',
+              phone: data.phone || '',
+              password: '*******',
+            });
+            return; 
+          }
+        }
+        
+        // API 로드 실패 시 로컬 스토리지 폴백
+        const login_id = await AsyncStorage.getItem('login_id');
+        const username = await AsyncStorage.getItem('username');
+        const phone = await AsyncStorage.getItem('phone');
 
-      setOrigin({
-        name: username || '',
-        phone: phone || '',
-        password: '*******',
-      });
+        setLoginId(login_id || '');
+        setName(username || '');
+        setPhone(phone || '');
+        setPassword('*******');
+
+        setOrigin({
+          name: username || '',
+          phone: phone || '',
+          password: '*******',
+        });
+      } catch (e) {
+        console.log('Load user info failed', e);
+      }
     };
     load();
   }, []);
@@ -266,9 +298,9 @@ const MyPageScreen = ({ navigation }) => {
               <Field label="성명">
                 <TextInput
                   ref={inputRefs.name}
-                  style={styles.input}
+                  style={[styles.input, snsType !== 'local' && styles.disabledInput]}
                   value={name}
-                  editable={isEditing}
+                  editable={isEditing && snsType === 'local'}
                   onFocus={() => scrollToInput(inputRefs.name)}
                   onChangeText={setName}
                 />
@@ -277,21 +309,21 @@ const MyPageScreen = ({ navigation }) => {
               <Field label="연락처">
                 <TextInput
                   ref={inputRefs.phone}
-                  style={styles.input}
+                  style={[styles.input, snsType !== 'local' && styles.disabledInput]}
                    value={phone ?? ''}
-                  editable={isEditing}
+                  editable={isEditing && snsType === 'local'}
                   keyboardType="phone-pad"
                   onFocus={() => scrollToInput(inputRefs.phone)}
                   onChangeText={(text) => {
-                    setPhone(text.replace(/[^0-9]/g, ''));
+                    if(snsType === 'local') setPhone(text.replace(/[^0-9]/g, ''));
                   }}
                 />
               </Field>
 
               <Field label="아이디">
                 <TextInput
-                  style={[styles.input, styles.readonly]}
-                  value={loginId}
+                  style={[styles.input, styles.disabledInput]}
+                  value={snsType === 'local' ? loginId : ''}
                   editable={false}
                 />
               </Field>
@@ -303,13 +335,15 @@ const MyPageScreen = ({ navigation }) => {
               >
                 <TextInput
                   ref={inputRefs.password}
-                  style={styles.input}
-                  value={password}
-                  editable={isEditing}
-                  secureTextEntry
+                  style={[styles.input, snsType !== 'local' && styles.disabledInput]}
+                  value={password || (snsType !== 'local' ? '*******' : '')}
+                  editable={isEditing && snsType === 'local'}
+                  secureTextEntry={true}
                   onFocus={() => {
-                    handlePasswordFocus();
-                    scrollToInput(inputRefs.password);
+                    if (snsType === 'local') {
+                      handlePasswordFocus();
+                      scrollToInput(inputRefs.password);
+                    }
                   }}
                   onChangeText={setPassword}
                 />
@@ -317,16 +351,26 @@ const MyPageScreen = ({ navigation }) => {
             </View>
 
             <View style={styles.buttons}>
-              <TouchableOpacity style={styles.primary} onPress={handleEdit}>
-                <Text style={styles.primaryText}>
-                  {isEditing ? '저장하기' : '회원 정보 수정하기'}
-                </Text>
-              </TouchableOpacity>
+              {(snsType === 'kakao' || snsType === 'google') ? (
+                <View style={styles.snsNoticeContainer}>
+                  <Text style={styles.snsNoticeText}>
+                    {snsType === 'kakao' ? '카카오' : '구글'} 로그인 계정은 수정이 불가능합니다.
+                  </Text>
+                </View>
+              ) : (
+                <>
+                  <TouchableOpacity style={styles.primary} onPress={handleEdit}>
+                    <Text style={styles.primaryText}>
+                      {isEditing ? '저장하기' : '회원 정보 수정하기'}
+                    </Text>
+                  </TouchableOpacity>
 
-              {isEditing && (
-                <TouchableOpacity style={styles.outline} onPress={handleCancel}>
-                  <Text style={styles.outlineText}>취소</Text>
-                </TouchableOpacity>
+                  {isEditing && (
+                    <TouchableOpacity style={styles.outline} onPress={handleCancel}>
+                      <Text style={styles.outlineText}>취소</Text>
+                    </TouchableOpacity>
+                  )}
+                </>
               )}
 
               {!isEditing && (
@@ -376,6 +420,7 @@ const styles = StyleSheet.create({
   field: { marginBottom: 15 },
   label: { fontSize: fontSizes.md, color: '#848484', marginBottom: 5 },
   input: { fontSize: fontSizes.lg, color: '#4B4B4B' },
+  disabledInput: { backgroundColor: '#F5F5F5', color: '#A4A4A4', paddingHorizontal: 5 },
   readonly: { color: '#A4A4A4' },
   divider: { height: 1, backgroundColor: '#848484', marginTop: 6 },
 
@@ -426,7 +471,22 @@ const styles = StyleSheet.create({
 
   errorText: {
     color: '#FF3B30',
-  }
+  },
+
+  snsNoticeContainer: {
+    width: 344,
+    height: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    backgroundColor: '#F2F2F2',
+    borderRadius: 8,
+  },
+  snsNoticeText: {
+    color: '#888',
+    fontSize: fontSizes.md,
+    fontWeight: '500',
+  },
 });
 
 export default MyPageScreen;
