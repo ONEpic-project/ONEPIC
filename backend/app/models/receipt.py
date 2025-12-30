@@ -1,8 +1,8 @@
 from sqlalchemy import Column, BigInteger, Integer, String, DateTime, ForeignKey
-from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
+from sqlalchemy.sql import func
 
-from app.database import Base
+from app.database.database import Base
 
 
 class Receipt(Base):
@@ -12,7 +12,6 @@ class Receipt(Base):
         BigInteger,
         primary_key=True,
         index=True,
-        autoincrement=True
     )
 
     user_id = Column(
@@ -27,11 +26,10 @@ class Receipt(Base):
     created_at = Column(
         DateTime,
         nullable=False,
-        server_default=func.current_timestamp()
+        server_default=func.now()
     )
 
     # 관계
-    user = relationship("User", back_populates="receipts")
     items = relationship(
         "ReceiptItem",
         back_populates="receipt",

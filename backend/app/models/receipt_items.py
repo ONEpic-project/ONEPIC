@@ -1,7 +1,7 @@
 from sqlalchemy import Column, BigInteger, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
 
-from app.database import Base
+from app.database.database import Base
 
 
 class ReceiptItem(Base):
@@ -9,9 +9,7 @@ class ReceiptItem(Base):
 
     receipt_item_id = Column(
         BigInteger,
-        primary_key=True,
-        index=True,
-        autoincrement=True
+        primary_key=True
     )
 
     receipt_id = Column(
