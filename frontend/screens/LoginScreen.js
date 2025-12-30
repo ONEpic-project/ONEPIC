@@ -70,9 +70,10 @@ const LoginScreen = ({ navigation }) => {
 
     // 로그인 성공 -사용자 정보 저장
       if (data.user_id && data.username) {
-        await AsyncStorage.setItem('user_id', data.user_id.toString());
-        await AsyncStorage.setItem('username', data.username);
-        await AsyncStorage.setItem('login_id', userId);
+        await AsyncStorage.setItem('user_id', data.user.user_id.toString());
+        await AsyncStorage.setItem('login_id', data.user.login_id);
+        await AsyncStorage.setItem('username', data.user.username);
+        await AsyncStorage.setItem('phone', data.user.phone);
 
         // 토큰 저장, 추후 인증 헤더에 사용 예정
         await AsyncStorage.setItem('access_token', data.access_token);

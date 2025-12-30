@@ -76,7 +76,9 @@ def login(user: UserLogin, db: Session = Depends(get_db)):
         "message": "로그인 성공",
         "access_token": access_token,
         "user_id": db_user.user_id,
-        "username": db_user.username
+        "login_id": db_user.login_id,
+        "username": db_user.username,
+        "phone": db_user.phone,
     }
 
 
@@ -155,8 +157,6 @@ def update_me(
             "phone": current_user.phone
         }
     }
-    db.commit()
-    return {"message": "회원탈퇴 완료"}
 
 
 #  아이디 찾기 ================================================
