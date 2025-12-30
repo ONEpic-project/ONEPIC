@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { 
-  View, 
-  Text, 
-  TouchableOpacity, 
-  Image, 
-  StyleSheet, 
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
   Dimensions,
   FlatList,
   Alert,
-  ActivityIndicator
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -23,7 +23,6 @@ const CartScreen = ({ navigation }) => {
   const [loading, setLoading] = useState(true);
   const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 
-  // 장바구니 조회
   const fetchCart = async () => {
     try {
       setLoading(true);
@@ -37,12 +36,13 @@ const CartScreen = ({ navigation }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      const items = response.data.items.map(item => ({
+      const items = (response.data?.items ?? []).map(item => ({
         id: item.cart_item_id,
         product_id: item.product_id,
         name: item.name,
         price: item.price,
         quantity: item.quantity,
+        image: { uri: `${API_BASE_URL}/static/products/${item.product_id}.jpg` },
         description: '',
       }));
 
@@ -50,7 +50,7 @@ const CartScreen = ({ navigation }) => {
       setPendingDeleteIds([]);
     } catch (error) {
       console.error('장바구니 조회 실패:', error);
-      Alert.alert('오류', '장바구니를 불러올 수 없습니다.');
+      Alert.alert('오류', '장바구니를 불러오지 못했습니다.');
     } finally {
       setLoading(false);
     }
@@ -134,7 +134,6 @@ const CartScreen = ({ navigation }) => {
         return;
       }
 
-      // 변경된 수량을 DB에 일괄 업데이트
       await syncCartChanges();
 
       const paymentProducts = cartItems.map(item => ({
@@ -144,7 +143,7 @@ const CartScreen = ({ navigation }) => {
         price: item.price,
         size: '-',
         quantity: item.quantity,
-        image_url: `/static/products/${item.product_id}/main.jpg`
+        image_url: `/static/products/${item.product_id}.jpg`,
       }));
 
       const total = cartItems.reduce(
@@ -158,7 +157,7 @@ const CartScreen = ({ navigation }) => {
           acc[item.product_id] = item.quantity;
           return acc;
         }, {}),
-        totalPrice: total
+        totalPrice: total,
       });
     } catch (error) {
       console.error('장바구니 업데이트 실패:', error);
@@ -166,14 +165,12 @@ const CartScreen = ({ navigation }) => {
     }
   };
 
-  // 수량 증가 (로컬에서만)
   const increaseQuantity = (id) => {
     setCartItems(prev => prev.map(item =>
       item.id === id ? { ...item, quantity: item.quantity + 1 } : item
     ));
   };
 
-  // 수량 감소 (로컬에서만)
   const decreaseQuantity = (id) => {
     setCartItems(prev => prev.map(item =>
       item.id === id && item.quantity > 1
@@ -182,115 +179,74 @@ const CartScreen = ({ navigation }) => {
     ));
   };
 
-  // 아이템 삭제
   const removeItem = (id) => {
     Alert.alert(
       '삭제 확인',
-      '이 상품을 장바구니에서 삭제하시겠습니까?',
+      '해당 상품을 장바구니에서 삭제하시겠습니까?',
       [
         { text: '취소', style: 'cancel' },
-        { 
-          text: '삭제', 
-
-          onPress: async () => {
-            try {
-              const token = await AsyncStorage.getItem('acce
-              await axios.delete(ss_token');
-                `${API_BASE_URL}/api/cart/items/${id}`,
-                { headers: { Authorization: `Bearer ${token}` } }
-              );
-
-              setCartItems(cartItems.filter(item => item.id !== id));
-            } catch (error) {
-
-          onPress: async () => {
-            try {
-              setPendingDeleteIds(prev => (
-                prev.includes(id) ? prev : [...prev, id]
-              ));
-              setCartItems(prev => prev.filter(item => item.id !== id));
-            } catch (error) {
-
-              console.error('삭제 실패:', error);
-              Alert.alert('오류', '삭제에 실패했습니다.');
-            }
+        {
+          text: '삭제',
+          onPress: () => {
+            setPendingDeleteIds(prev => (
+              prev.includes(id) ? prev : [...prev, id]
+            ));
+            setCartItems(prev => prev.filter(item => item.id !== id));
           },
-          style: 'destructive'
+          style: 'destructive',
         }
       ]
     );
   };
 
-  // 전체 삭제
   const removeAll = () => {
     Alert.alert(
       '전체 삭제',
       '장바구니를 비우시겠습니까?',
       [
         { text: '취소', style: 'cancel' },
-        { 
-          text: '전체 삭제', 
-          onPress: async () => {
-            try {
-
-              const token = await AsyncStorage.getItem('access_token');
-
-              const idsToDelete = cartItems.map(item => item.id);
-              setPendingDeleteIds(prev => {
-                const combined = new Set([...prev, ...idsToDelete]);
-                return Array.from(combined);
-              });
-
-              
-              // 각 아이템 삭제
-              setCartItems([]);
-            } catch (error) {
-              console.error('전체 삭제 실패:', error);
-              Alert.alert('오류', '삭제에 실패했습니다.');
-            }
+        {
+          text: '전체 삭제',
+          onPress: () => {
+            const idsToDelete = cartItems.map(item => item.id);
+            setPendingDeleteIds(prev => {
+              const combined = new Set([...prev, ...idsToDelete]);
+              return Array.from(combined);
+            });
+            setCartItems([]);
           },
-          style: 'destructive'
+          style: 'destructive',
         }
       ]
     );
   };
 
-  // 총 합계 계산
-  const totalPrice = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  const totalPrice = cartItems.reduce(
+    (sum, item) => sum + (item.price * item.quantity),
+    0
+  );
 
-  // 구매하기
-  const handlePurchase = () => {
-    if (cartItems.length === 0) {
-      Alert.alert('알림', '장바구니가 비어있습니다.');
-      return;
-    }
-    Alert.alert('구매 확인', `총 ${totalPrice.toLocaleString()}원을 결제하시겠습니까?`);
-  };
-
-  const renderCartItem = ({ item, index }) => (
+  const renderCartItem = ({ item }) => (
     <View style={styles.cartItem}>
-      {/* 상품 이미지 */}
       <Image source={item.image} style={styles.productImage} resizeMode="contain" />
-      
-      {/* 상품 정보 */}
+
       <View style={styles.productInfo}>
         <Text style={styles.productName}>{item.name}</Text>
         <Text style={styles.productDescription}>{item.description}</Text>
         <Text style={styles.productPrice}>{item.price.toLocaleString()}원</Text>
       </View>
 
-      {/* 수량 조절 */}
       <View style={styles.quantityControl}>
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.quantityButton}
           onPress={() => decreaseQuantity(item.id)}
         >
-          <Text style={styles.quantityButtonText}>−</Text>
+          <Text style={styles.quantityButtonText}>-</Text>
         </TouchableOpacity>
-        
+
         <Text style={styles.quantityText}>{item.quantity}개</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.quantityButton}
           onPress={() => increaseQuantity(item.id)}
         >
@@ -298,36 +254,33 @@ const CartScreen = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-      {/* 삭제 버튼 */}
-      <TouchableOpacity 
+      <TouchableOpacity
         style={styles.deleteButton}
         onPress={() => removeItem(item.id)}
       >
-        <Text style={styles.deleteButtonText}>✕</Text>
+        <Text style={styles.deleteButtonText}>×</Text>
       </TouchableOpacity>
     </View>
   );
 
   const renderHeader = () => (
     <>
-      {/* 상품 리스트 상단 부분 */}
       {cartItems.slice(0, Math.ceil(cartItems.length / 2)).map((item, index) => (
         <View key={item.id}>
           {renderCartItem({ item, index })}
         </View>
       ))}
 
-      {/* 합계 섹션 */}
       {cartItems.length > 0 && (
         <View style={styles.summarySection}>
           <View style={styles.totalContainer}>
             <Text style={styles.totalLabel}>합계</Text>
             <Text style={styles.totalPrice}>{totalPrice.toLocaleString()}원</Text>
           </View>
-          
-          <TouchableOpacity 
-          style={styles.purchaseButton}
-          onPress={handleCheckout}
+
+          <TouchableOpacity
+            style={styles.purchaseButton}
+            onPress={handleCheckout}
           >
             <Text style={styles.purchaseButtonText}>구매하기</Text>
           </TouchableOpacity>
@@ -338,20 +291,18 @@ const CartScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-      {/* 헤더 */}
-      <Header 
+      <Header
         navigation={navigation}
         title="장바구니"
       />
 
-        <TouchableOpacity 
-          style={styles.deleteAllButton}
-          onPress={removeAll}
-        >
-          <Text style={styles.deleteAllText}>전체 삭제</Text>
-        </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.deleteAllButton}
+        onPress={removeAll}
+      >
+        <Text style={styles.deleteAllText}>전체 삭제</Text>
+      </TouchableOpacity>
 
-      {/* 장바구니 리스트 */}
       {loading ? (
         <View style={styles.emptyContainer}>
           <ActivityIndicator size="large" color="#FF9500" />
@@ -364,7 +315,7 @@ const CartScreen = ({ navigation }) => {
         <FlatList
           data={cartItems.slice(Math.ceil(cartItems.length / 2))}
           renderItem={renderCartItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => String(item.id)}
           ListHeaderComponent={renderHeader}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
