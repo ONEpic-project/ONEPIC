@@ -46,6 +46,10 @@ export default function ScanScreen({ navigation }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const cameraRef = useRef(null);
+  const isSyncingRef = useRef(false);
+  const scannedProductsRef = useRef([]);
+  const productQuantitiesRef = useRef({});
+  const isMountedRef = useRef(true);
 
   // --- 드로워 애니메이션 및 제스처 로직 =============================================================
   const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
@@ -93,13 +97,82 @@ export default function ScanScreen({ navigation }) {
       }
     };
     initData();
+    return () => {
+      isMountedRef.current = false;
+    };
   }, []);
 
   useEffect(() => {
     if (Object.keys(productQuantities).length > 0) {
       saveCartToStorage(productQuantities);
     }
+    // keep refs updated for use in listeners
+    productQuantitiesRef.current = productQuantities;
+    scannedProductsRef.current = scannedProducts;
   }, [productQuantities]);
+
+  useEffect(() => {
+    scannedProductsRef.current = scannedProducts;
+  }, [scannedProducts]);
+
+  // helper: sync current scannedProducts -> server
+  const syncCartToServer = async (overrideItems = null) => {
+    if (isSyncingRef.current) return true;
+    isSyncingRef.current = true;
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if (!token) {
+        isSyncingRef.current = false;
+        return false;
+      }
+
+      const items = overrideItems ?? (scannedProductsRef.current || []).map((p) => ({
+        product_id: Number(p.product_id),
+        quantity: productQuantitiesRef.current[p.product_id] || 1,
+      }));
+
+      console.log('syncCartToServer: syncing items', items);
+
+      const res = await axios.post(`${API_BASE_URL}/api/cart/scan/sync`, { items }, { headers: { Authorization: `Bearer ${token}` }, timeout: 10000 });
+      console.log('syncCartToServer: success', res.status, res.data);
+      isSyncingRef.current = false;
+      return true;
+    } catch (e) {
+      console.error('syncCartToServer error', e?.response?.status, e?.response?.data || e.message);
+      isSyncingRef.current = false;
+      return false;
+    }
+  };
+
+  // block navigation on beforeRemove and attempt sync
+  useEffect(() => {
+    const beforeRemove = (e) => {
+      if (scannedProductsRef.current.length === 0) {
+        // nothing to sync
+        return;
+      }
+
+      e.preventDefault();
+
+      const trySync = async () => {
+        const ok = await syncCartToServer();
+        if (ok) {
+          navigation.dispatch(e.data.action);
+        } else {
+          Alert.alert('동기화 실패', '장바구니를 서버에 저장하지 못했습니다. 계속하시겠습니까?', [
+            { text: '취소', style: 'cancel' },
+            { text: '다시시도', onPress: () => trySync() },
+            { text: '저장 안함', style: 'destructive', onPress: () => navigation.dispatch(e.data.action) },
+          ]);
+        }
+      };
+
+      trySync();
+    };
+
+    const unsub = navigation.addListener('beforeRemove', beforeRemove);
+    return () => unsub();
+  }, [navigation]);
 
   const loadProducts = async () => {
     try {
