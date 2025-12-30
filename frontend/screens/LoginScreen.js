@@ -27,20 +27,7 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      try {
-        const token = await AsyncStorage.getItem('access_token');
-        if (token) {
-          // 토큰이 있으면 바로 홈으로 이동 (자동 로그인)
-          navigation.replace('Home');
-        }
-      } catch (e) {
-        console.log('Auto login check failed', e);
-      }
-    };
-    checkLoginStatus();
-  }, []);
+
 
   const handleLogin = async () => {
     //간단한 유효성 검사
