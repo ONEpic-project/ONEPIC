@@ -297,7 +297,7 @@ export default function ScanScreen({ navigation }) {
 
       const res = await axios.post(`${API_BASE_URL}/api/ai/detect`, formData, {
         headers: { "Content-Type": "multipart/form-data" },
-        timeout: 25000,
+        timeout: 10000,
       });
 
       console.log('Scan Result:', res.data); // [LOG] 스캔 결과 로그 복구
