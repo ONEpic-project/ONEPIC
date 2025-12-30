@@ -17,9 +17,13 @@ class User(Base):
 
     user_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     login_id = Column(String(50), nullable=False, unique=True, index=True)
-    password = Column(String(255), nullable=False)
+    password = Column(String(255), nullable=True)
     username = Column(String(50), nullable=False)
-    phone = Column(String(20), nullable=False, unique=True)
+    phone = Column(String(20), nullable=True, unique=True)
+    
+    # SNS Login Fields
+    sns_type = Column(String(20), default="local")  # 'kakao', 'local'
+    sns_id = Column(String(100), nullable=True)
 
     created_at = Column(
         DateTime,

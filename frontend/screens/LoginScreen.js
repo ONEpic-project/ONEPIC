@@ -16,6 +16,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { API_BASE_URL } from '../config/api';
+import KakaoLogin from '../components/KakaoLogin';
 
 const { width, height } = Dimensions.get('window');
 
@@ -153,6 +154,9 @@ const LoginScreen = ({ navigation }) => {
           >
             <Text style={styles.loginButtonText}>로그인 하기</Text>
           </TouchableOpacity>
+
+          {/* 카카오 로그인 버튼 (임시 추가) */}
+          <KakaoLogin navigation={navigation} />
 
           {/* 하단 링크 */}
           <View style={styles.footer}>

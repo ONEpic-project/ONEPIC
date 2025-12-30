@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 # from app.database.database import engine, Base
-from app.routers import products, ai, auth, health, cart, receipt
+from app.routers import products, ai, auth, health, cart, receipt, kakao_auth
 
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -52,6 +52,7 @@ app.include_router(products.router, prefix="/api/products")
 app.include_router(auth.router, prefix="/api")
 app.include_router(cart.router, prefix="/api")
 app.include_router(receipt.router, prefix="/api")
+app.include_router(kakao_auth.router, prefix="/api")
 
 
 
