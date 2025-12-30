@@ -85,20 +85,23 @@ const SignupScreen = ({ navigation }) => {
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+      {/* 헤더영역 */}
+          <Header 
+            navigation={navigation}
+            title="회원가입"
+          />
+
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         //style={styles.flex}
       >
+
         <ScrollView 
           //contentContainerStyle={styles.scrollContent}
           //keyboardShouldPersistTaps="handled"
           //showsVerticalScrollIndicator={false}
         >
-          {/* 헤더영역 */}
-          <Header 
-            navigation={navigation}
-            title="회원가입"
-          />
+          
 
           {/* 입력 필드들 */}
           <View style={styles.formContainer}>
@@ -165,7 +168,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   formContainer: {
-    marginBottom: height * 0.08,
+    marginBottom: height * 0.04,
     marginTop: height * 0.08,
     paddingHorizontal: width * 0.08,
     paddingTop: height * 0.02,
@@ -190,6 +193,7 @@ const styles = StyleSheet.create({
     borderRadius: height * 0.03,
     width: '83%',
     alignSelf: 'center',
+    marginTop: height * 0.02,
   },
   signupButtonText: {
     color: '#FFFFFF',
