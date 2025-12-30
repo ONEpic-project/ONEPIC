@@ -304,6 +304,7 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     width: '100%',
+    marginTop: height * 0.2,
   },
   searchButton: {
     width: '100%',
