@@ -16,13 +16,12 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Header from './components/Header';
 import { API_BASE_URL } from '../config/api';
-import { WebView } from 'react-native-webview';
 import { fontSizes } from '../config/typography';
 
 const { height } = Dimensions.get('window');
 
 const MyPageScreen = ({ navigation }) => {
-  const scrollRef = useRef(null); // ✅ 추가
+  const scrollRef = useRef(null);
 
   const [isEditing, setIsEditing] = useState(false);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
@@ -31,8 +30,10 @@ const MyPageScreen = ({ navigation }) => {
   const [phone, setPhone] = useState('');
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
-
   const [passwordError, setPasswordError] = useState('');
+
+  const [infoMessage, setInfoMessage] = useState('');
+  const [infoMessageType, setInfoMessageType] = useState('info'); 
 
   const [origin, setOrigin] = useState({
     name: '',
@@ -40,22 +41,15 @@ const MyPageScreen = ({ navigation }) => {
     password: '*******',
   });
 
-  /* ⌨️ 키보드 감지 + 스크롤 리셋 */
+  /* 키보드 감지 + 스크롤 리셋 */
   useEffect(() => {
-    const show = Keyboard.addListener('keyboardDidShow', () => {
-      setIsKeyboardVisible(true);
-    });
-
+    const show = Keyboard.addListener('keyboardDidShow', () =>
+      setIsKeyboardVisible(true)
+    );
     const hide = Keyboard.addListener('keyboardDidHide', () => {
       setIsKeyboardVisible(false);
-
-      // ✅ 키보드 내려가면 항상 처음 위치로
-      scrollRef.current?.scrollTo({
-        y: 0,
-        animated: false,
-      });
+      scrollRef.current?.scrollTo({ y: 0, animated: false });
     });
-
     return () => {
       show.remove();
       hide.remove();
@@ -84,9 +78,17 @@ const MyPageScreen = ({ navigation }) => {
   }, []);
 
   const handleEdit = () => {
-    if (!isEditing) setIsEditing(true);
-    else handleSave();
+    if (!isEditing) {
+      setIsEditing(true);
+
+      // 안내 문구 표시
+      setInfoMessage('수정할 정보를 선택해 주세요.');
+      setInfoMessageType('info');
+    } else {
+      handleSave();
+    }
   };
+
 
   const handleCancel = () => {
     setName(origin.name);
@@ -118,6 +120,10 @@ const MyPageScreen = ({ navigation }) => {
 
     const token = await AsyncStorage.getItem('access_token');
 
+    // 수정 완료 인라인 메시지
+    setInfoMessage('수정이 완료되었습니다.');
+    setInfoMessageType('success');
+
     await fetch(`${API_BASE_URL}/api/auth/me`, {
       method: 'PATCH',
       headers: {
@@ -137,6 +143,20 @@ const MyPageScreen = ({ navigation }) => {
     Keyboard.dismiss();
   };
 
+  const handleLogout = async () => {
+    await AsyncStorage.multiRemove([
+      'user_id',
+      'username',
+      'login_id',
+      'access_token',
+      'phone',
+    ]);
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'Login' }],
+    });
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -144,8 +164,8 @@ const MyPageScreen = ({ navigation }) => {
     >
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
-          ref={scrollRef} // ✅ 연결
-          scrollEnabled={isKeyboardVisible} // ✅ 키보드 있을 때만
+          ref={scrollRef}
+          scrollEnabled={isKeyboardVisible}
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
@@ -153,7 +173,6 @@ const MyPageScreen = ({ navigation }) => {
             <Header navigation={navigation} title="회원 정보" />
 
             <View style={styles.form}>
-              {/* 성명 */}
               <Field label="성명">
                 <TextInput
                   style={styles.input}
@@ -163,7 +182,6 @@ const MyPageScreen = ({ navigation }) => {
                 />
               </Field>
 
-              {/* 연락처 */}
               <Field label="연락처">
                 <TextInput
                   style={styles.input}
@@ -174,7 +192,6 @@ const MyPageScreen = ({ navigation }) => {
                 />
               </Field>
 
-              {/* 아이디 */}
               <Field label="아이디">
                 <TextInput
                   style={[styles.input, styles.readonly]}
@@ -183,8 +200,11 @@ const MyPageScreen = ({ navigation }) => {
                 />
               </Field>
 
-              {/* 비밀번호 */}
-              <Field label="비밀번호">
+              <Field
+                label="비밀번호"
+                message={passwordError || infoMessage}
+                messageType={passwordError ? 'error' : infoMessageType}
+              >
                 <TextInput
                   style={styles.input}
                   value={password}
@@ -193,9 +213,6 @@ const MyPageScreen = ({ navigation }) => {
                   onFocus={handlePasswordFocus}
                   onChangeText={setPassword}
                 />
-                {passwordError ? (
-                  <Text style={styles.error}>{passwordError}</Text>
-                ) : null}
               </Field>
             </View>
 
@@ -212,6 +229,12 @@ const MyPageScreen = ({ navigation }) => {
                 </TouchableOpacity>
               )}
 
+              {!isEditing && (
+                <TouchableOpacity style={styles.outline} onPress={handleLogout}>
+                  <Text style={styles.outlineText}>로그아웃</Text>
+                </TouchableOpacity>
+              )}
+
               <Text style={styles.withdraw}>회원 탈퇴하기</Text>
             </View>
           </View>
@@ -222,27 +245,39 @@ const MyPageScreen = ({ navigation }) => {
 };
 
 /* 공통 필드 */
-const Field = ({ label, children }) => (
+const Field = ({ label, children, message, messageType }) => (
   <View style={styles.field}>
     <Text style={styles.label}>{label}</Text>
     {children}
     <View style={styles.divider} />
+
+    {/*{ 고정 메시지 슬롯 }*/}
+    <Text
+      style={[
+        styles.messageSlot,
+        messageType === 'error' && styles.errorText,
+        messageType === 'success' && styles.successText,
+      ]}
+    >
+      {message ? message : ' '}
+    </Text>
   </View>
 );
+
 
 /* styles */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff' },
   scroll: { flexGrow: 1, paddingBottom: height * 0.18 },
 
-  form: { marginTop: 85, width: 296, alignSelf: 'center' },
-  field: { marginBottom: 28 },
-  label: { fontSize: fontSizes.md, color: '#848484', marginBottom: 6 },
+  form: { marginTop: 70, width: 296, alignSelf: 'center' },
+  field: { marginBottom: 15 },
+  label: { fontSize: fontSizes.md, color: '#848484', marginBottom: 5 },
   input: { fontSize: fontSizes.lg, color: '#4B4B4B' },
   readonly: { color: '#A4A4A4' },
   divider: { height: 1, backgroundColor: '#848484', marginTop: 6 },
 
-  error: { marginTop: 8, color: '#FF3B30', fontSize: fontSizes.sm },
+  error: { marginTop: 15, color: '#FF3B30', fontSize: fontSizes.sm },
 
   buttons: { alignItems: 'center', marginTop: height * 0.06 },
   primary: {
@@ -267,6 +302,29 @@ const styles = StyleSheet.create({
   },
   outlineText: { color: '#A4A4A4', fontSize: fontSizes.md },
   withdraw: { color: '#C3C3C3', fontSize: fontSizes.md },
+  
+  errorSlot: {
+  marginTop: 8,
+  fontSize: fontSizes.sm,
+  color: '#FF3B30',
+  lineHeight: 18,
+  minHeight: 18,
+},
+
+  messageSlot: {
+    marginTop: 8,
+    minHeight: 18,
+    fontSize: fontSizes.sm,
+    color: '#848484',
+  },
+
+  successText: {
+    color: '#34C759',
+  },
+
+  errorText: {
+    color: '#FF3B30',
+  }
 });
 
 export default MyPageScreen;
