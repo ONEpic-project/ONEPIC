@@ -180,25 +180,31 @@ export default function ScanScreen({ navigation }) {
 
   // --- 장바구니 핵심 로직 =============================================================
   const addToCart = (product) => {
+    const pid = Number(product.product_id);
+    const normalized = { ...product, product_id: pid };
+
     setScannedProducts((prev) => {
-      const isExist = prev.find((p) => p.product_id === product.product_id);
+      const isExist = prev.find((p) => Number(p.product_id) === pid);
       if (isExist) {
+        // force re-render by returning a new array with a copied item
+        const updated = prev.map((p) =>
+          Number(p.product_id) === pid ? { ...p } : p
+        );
         setProductQuantities((prevQty) => ({
           ...prevQty,
-          [product.product_id]: (prevQty[product.product_id] || 1) + 1,
+          [pid]: (prevQty[pid] || 1) + 1,
         }));
-        return prev;
+        return updated;
       }
       setProductQuantities((prevQty) => ({
         ...prevQty,
-        [product.product_id]: 1,
+        [pid]: 1,
       }));
-      return [...prev, product];
+      return [...prev, normalized];
     });
 
     setIsModalVisible(false);
     setSelectedProduct(null);
-    Alert.alert("장바구니", "상품이 성공적으로 추가되었습니다.");
   };
 
   const increaseQuantity = (productId) => {
@@ -480,7 +486,7 @@ export default function ScanScreen({ navigation }) {
         </View>
 
         {/* 인식 확인 모달 */}
-        <Modal visible={isModalVisible} transparent animationType="fade">
+        <Modal visible={isModalVisible} transparent animationType="none">
           <View style={styles.modalBg}>
             <View style={styles.modalContent}>
               
