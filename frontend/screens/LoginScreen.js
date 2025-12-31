@@ -128,7 +128,7 @@ const LoginScreen = ({ navigation }) => {
         >
           {/* 로고 영역 */}
           <View style={styles.logo}>
-            <AppText style={styles.title}>ONE pic</AppText>
+            <AppText style={styles.title}>ONE PIC</AppText>
             <AppText style={styles.subtitle}>마트에서 줄서기는 그만</AppText>
           </View>
 
@@ -212,9 +212,10 @@ const styles = StyleSheet.create({
   logo: {
     alignItems: 'center',
     marginBottom: height * 0.1, // 화면 높이의 10%
+    top: height * 0.05,
   },
   title: {
-    fontSize: fontSizes.xl,
+    fontSize: 50,
     fontWeight: 'bold',
     color: '#FF9500',
     marginBottom: height * 0.01,
@@ -226,7 +227,7 @@ const styles = StyleSheet.create({
   },
   formContainer: {
     width: '100%',
-    marginBottom: height * 0.08,
+    marginBottom: height * 0.05,
   },
   input: {
     width: '80%',

@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 
 // 화면 컴포넌트 import
 import Login from './screens/LoginScreen';
+import Splash from './screens/SplashScreen';
 import Header from './screens/components/Header';
 import Signup from './screens/SignupScreen';
 import FindAccount from './screens/FindAccountScreen';
@@ -25,12 +26,15 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator
-        initialRouteName="Login"
+        initialRouteName="Splash"
         screenOptions={{
           headerShown: false, // 모든 화면에서 헤더 숨김
           cardStyle: { backgroundColor: '#FFFFFF' },
         }}
       >
+        {/* Splash 화면 (앱 시작 시 먼저 표시) */}
+        <Stack.Screen name="Splash" component={Splash} />
+
         {/* 로그인 화면 */}
         <Stack.Screen 
           name="Login" 
