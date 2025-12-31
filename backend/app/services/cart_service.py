@@ -149,7 +149,7 @@ def create_cart_from_scan(
     db: Session,
     user_id: int,
     items: list,
-) -> Cart:
+) -> Cart | None:
     existing = (
         db.query(Cart)
         .filter(
@@ -162,6 +162,10 @@ def create_cart_from_scan(
     if existing:
         db.delete(existing)
         db.commit()
+
+    if not items:
+        # 빈 리스트가 들어오면 장바구니를 생성하지 않음 (삭제된 상태 유지)
+        return None
 
     cart = Cart(user_id=user_id, status="ACTIVE")
     db.add(cart)

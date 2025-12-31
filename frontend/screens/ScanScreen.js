@@ -50,6 +50,7 @@ export default function ScanScreen({ navigation }) {
   const scannedProductsRef = useRef([]);
   const productQuantitiesRef = useRef({});
   const isMountedRef = useRef(true);
+  const isDataLoadedRef = useRef(false);
 
   // --- 드로워 애니메이션 및 제스처 로직 =============================================================
   const pan = useRef(new Animated.ValueXY({ x: 0, y: 0 })).current;
@@ -95,6 +96,7 @@ export default function ScanScreen({ navigation }) {
       if (!hasServerCart) {
         await loadCartFromStorage();
       }
+      isDataLoadedRef.current = true;
     };
     initData();
     return () => {
@@ -103,9 +105,9 @@ export default function ScanScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
-    if (Object.keys(productQuantities).length > 0) {
-      saveCartToStorage(productQuantities);
-    }
+    // 수량이 변경될 때마다(비어있는 경우 포함) 로컬 스토리지 업데이트
+    saveCartToStorage(productQuantities);
+    
     // keep refs updated for use in listeners
     productQuantitiesRef.current = productQuantities;
     scannedProductsRef.current = scannedProducts;
@@ -147,10 +149,11 @@ export default function ScanScreen({ navigation }) {
   // block navigation on beforeRemove and attempt sync
   useEffect(() => {
     const beforeRemove = (e) => {
-      if (scannedProductsRef.current.length === 0) {
-        // nothing to sync
-        return;
-      }
+      // 데이터가 아직 로드되지 않은 상태에서 나가면 동기화 스킵 (기존 데이터 보존 위해)
+      if (!isDataLoadedRef.current) return;
+
+      // 리스트가 비어있어도 동기화 진행 (장바구니 비우기)
+      // if (scannedProductsRef.current.length === 0) return;
 
       e.preventDefault();
 
