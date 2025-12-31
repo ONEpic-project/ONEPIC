@@ -129,8 +129,18 @@ def delete_cart_item(
     if not item:
         return False
 
+    # 아이템 삭제 전 부모 cart 참조 가져오기
+    cart = item.cart
+    
     db.delete(item)
     db.commit()
+
+    # 장바구니가 비었는지 확인 후 삭제
+    db.refresh(cart)
+    if not cart.items:
+        db.delete(cart)
+        db.commit()
+
     return True
 
 
