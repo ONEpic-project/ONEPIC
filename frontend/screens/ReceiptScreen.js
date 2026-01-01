@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -26,13 +26,23 @@ const ReceiptScreen = ({ navigation }) => {
   const [receipts, setReceipts] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  const listRef = useRef(null);
+
   // 화면 포커스 될 때마다 리스트 갱신
+  // `period`를 의존성에 포함해서 사용자가 선택한 기간이 바뀌면
+  // 포커스 리스너도 최신 선택값을 사용하도록 함
   React.useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      fetchReceipts(PERIOD_MAP[period]);
+    const unsubscribe = navigation.addListener('focus', async () => {
+      await fetchReceipts(PERIOD_MAP[period]);
+      // 상세에서 돌아올 때 이전 스크롤 위치가 유지되는 문제 방지: 최상단으로 이동
+      try {
+        listRef.current?.scrollToOffset({ offset: 0, animated: true });
+      } catch (e) {
+        // ignore
+      }
     });
     return unsubscribe;
-  }, [navigation]);
+  }, [navigation, period]);
 
   const fetchReceipts = async (monthsAgo = null) => {
     try {
@@ -133,12 +143,15 @@ const ReceiptScreen = ({ navigation }) => {
                   <TouchableOpacity
                     key={option}
                     style={styles.dropdownItem}
-                    onPress={() => {
-                      setPeriod(option);
-                      setDropdownOpen(false);
-                      // 선택 즉시 해당 월로 필터
-                      fetchReceipts(PERIOD_MAP[option]);
-                    }}
+                    onPress={async () => {
+                          setPeriod(option);
+                          setDropdownOpen(false);
+                          // 선택 즉시 해당 월로 필터
+                          await fetchReceipts(PERIOD_MAP[option]);
+                          try {
+                            listRef.current?.scrollToOffset({ offset: 0, animated: true });
+                          } catch (e) {}
+                        }}
                     activeOpacity={0.8}
                   >
                     <AppText style={styles.dropdownItemText}>{option}</AppText>
@@ -163,7 +176,7 @@ const ReceiptScreen = ({ navigation }) => {
         renderItem={renderItem}
         ItemSeparatorComponent={() => <View style={styles.divider} />}
         refreshing={loading}
-        onRefresh={fetchReceipts}
+        onRefresh={() => fetchReceipts(PERIOD_MAP[period])}
         ListEmptyComponent={
           !loading && (
             <View style={{ padding: 20, alignItems: 'center' }}>
