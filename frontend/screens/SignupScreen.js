@@ -44,6 +44,14 @@ const SignupScreen = ({ navigation }) => {
     passwordConfirm: useRef(null),
   };
 
+  const [errors, setErrors] = useState({
+    name: '',
+    loginId: '',
+    phone: '',
+    password: '',
+    passwordConfirm: '',
+  });
+
   const scrollToInput = (inputRef) => {
     if (!inputRef.current || !scrollRef.current) return;
 
@@ -60,30 +68,37 @@ const SignupScreen = ({ navigation }) => {
   };
 
   const handleSignup = async () => {
+
+    // 모든 에러 초기화
+    const newErrors = { name: '', loginId: '', phone: '', password: '', passwordConfirm: '' };
+
     if (!name.trim()) {
-      Alert.alert('알림', '성명을 입력해주세요.');
+      newErrors.name = '성명을 입력해주세요.';
+      setErrors(newErrors);
       return;
     }
 
     if (!loginId.trim()) {
-      Alert.alert('알림', '아이디를 입력해주세요.');
+      newErrors.loginId = '아이디를 입력해주세요.';
+      setErrors(newErrors);
       return;
     }
 
     if (!phone.trim() || phone.length !== 11) {
-      Alert.alert('알림', '연락처는 11자리로 입력해주세요.');
+      newErrors.phone = '연락처는 11자리 숫자로 입력해주세요.';
+      setErrors(newErrors);
       return;
     }
 
     if (password.length < 6) {
-      setPasswordError('비밀번호는 6자 이상이어야 합니다.');
-      setPasswordConfirmError('');
+      newErrors.password = '비밀번호는 6자 이상이어야 합니다.';
+      setErrors(newErrors);
       return;
     }
 
     if (password !== passwordConfirm) {
-      setPasswordConfirmError('비밀번호가 일치하지 않습니다.');
-      setPasswordError('');
+      newErrors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
+      setErrors(newErrors);
       return;
     }
 
@@ -105,7 +120,7 @@ const SignupScreen = ({ navigation }) => {
       const data = await res.json();
 
       if (!res.ok) {
-        Alert.alert('회원가입 실패', data.detail || '오류 발생');
+        setErrors({...newErrors, loginId: data.detail || '회원가입에 실패했습니다.'});
         return;
       }
 
@@ -137,19 +152,19 @@ const SignupScreen = ({ navigation }) => {
         >
           <View style={styles.container}>
             <View style={styles.form}>
-              <Field label="성명">
+              <Field label="성명" message={errors.name} messageType="error">
                 <TextInput
                   ref={inputRefs.name}
-                  style={styles.input}
+                  style={[styles.input, errors.name ? styles.inputError : null]}
                   value={name}
                   placeholder="성명을 입력해 주세요"
                   placeholderTextColor="#C8C8C8"
-                  onChangeText={setName}
+                  onChangeText={(t) => { setName(t); setErrors(prev => ({...prev, name: ''})); }}
                   onFocus={() => scrollToInput(inputRefs.name)}
                 />
               </Field>
 
-              <Field label="아이디">
+              <Field label="아이디" message={errors.loginId} messageType="error">
                 <TextInput
                   ref={inputRefs.loginId}
                   style={styles.input}
@@ -157,12 +172,12 @@ const SignupScreen = ({ navigation }) => {
                   placeholder="아이디를 입력해 주세요"
                   placeholderTextColor="#C8C8C8"
                   autoCapitalize="none"
-                  onChangeText={setLoginId}
+                  onChangeText={(t) => { setLoginId(t); setErrors(prev => ({...prev, loginId: ''})); }}
                   onFocus={() => scrollToInput(inputRefs.loginId)}
                 />
               </Field>
 
-              <Field label="연락처">
+              <Field label="연락처" message={errors.phone} messageType="error">
                 <TextInput
                   ref={inputRefs.phone}
                   style={styles.input}
@@ -170,7 +185,7 @@ const SignupScreen = ({ navigation }) => {
                   placeholder="01012345678"
                   placeholderTextColor="#C8C8C8"
                   keyboardType="phone-pad"
-                  onChangeText={(t) => setPhone(t.replace(/[^0-9]/g, ''))}
+                  onChangeText={(t) => { setPhone(t.replace(/[^0-9]/g, '')); setErrors(prev => ({...prev, phone: ''})); }}
                   onFocus={() => scrollToInput(inputRefs.phone)}
                 />
               </Field>
@@ -189,10 +204,7 @@ const SignupScreen = ({ navigation }) => {
                     placeholder="6자 이상 입력해 주세요"
                     placeholderTextColor="#C8C8C8"
                     secureTextEntry={!showPassword}
-                    onChangeText={(text) => {
-                      setPassword(text);
-                      setPasswordConfirmError('');
-                    }}
+                    onChangeText={(t) => { setPassword(t); setErrors(prev => ({...prev, password: ''})); }}
                     onFocus={() => scrollToInput(inputRefs.password)}
                   />
 
@@ -224,7 +236,7 @@ const SignupScreen = ({ navigation }) => {
                     placeholder="비밀번호를 다시 입력해 주세요"
                     placeholderTextColor="#C8C8C8"
                     secureTextEntry={!showPasswordConfirm}
-                    onChangeText={setPasswordConfirm}
+                    onChangeText={(t) => { setPasswordConfirm(t); setErrors(prev => ({...prev, passwordConfirm: ''})); }}
                     onFocus={() => scrollToInput(inputRefs.passwordConfirm)}
                   />
 
@@ -299,7 +311,14 @@ const styles = StyleSheet.create({
     fontSize: fontSizes.sm,
     color: '#848484',
   },
-  errorText: { color: '#FF3B30' },
+  errorText: {
+    color: "#FF3B30",
+    fontSize: fontSizes.sm,
+    marginBottom: 10,
+  },
+  inputError: {
+    borderBottomColor: "#FF3B30",
+  },
 
   buttons: { alignItems: 'center', marginTop: height * 0.06 },
   primary: {
