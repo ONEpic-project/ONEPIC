@@ -97,8 +97,8 @@ const SignupScreen = ({ navigation }) => {
     }
 
     // === 추가된 부분: 비밀번호 확인 미입력 검사 ===
-    if (!passwordConfirm.trim()) {
-      newErrors.passwordConfirm = '비밀번호 확인을 입력해주세요.';
+    if (!password.trim()) {
+      newErrors.password = '비밀번호를 입력해주세요.';
       setErrors(newErrors);
       return;
     }
@@ -109,6 +109,7 @@ const SignupScreen = ({ navigation }) => {
       return;
     }
 
+    setErrors(newErrors);
     setPasswordError('');
     setPasswordConfirmError('');
 
