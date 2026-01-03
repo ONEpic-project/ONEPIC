@@ -29,16 +29,21 @@ const LoginScreen = ({ navigation }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
+  const [userIdError, setUserIdError] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
 
 
   const handleLogin = async () => {
+    setUserIdError('');
+    setPasswordError('');
     //간단한 유효성 검사
     if (!userId.trim()) {
-      Alert.alert('알림', '아이디를 입력해주세요.');
+      setUserIdError('아이디를 입력해주세요.');
       return;
     }
     if (!password.trim()) {
-      Alert.alert('알림', '비밀번호를 입력해주세요.');
+      setPasswordError('비밀번호를 입력해주세요.');
       return;
     }
 
@@ -135,22 +140,30 @@ const LoginScreen = ({ navigation }) => {
           {/* 입력 필드 영역 */}
           <View style={styles.formContainer}>
             <TextInput
-              style={styles.input}
+              style={[styles.input, userIdError ? styles.inputError : null]}
               placeholder="아이디"
               value={userId}
-              onChangeText={setUserId}
+              onChangeText={(text) => {
+                setUserId(text);
+                if (userIdError) setUserIdError(''); // 입력 시작하면 에러 문구 제거
+              }}
               autoCapitalize="none"
               autoCorrect={false}
               placeholderTextColor="#686868"
             />
+            {/* 아이디 에러 문구 */}
+            {userIdError ? <AppText style={styles.errorText}>{userIdError}</AppText> : null}
 
-            <View style={styles.passwordWrapper}>
+            <View style={[styles.passwordWrapper, passwordError ? styles.inputError : null]}>
               <TextInput
                 style={[styles.input, { flex: 1, marginBottom: 0, borderBottomWidth: 0 }]}
                 placeholder="비밀번호"
                 secureTextEntry={!showPassword}
                 value={password}
-                onChangeText={setPassword}
+                onChangeText={(text) => {
+                  setPassword(text);
+                  if (passwordError) setPasswordError(''); // 입력 시작하면 에러 문구 제거
+                }}
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholderTextColor="#686868"
@@ -167,6 +180,7 @@ const LoginScreen = ({ navigation }) => {
                 />
               </TouchableOpacity>
             </View>
+            {passwordError ? <AppText style={styles.errorText}>{passwordError}</AppText> : null}
           </View>
 
           {/* 로그인 버튼 */}
@@ -235,7 +249,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
     fontSize: fontSizes.lg,
-    marginBottom: height * 0.035,
+    marginBottom: height * 0.01,
     paddingVertical: 10,
     alignSelf: 'center',
   },
@@ -244,10 +258,23 @@ const styles = StyleSheet.create({
     height: height * 0.06,
     borderBottomWidth: 1,
     borderBottomColor: '#E0E0E0',
-    marginBottom: height * 0.035,
+    marginBottom: height * 0.01,
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'center',
+    marginTop: height * 0.02,
+  },
+  errorText: {
+    width: '80%',
+    alignSelf: 'center',
+    color: '#FF3B30', // iOS 시스템 레드 컬러 느낌
+    fontSize: fontSizes.sm,
+    marginBottom: height * 0.01,
+    paddingLeft: 5,
+  },
+  // 선택 사항: 에러 시 밑줄 색상 변경
+  inputError: {
+    borderBottomColor: '#FF3B30',
   },
   eyeButton: {
     position: 'absolute',

@@ -25,17 +25,20 @@ const FindAccountScreen = ({ navigation }) => {
   const [idName, setIdName] = useState("");
   const [idPhone, setIdPhone] = useState("");
   const [foundId, setFoundId] = useState("");
+  const [idError, setIdError] = useState(""); // 에러 메시지 추가
 
   // 비밀번호 찾기
   const [pwId, setPwId] = useState("");
   const [pwPhone, setPwPhone] = useState("");
   const [foundPassword, setFoundPassword] = useState("");
   const [pwMessage, setPwMessage] = useState("");
+  const [pwError, setPwError] = useState(""); // 에러 메시지 추가
 
   // ================== 아이디 찾기 ==================
   const handleFindId = async () => {
+    setIdError(""); // 초기화
     if (!idName.trim() || !idPhone.trim()) {
-      Alert.alert("알림", "성명과 연락처를 모두 입력해주세요.");
+      setIdError("성명과 연락처를 모두 입력해주세요.");
       return;
     }
 
@@ -52,7 +55,7 @@ const FindAccountScreen = ({ navigation }) => {
       const data = await response.json();
 
       if (!response.ok) {
-        Alert.alert("알림", data.detail);
+        setIdError(data.detail || "일치하는 정보가 없습니다.");
         setFoundId("");
         return;
       }
@@ -65,8 +68,9 @@ const FindAccountScreen = ({ navigation }) => {
 
   // ================== 비밀번호 찾기 ==================
   const handleFindPassword = async () => {
+    setPwError(""); // 초기화
     if (!pwId.trim() || !pwPhone.trim()) {
-      Alert.alert("알림", "아이디와 연락처를 모두 입력해주세요.");
+      setPwError("아이디와 연락처를 모두 입력해주세요.");
       return;
     }
 
@@ -154,60 +158,69 @@ const FindAccountScreen = ({ navigation }) => {
 
           {/* ================== 아이디 찾기 ================== */}
           {activeTab === "id" ? (
+            <>
             <View style={styles.formContainer}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, idError ? styles.inputError : null]}
                 placeholder="성명"
                 value={idName}
-                onChangeText={setIdName}
+                onChangeText={(t) => { setIdName(t); setIdError(""); }}
               />
               <TextInput
-                style={styles.input}
+                style={[styles.input, idError ? styles.inputError : null]}
                 placeholder="연락처 (- 제외)"
                 value={idPhone}
-                onChangeText={setIdPhone}
+                onChangeText={(t) => { setIdPhone(t); setIdError(""); }}
                 keyboardType="phone-pad"
               />
+
+              {/* 에러 메시지 표시 */}
+              {idError ? <AppText style={styles.errorText}>{idError}</AppText> : null}
 
               {foundId && (
                 <View style={styles.resultContainer}>
                   <AppText style={styles.resultText}>아이디 : {foundId}</AppText>
                 </View>
               )}
-
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.searchButton}
-                  onPress={handleFindId}
-                >
-                  <AppText style={styles.searchButtonText}>검색</AppText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.loginButton}
-                  onPress={goToLogin}
-                >
-                  <AppText style={styles.loginButtonText}>로그인 하기</AppText>
-                </TouchableOpacity>
-              </View>
             </View>
+            
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleFindId}
+              >
+                <AppText style={styles.searchButtonText}>검색</AppText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={goToLogin}
+              >
+                <AppText style={styles.loginButtonText}>로그인 하기</AppText>
+              </TouchableOpacity>
+            </View>
+            </>
           ) : (
             /* ================== 비밀번호 찾기 ================== */
+            <>
             <View style={styles.formContainer}>
               <TextInput
-                style={styles.input}
+                style={[styles.input, pwError ? styles.inputError : null]}
                 placeholder="아이디"
                 value={pwId}
-                onChangeText={setPwId}
+                onChangeText={(t) => { setPwId(t); setPwError(""); }}
                 autoCapitalize="none"
               />
               <TextInput
-                style={styles.input}
+                style={[styles.input, pwError ? styles.inputError : null]}
                 placeholder="연락처 (- 제외)"
                 value={pwPhone}
-                onChangeText={setPwPhone}
+                onChangeText={(t) => { setPwPhone(t); setPwError(""); }}
                 keyboardType="phone-pad"
               />
+
+              {/* 에러 메시지 표시 */}
+              {pwError ? <AppText style={styles.errorText}>{pwError}</AppText> : null}
 
               {foundPassword && (
                 <View style={styles.resultContainer}>
@@ -227,23 +240,23 @@ const FindAccountScreen = ({ navigation }) => {
                   </AppText>
                 </View>
               )}
-
-              <View style={styles.buttonContainer}>
-                <TouchableOpacity
-                  style={styles.searchButton}
-                  onPress={handleFindPassword}
-                >
-                  <AppText style={styles.searchButtonText}>검색</AppText>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.loginButton}
-                  onPress={goToLogin}
-                >
-                  <AppText style={styles.loginButtonText}>로그인 하기</AppText>
-                </TouchableOpacity>
-              </View>
             </View>
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity
+                style={styles.searchButton}
+                onPress={handleFindPassword}
+              >
+                <AppText style={styles.searchButtonText}>검색</AppText>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.loginButton}
+                onPress={goToLogin}
+              >
+                <AppText style={styles.loginButtonText}>로그인 하기</AppText>
+              </TouchableOpacity>
+            </View>
+            </>
           )}
         </View>
       </ScrollView>
@@ -261,6 +274,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: width * 0.1,
     paddingTop: height * 0.08,
     paddingBottom: height * 0.05,
+    minHeight: height * 0.8,  // 추가: 최소 높이 보장
   },
   tabContainer: {
     flexDirection: "row",
@@ -302,6 +316,20 @@ const styles = StyleSheet.create({
     marginBottom: height * 0.035,
     paddingVertical: 10,
   },
+  // 에러 텍스트 스타일
+  errorText: {
+    width: '80%',
+    alignSelf: 'center',
+    color: '#FF3B30', // iOS 시스템 레드 컬러 느낌
+    fontSize: fontSizes.sm,
+    marginBottom: height * 0.01,
+    paddingLeft: 5,
+  },
+  // 선택 사항: 에러 시 밑줄 색상 변경
+  inputError: {
+    borderBottomColor: '#FF3B30',
+  },
+
   resultContainer: {
     alignItems: "center",
     marginVertical: height * 0.05,
@@ -320,8 +348,10 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   buttonContainer: {
-    width: "100%",
-    //marginTop: height * 0.2,
+    position: 'absolute',
+    bottom: height * 0,  // 바닥에서 5% 떨어진 위치
+    width: '100%',
+    alignSelf: 'center',
   },
   searchButton: {
     width: "100%",
