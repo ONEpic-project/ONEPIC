@@ -108,7 +108,7 @@ const HomeScreen = ({ navigation }) => {
 
             {/* 🔹 기존 텍스트 / 버튼 (블러 영향 X) */}
             <AppText style={styles.scanTitle}>
-              줄 안 서고 결제{'\n'}
+              기다리지 말고 결제{'\n'}
               <AppText style={styles.scanSubText}>지금 사용해 보세요</AppText>
             </AppText>
 

@@ -231,15 +231,15 @@ const CartScreen = ({ navigation }) => {
   const renderCartItem = ({ item }) => (
     <View style={styles.cartItemCard}>
       {/* 상단: 삭제 버튼 (상품명은 이미지 옆 한 곳에서만 표시) */}
-      <View style={styles.itemHeader}>
+      {/* <View style={styles.itemHeader}>
         <View style={{ flex: 1 }} />
         <TouchableOpacity 
           onPress={() => removeItem(item.id)}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
         >
           <AppText style={styles.deleteIcon}>✕</AppText>
         </TouchableOpacity>
-      </View>
+      </View> */}
 
       {/* 중간: 이미지 + 정보 */}
       <View style={styles.itemBody}>
@@ -254,6 +254,12 @@ const CartScreen = ({ navigation }) => {
             </AppText>
           ) : null}
         </View>
+        <TouchableOpacity 
+          onPress={() => removeItem(item.id)}
+          hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+        >
+          <AppText style={styles.deleteIcon}>✕</AppText>
+        </TouchableOpacity>
       </View>
 
       {/* 하단: 가격 + 수량 조절 */}
@@ -430,20 +436,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f5f5f5",
-    borderRadius: 20,
+    borderRadius: 25,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   qtyBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 35,
+    height: 35,
+    borderRadius: 20,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
     elevation: 1,
   },
-  qtyBtnText: { fontSize: fontSizes.md, fontWeight: "600", color: "#333" },
+  qtyBtnText: { 
+    fontSize: fontSizes.md, 
+    fontWeight: "600", 
+    color: "#333" 
+  },
   qtyText: {
     fontSize: fontSizes.sm,
     fontWeight: "bold",
@@ -452,7 +462,6 @@ const styles = StyleSheet.create({
     minWidth: 15,
     textAlign: "center",
   },
-
   fixedFooter: {
     position: "absolute",
     bottom: 0,

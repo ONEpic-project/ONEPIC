@@ -494,15 +494,6 @@ export default function ScanScreen({ navigation }) {
             ) : (
               scannedProducts.map((item) => (
                 <View key={item.product_id} style={styles.cartItem}>
-                  <View style={styles.itemHeader}>
-                    <View />
-                    <TouchableOpacity
-                      onPress={() => removeProduct(item.product_id)}
-                    >
-                      <AppText style={{ color: "#ccc" }}>✕</AppText>
-                    </TouchableOpacity>
-                  </View>
-
                   <View style={styles.itemBody}>
                     <Image
                       source={{ uri: `${API_BASE_URL}${item.image_url}` }}
@@ -514,6 +505,12 @@ export default function ScanScreen({ navigation }) {
                         {item.product_name}
                       </AppText>
                     </View>
+                    <TouchableOpacity
+                      onPress={() => removeProduct(item.product_id)}
+                      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+                    >
+                      <AppText style={{ color: "#ccc" }}>✕</AppText>
+                    </TouchableOpacity>
                   </View>
 
                   <View style={styles.itemFooter}>
@@ -739,12 +736,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#f0f0f0",
   },
-  itemHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    //marginBottom: 5,
-  },
   itemImg: {
     width: 50,
     height: 50,
@@ -784,17 +775,18 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#f5f5f5",
-    borderRadius: 20,
+    borderRadius: 25,
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   qtyBtn: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    width: 35,
+    height: 35,
+    borderRadius: 20,
     backgroundColor: "#fff",
     justifyContent: "center",
     alignItems: "center",
+    fontSize: fontSizes.md,
     // 버튼 입체감
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 1 },
@@ -803,7 +795,7 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   qtyText: {
-    fontSize: fontSizes.sm,
+    fontSize: fontSizes.md,
     fontWeight: "bold",
     color: "#333",
     marginHorizontal: 12,
