@@ -96,6 +96,13 @@ const SignupScreen = ({ navigation }) => {
       return;
     }
 
+    // === 추가된 부분: 비밀번호 확인 미입력 검사 ===
+    if (!passwordConfirm.trim()) {
+      newErrors.passwordConfirm = '비밀번호 확인을 입력해주세요.';
+      setErrors(newErrors);
+      return;
+    }
+
     if (password !== passwordConfirm) {
       newErrors.passwordConfirm = '비밀번호가 일치하지 않습니다.';
       setErrors(newErrors);
@@ -182,7 +189,7 @@ const SignupScreen = ({ navigation }) => {
                   ref={inputRefs.phone}
                   style={styles.input}
                   value={phone}
-                  placeholder="01012345678"
+                  placeholder="- 없이 숫자만 입력해 주세요"
                   placeholderTextColor="#C8C8C8"
                   keyboardType="phone-pad"
                   onChangeText={(t) => { setPhone(t.replace(/[^0-9]/g, '')); setErrors(prev => ({...prev, phone: ''})); }}
@@ -192,7 +199,7 @@ const SignupScreen = ({ navigation }) => {
 
               <Field
                 label="비밀번호"
-                message={passwordError}
+                message={errors.password}
                 messageType="error"
               >
                 <View style={styles.passwordWrapper}>
@@ -224,7 +231,7 @@ const SignupScreen = ({ navigation }) => {
 
               <Field
                 label="비밀번호 확인"
-                message={passwordConfirmError}
+                message={errors.passwordConfirm}
                 messageType="error"
               >
                 <View style={styles.passwordWrapper}>
@@ -320,7 +327,9 @@ const styles = StyleSheet.create({
     borderBottomColor: "#FF3B30",
   },
 
-  buttons: { alignItems: 'center', marginTop: height * 0.06 },
+  buttons: { 
+    alignItems: 'center', 
+  },
   primary: {
     width: 344,
     height: 50,
