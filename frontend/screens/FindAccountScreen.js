@@ -174,6 +174,7 @@ const FindAccountScreen = ({ navigation }) => {
                 onSubmitEditing={() => idPhoneRef.current?.focus()}
               />
               <TextInput
+                ref={idPhoneRef}
                 style={[styles.input, idError ? styles.inputError : null]}
                 placeholder="연락처 (- 제외)"
                 value={idPhone}
@@ -227,8 +228,9 @@ const FindAccountScreen = ({ navigation }) => {
                 onSubmitEditing={() => pwPhoneRef.current?.focus()}
               />
               <TextInput
+                ref={pwPhoneRef}
                 style={[styles.input, pwError ? styles.inputError : null]}
-                placeholder="연락처 (- 제외)"
+                placeholder="연락처 (- 제외하여 입력하십시오)"
                 value={pwPhone}
                 onChangeText={(t) => { setPwPhone(t); setPwError(""); }}
                 keyboardType="phone-pad"

@@ -169,6 +169,7 @@ const LoginScreen = ({ navigation }) => {
 
             <View style={[styles.passwordWrapper, passwordError ? styles.inputError : null]}>
               <TextInput
+                ref={passwordRef} // ref 연결 확인
                 style={[styles.input, { flex: 1, marginBottom: 0, borderBottomWidth: 0 }]}
                 placeholder="비밀번호"
                 secureTextEntry={!showPassword}
@@ -179,9 +180,7 @@ const LoginScreen = ({ navigation }) => {
                 }}
                 returnKeyType="done"
                 submitBehavior="blurAndSubmit"
-                onSubmitEditing={() => {
-                  if (userId.trim() && password.trim()) Keyboard.dismiss();
-                }}
+                onSubmitEditing={handleLogin}
                 autoCapitalize="none"
                 autoCorrect={false}
                 placeholderTextColor="#686868"
