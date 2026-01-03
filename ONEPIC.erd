@@ -2005,19 +2005,19 @@
         "id": "9tjkc-jX8b724H3BxgurS",
         "tableId": "5415_W2MdJbkQlw3Dz2lj",
         "name": "sns_type",
-        "comment": "'local,/kakao'",
+        "comment": "'local/kakao/google'",
         "dataType": "VARCHAR(20)",
         "default": "local",
         "options": 0,
         "ui": {
           "keys": 0,
           "widthName": 60,
-          "widthComment": 70,
+          "widthComment": 110,
           "widthDataType": 75,
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1767087492911,
+          "updateAt": 1767447181540,
           "createAt": 1767087323448
         }
       },
@@ -2025,19 +2025,19 @@
         "id": "AbYrYiDAnAE3HBQscTuGU",
         "tableId": "5415_W2MdJbkQlw3Dz2lj",
         "name": "sns_id",
-        "comment": "",
+        "comment": "SNS 사용자 고유ID",
         "dataType": "VARCHAR(100)",
         "default": "",
         "options": 0,
         "ui": {
           "keys": 0,
           "widthName": 60,
-          "widthComment": 60,
+          "widthComment": 102,
           "widthDataType": 81,
           "widthDefault": 60
         },
         "meta": {
-          "updateAt": 1767087390434,
+          "updateAt": 1767447342002,
           "createAt": 1767087373754
         }
       }
@@ -2193,7 +2193,7 @@
           "columnIds": [
             "_xEKKzzSRo5s3Y9Jofbva"
           ],
-          "x": 1788.7191,
+          "x": 1813.4691,
           "y": 748.6717,
           "direction": 4
         },
@@ -2277,7 +2277,7 @@
           "columnIds": [
             "_xEKKzzSRo5s3Y9Jofbva"
           ],
-          "x": 1672.4691,
+          "x": 1688.9691,
           "y": 996.6717,
           "direction": 8
         },
@@ -2361,7 +2361,7 @@
           "columnIds": [
             "_xEKKzzSRo5s3Y9Jofbva"
           ],
-          "x": 1556.2191,
+          "x": 1564.4691,
           "y": 748.6717,
           "direction": 4
         },
