@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   View,
   ScrollView,
@@ -10,7 +10,8 @@ import {
   Platform,
   Alert,
   Dimensions,
-  ActivityIndicator
+  ActivityIndicator,
+  Keyboard
 } from 'react-native';
 import AppText from '../components/AppText';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -32,6 +33,8 @@ const LoginScreen = ({ navigation }) => {
   const [userIdError, setUserIdError] = useState('');
   const [passwordError, setPasswordError] = useState('');
 
+  const passwordRef = useRef(null); // 비밀번호 필드 참조 추가
+
 
 
   const handleLogin = async () => {
@@ -48,6 +51,13 @@ const LoginScreen = ({ navigation }) => {
     }
 
     setIsLoading(true);
+
+    // 모든 필드가 채워졌는지 확인하는 함수
+    const checkAndDismissKeyboard = () => {
+      if (userId.trim() && password.trim()) {
+        Keyboard.dismiss();
+      }
+    };
 
     // 로그인 로직 (실제로는 API 호출)
     console.log('Login:', userId, password);
@@ -148,6 +158,9 @@ const LoginScreen = ({ navigation }) => {
                 if (userIdError) setUserIdError(''); // 입력 시작하면 에러 문구 제거
               }}
               autoCapitalize="none"
+              returnKeyType="next" // 키보드 버튼을 '다음'으로 변경
+              onSubmitEditing={() => passwordRef.current?.focus()} // 다음 필드로 이동
+              submitBehavior="submit" // 포커스 이동 시 키보드 유지
               autoCorrect={false}
               placeholderTextColor="#686868"
             />
@@ -163,6 +176,11 @@ const LoginScreen = ({ navigation }) => {
                 onChangeText={(text) => {
                   setPassword(text);
                   if (passwordError) setPasswordError(''); // 입력 시작하면 에러 문구 제거
+                }}
+                returnKeyType="done"
+                submitBehavior="blurAndSubmit"
+                onSubmitEditing={() => {
+                  if (userId.trim() && password.trim()) Keyboard.dismiss();
                 }}
                 autoCapitalize="none"
                 autoCorrect={false}

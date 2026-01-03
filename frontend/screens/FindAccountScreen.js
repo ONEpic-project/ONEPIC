@@ -1,5 +1,5 @@
 // FindAccountScreen.js
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   TextInput,
@@ -8,6 +8,7 @@ import {
   Alert,
   ScrollView,
   Dimensions,
+  Keyboard
 } from "react-native";
 import AppText from "../components/AppText";
 import { fontSizes } from '../config/typography';
@@ -20,6 +21,9 @@ const { width, height } = Dimensions.get("window");
 
 const FindAccountScreen = ({ navigation }) => {
   const [activeTab, setActiveTab] = useState("id");
+
+  const idPhoneRef = useRef(null);
+  const pwPhoneRef = useRef(null);
 
   // 아이디 찾기
   const [idName, setIdName] = useState("");
@@ -165,6 +169,9 @@ const FindAccountScreen = ({ navigation }) => {
                 placeholder="성명"
                 value={idName}
                 onChangeText={(t) => { setIdName(t); setIdError(""); }}
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={() => idPhoneRef.current?.focus()}
               />
               <TextInput
                 style={[styles.input, idError ? styles.inputError : null]}
@@ -172,6 +179,11 @@ const FindAccountScreen = ({ navigation }) => {
                 value={idPhone}
                 onChangeText={(t) => { setIdPhone(t); setIdError(""); }}
                 keyboardType="phone-pad"
+                returnKeyType="done"
+                submitBehavior="blurAndSubmit"
+                onSubmitEditing={() => {
+                  if(idName && idPhone) Keyboard.dismiss();
+                }}
               />
 
               {/* 에러 메시지 표시 */}
@@ -210,6 +222,9 @@ const FindAccountScreen = ({ navigation }) => {
                 value={pwId}
                 onChangeText={(t) => { setPwId(t); setPwError(""); }}
                 autoCapitalize="none"
+                returnKeyType="next"
+                submitBehavior="submit"
+                onSubmitEditing={() => pwPhoneRef.current?.focus()}
               />
               <TextInput
                 style={[styles.input, pwError ? styles.inputError : null]}
@@ -217,6 +232,11 @@ const FindAccountScreen = ({ navigation }) => {
                 value={pwPhone}
                 onChangeText={(t) => { setPwPhone(t); setPwError(""); }}
                 keyboardType="phone-pad"
+                returnKeyType="done"
+                submitBehavior="blurAndSubmit"
+                onSubmitEditing={() => {
+                  if(pwId && pwPhone) Keyboard.dismiss();
+                }}
               />
 
               {/* 에러 메시지 표시 */}

@@ -113,6 +113,12 @@ const SignupScreen = ({ navigation }) => {
     setPasswordError('');
     setPasswordConfirmError('');
 
+    const checkComplete = () => {
+      if (name && loginId && phone && password && passwordConfirm) {
+        Keyboard.dismiss();
+      }
+    };
+
     try {
       const res = await fetch(`${API_BASE_URL}/api/auth/signup`, {
         method: 'POST',
@@ -167,6 +173,9 @@ const SignupScreen = ({ navigation }) => {
                   value={name}
                   placeholder="성명을 입력해 주세요"
                   placeholderTextColor="#C8C8C8"
+                  returnKeyType="next"
+                  onSubmitEditing={() => inputRefs.loginId.current?.focus()}
+                  submitBehavior="submit"
                   onChangeText={(t) => { setName(t); setErrors(prev => ({...prev, name: ''})); }}
                   onFocus={() => scrollToInput(inputRefs.name)}
                 />
@@ -180,6 +189,9 @@ const SignupScreen = ({ navigation }) => {
                   placeholder="아이디를 입력해 주세요"
                   placeholderTextColor="#C8C8C8"
                   autoCapitalize="none"
+                  returnKeyType="next"
+                  onSubmitEditing={() => inputRefs.phone.current?.focus()}
+                  submitBehavior="submit"
                   onChangeText={(t) => { setLoginId(t); setErrors(prev => ({...prev, loginId: ''})); }}
                   onFocus={() => scrollToInput(inputRefs.loginId)}
                 />
@@ -193,6 +205,9 @@ const SignupScreen = ({ navigation }) => {
                   placeholder="- 없이 숫자만 입력해 주세요"
                   placeholderTextColor="#C8C8C8"
                   keyboardType="phone-pad"
+                  submitBehavior="submit"
+                  returnKeyType="next"
+                  onSubmitEditing={() => inputRefs.password.current?.focus()}
                   onChangeText={(t) => { setPhone(t.replace(/[^0-9]/g, '')); setErrors(prev => ({...prev, phone: ''})); }}
                   onFocus={() => scrollToInput(inputRefs.phone)}
                 />
@@ -212,6 +227,9 @@ const SignupScreen = ({ navigation }) => {
                     placeholder="6자 이상 입력해 주세요"
                     placeholderTextColor="#C8C8C8"
                     secureTextEntry={!showPassword}
+                    submitBehavior="submit"
+                    returnKeyType="next"
+                    onSubmitEditing={() => inputRefs.passwordConfirm.current?.focus()}
                     onChangeText={(t) => { setPassword(t); setErrors(prev => ({...prev, password: ''})); }}
                     onFocus={() => scrollToInput(inputRefs.password)}
                   />
@@ -244,6 +262,13 @@ const SignupScreen = ({ navigation }) => {
                     placeholder="비밀번호를 다시 입력해 주세요"
                     placeholderTextColor="#C8C8C8"
                     secureTextEntry={!showPasswordConfirm}
+                    returnKeyType="done"
+                    onSubmitEditing={() => {
+                      if (name && loginId && phone && password && passwordConfirm) {
+                        Keyboard.dismiss();
+                      }
+                    }}
+                    submitBehavior="blurAndSubmit"
                     onChangeText={(t) => { setPasswordConfirm(t); setErrors(prev => ({...prev, passwordConfirm: ''})); }}
                     onFocus={() => scrollToInput(inputRefs.passwordConfirm)}
                   />
