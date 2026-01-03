@@ -278,14 +278,17 @@ const MyPageScreen = ({ navigation }) => {
 
 
   return (
+    <>
+    <Header navigation={navigation} title="회원 정보" />
+
     <SafeAreaView style={{ flex: 1, backgroundColor: '#fff' }}>
+      
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={{ flex: 1 }}
       >
-        <View style={{ marginTop: -20 }}>
-          <Header navigation={navigation} title="회원 정보" />
-        </View>
+    
+          
         
         <ScrollView
           ref={scrollRef}
@@ -415,6 +418,7 @@ const MyPageScreen = ({ navigation }) => {
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
+    </>
   );
 };
 

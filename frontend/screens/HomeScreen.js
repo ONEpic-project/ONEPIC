@@ -164,11 +164,12 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(90),
     marginLeft: scale(20),
     fontSize: fontSizes.md,
-    color: '#e6e6e6ff',
+    color: '#ffecd2ff',
   },
   boldText: {
     fontSize: fontSizes.xl,
     fontWeight: '800',
+    color: '#ffffff',
   },
   marketImageContainer: {
     position: 'absolute',
