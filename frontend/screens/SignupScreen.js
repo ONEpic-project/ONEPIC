@@ -90,15 +90,15 @@ const SignupScreen = ({ navigation }) => {
       return;
     }
 
-    if (password.length < 6) {
-      newErrors.password = '비밀번호는 6자 이상이어야 합니다.';
+    // === 추가된 부분: 비밀번호 확인 미입력 검사 ===
+    if (!password.trim()) {
+      newErrors.password = '비밀번호를 입력해주세요.';
       setErrors(newErrors);
       return;
     }
 
-    // === 추가된 부분: 비밀번호 확인 미입력 검사 ===
-    if (!password.trim()) {
-      newErrors.password = '비밀번호를 입력해주세요.';
+    if (password.length < 6) {
+      newErrors.password = '비밀번호는 6자 이상이어야 합니다.';
       setErrors(newErrors);
       return;
     }
