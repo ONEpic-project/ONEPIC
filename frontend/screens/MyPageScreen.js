@@ -30,7 +30,9 @@ const MyPageScreen = ({ navigation }) => {
   const [phone, setPhone] = useState('');
   const [loginId, setLoginId] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('*******');
   const [passwordError, setPasswordError] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [infoMessage, setInfoMessage] = useState('');
   const [infoMessageType, setInfoMessageType] = useState('info'); 
@@ -38,8 +40,6 @@ const MyPageScreen = ({ navigation }) => {
   const [showPassword, setShowPassword] = useState(false); 
 
   const [snsType, setSnsType] = useState('local');
-
-
 
   const [origin, setOrigin] = useState({
     name: '',
@@ -55,6 +55,7 @@ const MyPageScreen = ({ navigation }) => {
     name: useRef(null),
     phone: useRef(null),
     password: useRef(null),
+    confirmPassword: useRef(null),
   };
 
   const scrollToInput = (inputRef) => {
@@ -157,6 +158,7 @@ const MyPageScreen = ({ navigation }) => {
     setName(origin.name);
     setPhone(origin.phone);
     setPassword(origin.password);
+    setConfirmPassword(origin.password);
 
     setPasswordError('');
     setInfoMessage('');          // 안내 문구 제거
@@ -171,9 +173,20 @@ const MyPageScreen = ({ navigation }) => {
     setPasswordError('');
   };
 
+  const handleConfirmPasswordFocus = () => {
+    if (confirmPassword === '*******') setConfirmPassword('');
+    setPasswordError('');
+  };
+
   const handleSave = async () => {
     if (password && password !== '*******' && password.length < 6) {
       setPasswordError('비밀번호는 6자 이상이어야 합니다.');
+      return;
+    }
+
+    // 유효성 검사: 비밀번호 일치 여부 확인
+    if (isEditing && password !== confirmPassword) {
+      setPasswordError('비밀번호가 일치하지 않습니다.');
       return;
     }
 
@@ -215,6 +228,7 @@ const MyPageScreen = ({ navigation }) => {
 
     setOrigin({ name, phone, password: '*******' });
     setPassword('*******');
+    setConfirmPassword('*******'); // 추가
 
     setInfoMessage('수정이 완료되었습니다.');
     setInfoMessageType('success');
@@ -363,6 +377,8 @@ const MyPageScreen = ({ navigation }) => {
                         }
                     }}
                     onChangeText={setPassword}
+                    returnKeyType="next"
+                    onSubmitEditing={() => inputRefs.confirmPassword.current?.focus()}
                     />
                     {isEditing && (
                      <TouchableOpacity
@@ -379,6 +395,37 @@ const MyPageScreen = ({ navigation }) => {
                     )}
                 </View>
               </Field>
+
+              {/* 5. 비밀번호 확인 필드 추가 */}
+                {isEditing && (
+                  <Field
+                    label="비밀번호 확인"
+                    message={password !== confirmPassword && confirmPassword !== '' ? "비밀번호가 일치하지 않습니다." : ""}
+                    messageType="error"
+                  >
+                    <View style={styles.passwordWrapper}>
+                      <TextInput
+                        ref={inputRefs.confirmPassword}
+                        style={[styles.input, { flex: 1 }]}
+                        value={confirmPassword === '*******' ? '' : confirmPassword}
+                        editable={isEditing}
+                        secureTextEntry={!showConfirmPassword}
+                        placeholder="다시 한번 입력해 주세요"
+                        onFocus={() => {
+                          handleConfirmPasswordFocus();
+                          scrollToInput(inputRefs.confirmPassword);
+                        }}
+                        onChangeText={setConfirmPassword}
+                        returnKeyType="done"
+                        onSubmitEditing={handleSave}
+                      />
+                      <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeButton}>
+                        <Feather name={showConfirmPassword ? 'eye' : 'eye-off'} size={25} color="#9A9A9A" />
+                      </TouchableOpacity>
+                    </View>
+                  </Field>
+                )}
+             
             </View>
 
             <View style={styles.buttons}>
