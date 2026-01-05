@@ -389,7 +389,7 @@ export default function ScanScreen({ navigation }) {
         const result = res.data.result;
         console.log("Detected Product:", result); // [LOG] 인식된 상품 정보
 
-        if (typeof result.confidence === "number" && result.confidence < 0.8) {
+        if (typeof result.confidence === "number" && result.confidence < 0.7) {
           console.log("Low Confidence:", result.confidence); // [LOG] 정확도 낮음
           Alert.alert("알림", "상품을 인식할 수 없습니다.\n다시 스캔해주세요.");
         } else {
