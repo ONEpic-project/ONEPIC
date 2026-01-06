@@ -350,8 +350,8 @@ const MyPageScreen = ({ navigation }) => {
 
               <Field
                 label="비밀번호"
-                message={passwordError || infoMessage}
-                messageType={passwordError ? 'error' : infoMessageType}
+                message={passwordError}
+                messageType={passwordError ? 'error' : 'info'}
               >
                 <View style={[styles.passwordWrapper, { borderBottomWidth: 0 }]}>
                     <TextInput
@@ -420,7 +420,7 @@ const MyPageScreen = ({ navigation }) => {
                         onSubmitEditing={handleSave}
                       />
                       <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)} style={styles.eyeButton}>
-                        <Feather name={showConfirmPassword ? 'eye' : 'eye-off'} size={25} color="#9A9A9A" />
+                        <Feather name={showConfirmPassword ? 'eye-off' : 'eye'} size={25} color="#9A9A9A" />
                       </TouchableOpacity>
                     </View>
                   </Field>

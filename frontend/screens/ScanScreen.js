@@ -502,7 +502,7 @@ export default function ScanScreen({ navigation }) {
                     />
                     <View style={{ flex: 1, marginLeft: 10 }}>
                       <AppText style={styles.itemNameInline} numberOfLines={1}>
-                        {item.product_name}
+                        {item.brand_name}{" "}{item.product_name}
                       </AppText>
                     </View>
                     <TouchableOpacity
@@ -575,7 +575,7 @@ export default function ScanScreen({ navigation }) {
                     resizeMode="contain"
                   />
                   <AppText style={styles.modalName}>
-                    {selectedProduct.product_name}
+                    {selectedProduct.brand_name}{" "}{selectedProduct.product_name}
                   </AppText>
                   <AppText style={styles.modalPrice}>
                     {selectedProduct.price?.toLocaleString()}원
