@@ -3,7 +3,6 @@
 import os
 import cv2
 import re
-import time
 import numpy as np
 import torch
 from paddleocr import PaddleOCR
