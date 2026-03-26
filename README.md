@@ -197,7 +197,7 @@ sequenceDiagram
     participant OAUTH as Google / Kakao
     participant DB as AWS RDS
 
-    rect rgb(220, 240, 255)
+    rect rgb(100, 160, 220)
         Note over APP,DB: 로컬 로그인
         APP->>NGINX: POST /api/auth/login
         NGINX->>API: Proxy
@@ -207,7 +207,7 @@ sequenceDiagram
         APP->>APP: AsyncStorage 저장
     end
 
-    rect rgb(220, 255, 220)
+    rect rgb(80, 175, 120)
         Note over APP,DB: SNS 로그인 (Google / Kakao)
         APP->>OAUTH: WebView OAuth 요청
         OAUTH-->>APP: Authorization Code
@@ -235,17 +235,17 @@ sequenceDiagram
     APP->>NGINX: POST /api/ai/detect (이미지 업로드)
     NGINX->>AI: Proxy
 
-    rect rgb(255, 245, 220)
+    rect rgb(200, 150, 50)
         Note over AI: Stage 1 - YOLOv8
         AI->>AI: Object Detection<br/>352px · conf=0.20 · iou=0.50<br/>바운딩 박스 검출
     end
 
-    rect rgb(220, 255, 240)
+    rect rgb(50, 160, 140)
         Note over AI: Stage 2 - MobileNetV3
         AI->>AI: Classification<br/>34개 클래스 분류
     end
 
-    rect rgb(255, 220, 240)
+    rect rgb(175, 70, 130)
         Note over AI: Stage 3 - PaddleOCR
         AI->>AI: 한국어 텍스트 인식<br/>바코드 / 상품명 추출
     end
